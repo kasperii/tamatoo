@@ -21,7 +21,7 @@
      fetch('./color', {
          method: "POST",
          body: color
-     }}}
+     }}
 
 </script>
 
