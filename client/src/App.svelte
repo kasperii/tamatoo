@@ -54,7 +54,7 @@
          var dataToSend = new FormData();
      dataToSend.append( "json", JSON.stringify( obj ) );
 
-     const res = await fetch('./color', {
+     const res = await fetch('./wheels', {
          method: "POST",
          body: dataToSend
      })
