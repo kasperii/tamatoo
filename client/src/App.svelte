@@ -1,14 +1,14 @@
 <script>
 
  let collist= [{
-		id: r,
-		name: 'Red'
-	}, {
-		id: g,
-		name: 'Green'
-	}, {
-		id: b,
-		name: 'Blue'
+	 id: "r",
+	 name: 'Red'
+ }, {
+	 id: "g",
+	 name: 'Green'
+ }, {
+	 id: "b",
+	 name: 'Blue'
  }];
 
  let rand = -1;
@@ -17,11 +17,20 @@
          .then(d => d.text())
          .then(d => (rand = d));
  }
- function sendCol(color) {
-     fetch('./color', {
+ async function sendCol(color) {
+    console.log(color)
+    var obj = {'c': color}
+
+    var dataToSend = new FormData();
+     dataToSend.append( "json", JSON.stringify( obj ) );
+
+     const res = await fetch('./color', {
          method: "POST",
-         body: color
-     })}
+         body: dataToSend
+        })
+     const json = await res.json()
+	 console.log(JSON.stringify(json))
+ }
 
 </script>
 
@@ -29,7 +38,7 @@
 <button on:click={getRand}>Get a random number</button>
 
 {#each collist as col}
-    <button on:clock={sendCol(col.id)}>{col.name}</button>
+    <button on:click={() => sendCol(col.id)}>{col.name}</button>
 {/each}
 
 
