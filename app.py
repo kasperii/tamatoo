@@ -47,11 +47,14 @@ def wheels():
 def sendToArduino(message):
     ser = serial.Serial('/dev/serial/by-id/usb-Silicon_Labs_CP2104_USB_to_UART_Bridge_Controller_0178C8A8-if00-port0', 115200, timeout=1)
     ser.reset_input_buffer()
+    print(message.encode('utf-8'))
     while True:
         ser.write(message.encode('utf-8'))
         line = ser.readline().decode('utf-8').rstrip()
         print(line)
         time.sleep(1)
+        break
+
 
 if __name__ == "__main__":
     app.run(debug=True)
