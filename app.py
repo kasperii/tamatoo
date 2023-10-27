@@ -32,7 +32,7 @@ def color():
 
 
 def sendToArduino(message):
-    ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1)
+    ser = serial.Serial('/dev/serial/by-id/usb-Silicon_Labs_CP2104_USB_to_UART_Bridge_Controller_0178C8A8-if00-port0', 115200, timeout=1)
     ser.reset_input_buffer()
     while True:
         ser.write(message.encode('utf-8'))
