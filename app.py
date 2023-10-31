@@ -68,14 +68,14 @@ def sendToTama(message):
 
 @app.route("/color", methods=["POST"])
 def color():
-    clt = 'W'
+    clr = 'W'
     ptn = 1
     frq = 0
     data = json.loads(request.form['json'])
     print(data)
     print(data['c'])
     print('color change!', file=sys.stderr)
-    clt = data['c']
+    clr = data['c']
     cmdbuff = [ord('E'),ord(clr),ptn, frq, ord('\n')]#command,pan-sign,pan-val,tilt-sign,tilt-val,TF-sign,TF-val
     # clr = eye color(R/ G/ B/ Y/ P/ C/ W/ N)
     # ptn = blink pattern (0=off/ 1=on/ 2=blink/ 3=wink)
