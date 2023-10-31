@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 serWheels = serial.Serial('/dev/serial/by-id/usb-Silicon_Labs_CP2104_USB_to_UART_Bridge_Controller_0178C8A8-if00-port0', 115200, timeout=1)
 serTama = serial.Serial('/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A50285BI-if00-port0', 115200, timeout=1)
-​
+
 pan = 0
 tilt = 0
 
@@ -43,7 +43,7 @@ def wheels():
  #          patternHandler()
     print('wheels should be moving!', file=sys.stderr)
 
-    sendToWheels(data['w'])
+    
     return make_response(jsonify("success"), 201)
 
 def sendToWheels(message):
