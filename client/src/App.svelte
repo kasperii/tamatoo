@@ -1,13 +1,15 @@
 <script>
-
+ import Tama from './Tama.svelte';
+ import Controller from './Controller.svelte';
+ let movement = 'r0';
  let collist= [{
-	 id: "r",
+	 id: "R",
 	 name: 'Red'
  }, {
-	 id: "g",
+	 id: "G",
 	 name: 'Green'
  }, {
-	 id: "b",
+	 id: "B",
 	 name: 'Blue'
  }];
 
@@ -25,8 +27,19 @@
 	 name: 'Back'
  }];
 
-
+ function debut(){
+     console.log(movement)
+ }
  let rand = -1;
+ $: {
+     // console.log("OUTSIDe")
+     // console.log(movement)
+     // console.log(movement.substring(0, 1));
+     // console.log(movement.substring(1));
+
+     sendWheel(movement.substring(0,1),movement.substring(1))
+ }
+
  function getRand() {
      fetch("./rand")
          .then(d => d.text())
@@ -46,10 +59,22 @@
      const json = await res.json()
 	 console.log(JSON.stringify(json))
  }
+  async function sendGaze(gaze) {
+     var obj = {'g': gaze}
 
- async function sendWheel(direction) {
-     console.log(direction)
-     var obj = {'w': direction}
+         var dataToSend = new FormData();
+     dataToSend.append( "json", JSON.stringify( obj ) );
+
+     const res = await fetch('./gaze', {
+         method: "POST",
+         body: dataToSend
+     })
+      const json = await res.json()
+	  console.log(JSON.stringify(json))
+  }
+
+ async function sendWheel(action,direction) {
+     var obj = {[action]: direction}
 
          var dataToSend = new FormData();
      dataToSend.append( "json", JSON.stringify( obj ) );
@@ -62,14 +87,48 @@
 	 console.log(JSON.stringify(json))
  }
 
+ function getPoint(e){
+     let view = document.getElementById('tamaview')
+     let angles =""
+     var ratioX = e.target.width / e.target.offsetWidth;
+     var ratioY = e.target.height / e.target.offsetHeight;
+
+
+     var domX = e.x + window.pageXOffset - e.target.offsetLeft;
+     var domY = e.y + window.pageYOffset - e.target.offsetTop;
+
+
+     var imgX = Math.floor(domX * ratioX);
+     var imgY = Math.floor(domY * ratioY);
+     let aX = Math.floor((imgX/e.target.width-.5)*180)
+     let aY = Math.floor((90-(imgY/e.target.height)*90))
+     angles = "p" + aX + "t" + aY
+     console.log(aX, aY);
+     console.log(angles)
+
+     sendGaze(angles)
+ };
+
+
 </script>
+<Tama />
 
-<h1>Your number is {rand}!</h1>
+<div class="row">
+      <div class="column" id="text">
+          {#each collist as col}
+              <button on:click={() => sendCol(col.id)}>{col.name}</button>
+          {/each}
+      </div>
+      <div class="column" id="controller">
+          <Controller bind:movement/>
+      </div>
+      <div class="column" id="view"></div>
+</div>
+<!-- <h1>Your number is {rand}!</h1> -->
 <button on:click={getRand}>Get a random number</button>
+<button on:click={debut}>Debug</button>
 
-{#each collist as col}
-    <button on:click={() => sendCol(col.id)}>{col.name}</button>
-{/each}
+<img id="tamaview" on:click={getPoint} width="100px" height="50px" src="https://via.placeholder.com/80x40">
 
 {#each wheellist as dir}
     <button on:click={() => sendWheel(dir.id)}>{dir.name}</button>
@@ -83,6 +142,7 @@
 	 margin: 0 auto;
  }
 
+
  h1 {
 	 color: #ff3e00;
 	 text-transform: uppercase;
@@ -90,9 +150,25 @@
 	 font-weight: 100;
  }
 
+
+
  @media (min-width: 640px) {
 	 main {
 		 max-width: none;
 	 }
  }
+ #text {
+     background-color: beige;
+     width: 20%;
+ }
+ #controller {
+     width: 200px;
+ }
+ #view {
+     width: 50%;
+     background-color: beige;
+ }
+ .column {
+     float: left;
+}
 </style>
