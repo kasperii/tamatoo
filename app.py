@@ -66,7 +66,7 @@ def sendToTama(message):
 
     #cmdbuff = [ord('M'),ps,pv,ts,tv,tfs,tfv,ord('\n')]#command,pan-sign,pan-val,tilt-sign,tilt-val,TF-sign,TF-val
 
-    serTama.write(message)
+    serTama.write(message.encode('utf-8'))
 
 
 
