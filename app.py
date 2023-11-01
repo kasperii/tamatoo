@@ -4,7 +4,12 @@ import sys
 import json
 import serial
 import time
-from camera import VideoCamera
+
+
+
+
+
+#from camera import VideoCamera
 
 app = Flask(__name__)
 
@@ -14,22 +19,48 @@ serTama = serial.Serial('/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A50285BI-if0
 pan = 0
 tilt = 0
 
+# from picamera2 import Picamera2, Preview
+# picam2 = Picamera2()
+# camera_config = picam2.create_preview_configuration()
+# picam2.configure(camera_config)
+# picam2.start_preview(Preview.DRM)
+# picam2.start()
+# time.sleep(2)
+# picam2.capture_file("testing.jpg")
+
 
 # ------ CAMERA ------
+import picamera2 #camera module for RPi camera
+from picamera2 import Picamera2
+from picamera2.encoders import JpegEncoder
+from picamera2.outputs import FileOutput
 
-pi_camera = VideoCamera(flip=False) # flip pi camera if upside down.
+
+class StreamingOutput(io.BufferedIOBase):
+    def __init__(self):
+        self.frame = None
+        self.condition = Condition()
+
+    def write(self, buf):
+        with self.condition:
+            self.frame = buf
+            self.condition.notify_all()
 
 
-def gen(camera):
-    #get camera frame
+def genFrames():
+    #buffer = StreamingOutput()
     while True:
-        frame = camera.get_frame()
+        with picamera2.Picamera2() as camera:
+            camera.configure(camera.create_video_configuration(main={"size": (640, 480)}))
+            output = StreamingOutput()
+            camera.start_recording(JpegEncoder(), FileOutput(output))
         yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+            b'Content-Type: image/jpeg\r\n\r\n' + output.frame + b'\r\n')
 
-@app.route('/video_feed')
+#defines the route that will access the video feed and call the feed function
+@bp.route('/video_feed')
 def video_feed():
-    return Response(gen(pi_camera),
+    return Response(genFrames(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
@@ -141,4 +172,4 @@ def eye():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True,threaded=True)

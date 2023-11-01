@@ -28,3 +28,9 @@
 picam2.start()
 time.sleep(2)
 picam2.capture_file("test2.jpg")
+
+
+So what I want to do is to have a script on the raspberry pi to be able to send more precise head movements to the tama head.
+
+1. I can either do this with the combined program (but then it needs to take in more than just one letter – and that means not to use wire?)
+2. Or use this device that we already had, but then it needs another wire for the power? And also I cannot get this working.
