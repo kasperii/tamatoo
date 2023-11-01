@@ -1,9 +1,10 @@
-from flask import Flask, send_from_directory, make_response, jsonify, request
+from flask import Flask, send_from_directory, make_response, jsonify, request, Response
 import random
 import sys
 import json
 import serial
 import time
+from camera import VideoCamera
 
 app = Flask(__name__)
 
@@ -12,6 +13,25 @@ serTama = serial.Serial('/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A50285BI-if0
 
 pan = 0
 tilt = 0
+
+
+# ------ CAMERA ------
+
+pi_camera = VideoCamera(flip=False) # flip pi camera if upside down.
+
+
+def gen(camera):
+    #get camera frame
+    while True:
+        frame = camera.get_frame()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+
+@app.route('/video_feed')
+def video_feed():
+    return Response(gen(pi_camera),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
 
 # Path for our main Svelte page
 @app.route("/")

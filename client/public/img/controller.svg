@@ -23,3 +23,8 @@
 <circle cx="99.6" cy="99.7" r="13.12"/>
 <polyline class="st1" points="95.97,95.52 99.6,89.19 103.42,95.52 "/>
 </svg>
+
+
+picam2.start()
+time.sleep(2)
+picam2.capture_file("test2.jpg")

@@ -128,7 +128,7 @@
 <button on:click={getRand}>Get a random number</button>
 <button on:click={debut}>Debug</button>
 
-<img id="tamaview" on:click={getPoint} width="100px" height="50px" src="https://via.placeholder.com/80x40">
+<img id="tamaview" src="video_feed" on:click={getPoint} width="640px" height="480px">
 
 {#each wheellist as dir}
     <button on:click={() => sendWheel(dir.id)}>{dir.name}</button>
