@@ -36,34 +36,34 @@
 </svg>
 
 <div class="buttonoverlay">
-    <button class="button button1" on:click={() => test("mn")}>
+    <button class="button button1" on:click={() => test("mr")}>
 
     </button>
-    <button class="button button2" on:click={() => test("mnw")}>
+    <button class="button button2" on:click={() => test("mw")}>
 
     </button>
-    <button class="button button3" on:click={() => test("mne")}>
+    <button class="button button3" on:click={() => test("my")}>
 
     </button>
-    <button class="button button4" on:click={() => test("msw")}>
+    <button class="button button4" on:click={() => test("mz")}>
 
     </button>
-    <button class="button button5" on:click={() => test("mse")}>
+    <button class="button button5" on:click={() => test("mb")}>
 
     </button>
-    <button class="button button6" on:click={() => test("ms")}>
+    <button class="button button6" on:click={() => test("mc")}>
 
     </button>
 
 </div>
 <div class="buttonoverlay">
-    <button class="button button1r" on:click={() => test("rn")}>
+    <button class="button button1r" on:click={() => test("ro")}>
 
     </button>
-    <button class="button button2r" on:click={() => test("rnw")}>
+    <button class="button button2r" on:click={() => test("rp")}>
         ↻
     </button>
-    <button class="button button3r" on:click={() => test("rne")}>
+    <button class="button button3r" on:click={() => test("rl")}>
         ↻
     </button>
     <button class="button button4r" on:click={() => test("rsw")}>
