@@ -36,37 +36,50 @@ import socketserver
 from http import server
 from threading import Condition
 
-from picamera2 import Picamera2
-from picamera2.encoders import JpegEncoder
-from picamera2.outputs import FileOutput
+
+from camera import VideoCamera
+
+# from picamera2 import Picamera2
+# from picamera2.encoders import H264Encoder
+# from picamera2.outputs import FileOutput
 
 
-class StreamingOutput(io.BufferedIOBase):
-    def __init__(self):
-        self.frame = None
-        self.condition = Condition()
+# picam2 = Picamera2()
+# camera_config = picam2.create_preview_configuration()
+# picam2.configure(camera_config)
+# encoder = H264Encoder(1000000)
 
-    def write(self, buf):
-        with self.condition:
-            self.frame = buf
-            self.condition.notify_all()
+# class StreamingOutput(io.BufferedIOBase):
+#     def __init__(self):
+#         self.frame = None
+#         self.condition = Condition()
+
+#     def write(self, buf):
+#         with self.condition:
+#             self.frame = buf
+#             self.condition.notify_all()
 
 
-def genFrames():
-    #buffer = StreamingOutput()
+def gen(camera):
     while True:
-        with Picamera2() as camera:
-            camera.configure(camera.create_video_configuration(main={"size": (640, 480)}))
-            output = StreamingOutput()
-            camera.start_recording(JpegEncoder(), FileOutput(output))
+        frame = camera.get_frame()
         yield (b'--frame\r\n'
-            b'Content-Type: image/jpeg\r\n\r\n' + output.frame + b'\r\n')
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
-#defines the route that will access the video feed and call the feed function
 @app.route('/video_feed')
 def video_feed():
-    return Response(genFrames(),
+    return Response(gen(VideoCamera()),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
+
+    #buffer = StreamingOutput()
+    # while True:
+    #     with Picamera2() as camera:
+    #         camera.configure(camera.create_video_configuration(main={"size": (640, 480)}))
+    #         output = StreamingOutput()
+    #         camera.start_recording(JpegEncoder(), FileOutput(output))
+    #     yield (b'--frame\r\n'
+    #         b'Content-Type: image/jpeg\r\n\r\n' + output.frame + b'\r\n')
+
 
 
 # Path for our main Svelte page
