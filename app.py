@@ -63,7 +63,7 @@ def genFrames():
             b'Content-Type: image/jpeg\r\n\r\n' + output.frame + b'\r\n')
 
 #defines the route that will access the video feed and call the feed function
-@bp.route('/video_feed')
+@app.route('/video_feed')
 def video_feed():
     return Response(genFrames(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
