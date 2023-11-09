@@ -30,19 +30,42 @@ tilt = 0
 
 
 # ------ CAMERA funcs ------
+# import io
+# import logging
+# import socketserver
+# from http import server
+# from threading import Condition
+# from camera import VideoCamera
+
+import picamera2 #camera module for RPi camera
+from picamera2 import Picamera2
+from picamera2.encoders import JpegEncoder
+from picamera2.outputs import FileOutput
 import io
-import logging
-import socketserver
-from http import server
-from threading import Condition
 
+class StreamingOutput(io.BufferedIOBase):
+    def __init__(self):
+        self.frame = None
+        self.condition = Condition()
 
-from camera import VideoCamera
+    def write(self, buf):
+        with self.condition:
+            self.frame = buf
+            self.condition.notify_all()
 
-# from picamera2 import Picamera2
-# from picamera2.encoders import H264Encoder
-# from picamera2.outputs import FileOutput
-
+def genFrames():
+    #buffer = StreamingOutput()
+    with picamera2.Picamera2() as camera:
+        output = StreamingOutput()
+        camera.configure(camera.create_video_configuration(main={"size": (640, 480)}))
+        output = StreamingOutput()
+        camera.start_recording(JpegEncoder(), FileOutput(output))
+        while True:
+            with output.condition:
+                output.condition.wait()
+                frame = output.frame
+            yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 # picam2 = Picamera2()
 # camera_config = picam2.create_preview_configuration()
@@ -60,15 +83,16 @@ from camera import VideoCamera
 #             self.condition.notify_all()
 
 
-def gen(camera):
-    while True:
-        frame = camera.get_frame()
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+# def gen(camera):
+#     while True:
+#         frame = camera.get_frame()
+#         yield (b'--frame\r\n'
+#                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n'
+               )
 
 @app.route('/video_feed')
 def video_feed():
-    return Response(gen(VideoCamera()),
+    return Response(genFrames(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
     #buffer = StreamingOutput()
