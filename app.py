@@ -59,7 +59,7 @@ def genFrames():
     #buffer = StreamingOutput()
     with picamera2.Picamera2() as camera:
         output = StreamingOutput()
-        camera.configure(camera.create_video_configuration(main={"size": (640, 480)}))
+        camera.configure(camera.create_video_configuration(main={"size": (2592,1944)}))
         output = StreamingOutput()
         camera.start_recording(JpegEncoder(), FileOutput(output))
         while True:
