@@ -171,13 +171,13 @@
  .column {
      float: left;
  }
-img {
-     -webkit-transform: scaleX(-1);
-     -moz-transform: scaleX(-1);
-     -o-transform: scaleX(-1);
-     transform: scaleX(-1);
+ img {
+     -webkit-transform: rotate(180deg);
+     -moz-transform: rotate(180deg);
+     -o-transform: rotate(180deg);
+     transform: rotate(180deg);
 
      filter: FlipH;
      -ms-filter: "FlipH";
-}
+ }
 </style>
