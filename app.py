@@ -231,7 +231,7 @@ def separate_string(input_string):
     result_dict = {}
 
     # Using regular expression to find letter-number pairs
-    pattern = re.compile(r'([a-zA-Z])(\d+)')
+    pattern = re.compile(r'([a-zA-Z])(-?\d+)')
     matches = pattern.findall(input_string)
 
     # Constructing the dictionary
