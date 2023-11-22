@@ -64,8 +64,8 @@ function calculateVectorInfo(x, y) {
     console.log('Object state changed:', state);
     console.log(calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).angleDegrees);
     console.log(calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).vectorLength);
-      newDegrees = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).angleDegrees
-      newDegrees = int(newDegrees/36)*36
+    let newDegrees = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).angleDegrees
+    newDegrees = int(newDegrees/36)*36
       if (newDegrees != degrees){
           degrees = newDegrees
           sendWheel('m',directionFromDegrees(degrees))
