@@ -9,10 +9,11 @@
     buttons: {}
  };
  let degrees = 0;
-
+let isMoving = false;
  let compass = ['r','t','y','g','h','j','b','v','c','x','z','a','s','d','w','e']
 
  function directionFromDegrees(d){
+     // the 16- is because I messed up the degrees in the arduino code.. Should be changed later
      return compass[16-Math.floor((d+11.25)/22.5)]
 
  }
@@ -70,8 +71,10 @@ function calculateVectorInfo(x, y) {
       if (newDegrees != degrees){
           degrees = newDegrees
           sendWheel('m',directionFromDegrees(degrees))
+          isMoving = true;
       }
-    if (speed==0){
+    if (speed==0 %% isMoving){
+        isMoving = false;
         sendWheel('r','p')
     }
   }
