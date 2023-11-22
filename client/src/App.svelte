@@ -61,10 +61,10 @@ function calculateVectorInfo(x, y) {
  }
 
   $: {
-    // This reactive statement will run whenever myObject changes
-   let newDegrees = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).angleDegrees
-    let speed = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).vectorLength
-      newDegrees = Math.floor((newDegrees+270)/36)*36%360
+      // This reactive statement will run whenever myObject changes
+      let newDegrees = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).angleDegrees
+      let speed = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).vectorLength
+      newDegrees = (Math.round((newDegrees+90)/11.25)*11.25)%360
       if (newDegrees != degrees){
           degrees = newDegrees
           console.log(degrees)
