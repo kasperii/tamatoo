@@ -10,7 +10,7 @@
  };
  let degrees = 0;
 let isMoving = false;
- let compass = ['r','t','y','g','h','j','b','v','c','x','z','a','s','d','w','e']
+ let compass = ['r','t','y','g','h','j','b','v','c','x','z','a','s','d','w','e','r']
 
  function directionFromDegrees(d){
      // the 16- is because I messed up the degrees in the arduino code.. Should be changed later
@@ -62,15 +62,13 @@ function calculateVectorInfo(x, y) {
 
   $: {
     // This reactive statement will run whenever myObject changes
-    console.log('Object state changed:', state);
-    console.log(calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).angleDegrees);
-    console.log(calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).vectorLength);
-    let newDegrees = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).angleDegrees
+   let newDegrees = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).angleDegrees
     let speed = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).vectorLength
-      newDegrees = Math.floor(newDegrees/36)*36
+      newDegrees = Math.floor((newDegrees+270)/36)*36%360
       if (newDegrees != degrees){
           degrees = newDegrees
-          sendWheel('m',directionFromDegrees(degrees))
+          console.log(degrees)
+          //sendWheel('m',directionFromDegrees(degrees))
           isMoving = true;
       }
     if (speed==0 && isMoving){
