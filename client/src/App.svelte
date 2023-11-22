@@ -131,8 +131,8 @@
 
      var imgX = Math.floor(domX * ratioX);
      var imgY = Math.floor(domY * ratioY);
-     let aX = Math.floor((imgX/e.target.width-.5)*180)
-     let aY = Math.floor((90-(imgY/e.target.height)*90))
+     let aX = Math.floor((imgX/e.target.width-.5)*50)
+     let aY = Math.floor((45-(imgY/e.target.height)*45))
      angles = "p" + aX + "t" + aY
      console.log(aX, aY);
      console.log(angles)
