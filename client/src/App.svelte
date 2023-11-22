@@ -10,12 +10,10 @@
  };
  let degrees = 0;
 
- let compass = ['N','NNE','NE','NEE','E','SEE','SE','SSE','S','SSW','SW','SWW','W','NWW','NW','NNW']
+ let compass = ['r','t','y','g','h','j','b','v','c','x','z','a','s','d','w','e']
 
  function directionFromDegrees(d){
-     console.log(d)
-     console.log(Math.floor((d+11.25)/22.5))
-     return compass(Math.floor((d+11.25)/22.5))
+     return compass[16-Math.floor((d+11.25)/22.5)]
 
  }
 
@@ -67,11 +65,15 @@ function calculateVectorInfo(x, y) {
     console.log(calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).angleDegrees);
     console.log(calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).vectorLength);
     let newDegrees = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).angleDegrees
-    newDegrees = Math.floor(newDegrees/36)*36
+    let speed = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).vectorLength
+      newDegrees = Math.floor(newDegrees/36)*36
       if (newDegrees != degrees){
           degrees = newDegrees
           sendWheel('m',directionFromDegrees(degrees))
       }
+    if (speed==0){
+        sendWheel('r','p')
+    }
   }
 
  let movement = 'r0';
