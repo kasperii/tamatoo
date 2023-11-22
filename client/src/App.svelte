@@ -1,6 +1,37 @@
 <script>
  import Tama from './Tama.svelte';
  import Controller from './Controller.svelte';
+ import Gamepad from "./Gamepad.svelte";
+
+ let state = {
+    leftAxis: { x: 0, y: 0 },
+    rightAxis: { x: 0, y: 0 },
+    buttons: {}
+ };
+ function gamepadConnected(event) {
+    console.log(`app: gamepad ${event.detail.gamepadIndex} connected`);
+  }
+  function APressed(event) {
+    state.buttons["A"] = event.detail;
+    console.log("A pressed");
+  }
+
+  function RTPressed(event) {
+    state.buttons["RT"] = event.detail;
+    console.log("RT pressed");
+  }
+
+  function LeftStick(event) {
+    state.leftAxis = event.detail;
+    console.log(event.detail);
+
+  }
+
+ function RightStick(event) {
+    state.rightAxis = event.detail;
+    console.log(event.detail);
+ }
+
  let movement = 'r0';
  let collist= [{
 	 id: "R",
@@ -127,7 +158,14 @@
 <!-- <h1>Your number is {rand}!</h1> -->
 <button on:click={getRand}>Get a random number</button>
 <button on:click={debut}>Debug</button>
-
+<Gamepad
+    gamepadIndex={0}
+    on:Connected={gamepadConnected}
+    on:A={APressed}
+    on:RT={RTPressed}
+    on:LeftStick={LeftStick}
+    on:RightStick={RightStick}
+/>
 <img id="tamaview" src="./video_feed" on:click={getPoint} width="1296px" height="972px">
 
 {#each wheellist as dir}

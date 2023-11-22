@@ -192,7 +192,20 @@ def eye():
     sendToTama(data['c'])
     return make_response(jsonify("success"), 201)
 
+def mysplit(s):
+    head = s.rstrip('0123456789')
+    tail = s[len(head):]
+    return head, tail
 
+@app.route("/gaze", methods=["POST"])
+def gaze():
+
+    data = json.loads(request.form['json'])
+    print(data)
+    print(data['c'])
+    print('color change!', file=sys.stderr)
+    sendToTama(data['c'])
+    return make_response(jsonify("success"), 201
 
 # THIS is just old code that could go into the def color as a way of setting the color more specifically
 # elif m == 'C':
