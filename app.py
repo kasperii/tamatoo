@@ -204,9 +204,41 @@ def gaze():
     print(data)
     print(data['g'])
     print('color change!', file=sys.stderr)
-    #sendToTama(data['c'])
+    dataDict =  separate_string(data)
+    p = dataDict['p']
+    t = dataDict['t']
+    ps = 1
+    if (p < 0):
+        ps = 255
+    ts = 1
+    if (t < 0):
+        ts = 255
+
+    pv = abs(p)
+    tv = abs(t)
+
+    tfs = 1
+    tfs = 0
+
+    cmdbuff = [ord('M'),ps,pv,ts,tv,tfs,tfv,ord('\n')]#command,pan-sign,pan-val,tilt-sign,tilt-val,TF-sign,TF-val
+
+    sendToTama(cmdbuff]
     return make_response(jsonify("success"), 201)
 
+
+def separate_string(input_string):
+    result_dict = {}
+
+    # Using regular expression to find letter-number pairs
+    pattern = re.compile(r'([a-zA-Z])(\d+)')
+    matches = pattern.findall(input_string)
+
+    # Constructing the dictionary
+    for match in matches:
+        letter, number = match
+        result_dict[letter] = int(number)
+
+    return result_dict
 # THIS is just old code that could go into the def color as a way of setting the color more specifically
 # elif m == 'C':
 #         print("input Right Red value(0-255)")
