@@ -219,7 +219,7 @@ def gaze():
     tv = abs(t)
 
     tfs = 1
-    tfs = 0
+    tfv = 0
 
     cmdbuff = [ord('M'),ps,pv,ts,tv,tfs,tfv,ord('\n')]#command,pan-sign,pan-val,tilt-sign,tilt-val,TF-sign,TF-val
 
