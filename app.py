@@ -205,6 +205,7 @@ def gaze():
     print(data['g'])
     print('color change!', file=sys.stderr)
     dataDict =  separate_string(data['g'])
+    print(dataDict)
     p = dataDict['p']
     t = dataDict['t']
     ps = 1
