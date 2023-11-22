@@ -73,7 +73,7 @@ function calculateVectorInfo(x, y) {
           sendWheel('m',directionFromDegrees(degrees))
           isMoving = true;
       }
-    if (speed==0 %% isMoving){
+    if (speed==0 && isMoving){
         isMoving = false;
         sendWheel('r','p')
     }
