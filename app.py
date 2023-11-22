@@ -222,7 +222,7 @@ def gaze():
 
     cmdbuff = [ord('M'),ps,pv,ts,tv,tfs,tfv,ord('\n')]#command,pan-sign,pan-val,tilt-sign,tilt-val,TF-sign,TF-val
 
-    sendToTama(cmdbuff]
+    sendToTama(cmdbuff)
     return make_response(jsonify("success"), 201)
 
 
