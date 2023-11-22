@@ -13,6 +13,8 @@
  let compass = ['N','NNE','NE','NEE','E','SEE','SE','SSE','S','SSW','SW','SWW','W','NWW','NW','NNW']
 
  function directionFromDegrees(d){
+     console.log(d)
+     console.log(Math.floor((d+11.25)/22.5))
      return compass(Math.floor((d+11.25)/22.5))
 
  }
