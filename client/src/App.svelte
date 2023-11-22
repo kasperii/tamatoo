@@ -8,6 +8,15 @@
     rightAxis: { x: 0, y: 0 },
     buttons: {}
  };
+ let degrees = 0;
+
+ let compass = ['N','NNE','NE','NEE','E','SEE','SE','SSE','S','SSW','SW','SWW','W','NWW','NW','NNW']
+
+ function directionFromDegrees(d){
+     return compass(Math.floor((d+11.25)/22.5))
+
+ }
+
  function gamepadConnected(event) {
     console.log(`app: gamepad ${event.detail.gamepadIndex} connected`);
   }
@@ -23,14 +32,45 @@
 
   function LeftStick(event) {
     state.leftAxis = event.detail;
-    console.log(event.detail);
 
   }
 
  function RightStick(event) {
     state.rightAxis = event.detail;
-    console.log(event.detail);
  }
+
+function calculateVectorInfo(x, y) {
+    // Calculate the angle in radians
+    let angleRadians = Math.atan2(y, x);
+
+    // Convert radians to degrees
+    let angleDegrees = (angleRadians * 180) / Math.PI;
+
+    // Ensure the angle is between 0 and 360 degrees
+    angleDegrees = (angleDegrees + 360) % 360;
+
+    // Calculate the length of the vector
+    let vectorLength = Math.sqrt(x * x + y * y);
+
+    // Return the result
+    return {
+        angleDegrees: angleDegrees,
+        vectorLength: vectorLength
+    };
+ }
+
+  $: {
+    // This reactive statement will run whenever myObject changes
+    console.log('Object state changed:', state);
+    console.log(calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).angleDegrees);
+    console.log(calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).vectorLength);
+      newDegrees = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).angleDegrees
+      newDegrees = int(newDegrees/36)*36
+      if (newDegrees != degrees){
+          degrees = newDegrees
+          sendWheel('m',directionFromDegrees(degrees))
+      }
+  }
 
  let movement = 'r0';
  let collist= [{
