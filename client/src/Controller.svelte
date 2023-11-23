@@ -57,22 +57,22 @@
 
 </div>
 <div class="buttonoverlay">
-    <button class="button button1r" on:click={() => test("ro")}>
+    <button class="button button1r" on:click={() => test("rM")}>
 
     </button>
-    <button class="button button2r" on:click={() => test("rp")}>
+    <button class="button button2r" on:click={() => test("rL")}>
         ↻
     </button>
-    <button class="button button3r" on:click={() => test("rl")}>
+    <button class="button button3r" on:click={() => test("rR")}>
         ↻
     </button>
-    <button class="button button4r" on:click={() => test("rsw")}>
+    <button class="button button4r" on:click={() => test("rL")}>
         ↻
     </button>
-    <button class="button button5r" on:click={() => test("rse")}>
+    <button class="button button5r" on:click={() => test("rR")}>
         ↻
     </button>
-    <button class="button button6r" on:click={() => test("rs")}>
+    <button class="button button6r" on:click={() => test("rR")}>
         ↻
     </button>
 
