@@ -150,7 +150,7 @@ def wheels():
 def sendToWheels(value):
     #serWheels.reset_input_buffer()
     #print(message.encode('utf-8'))
-    message = chr(value)
+    message = chr(value+32)
     while True:
         print("Wheel debug message")
         print(value)
