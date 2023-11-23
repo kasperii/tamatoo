@@ -129,11 +129,11 @@ def wheels():
     print(data)
     datastring = ""
     if('r' in data):
-        if(data['r'] = 'L'):
+        if(data['r'] == 'L'):
             sendToWheels(41)
-        if(data['r'] = 'R'):
+        if(data['r'] == 'R'):
             sendToWheels(39)
-        if(data['r'] = 'M'):
+        if(data['r'] == 'M'):
             sendToWheels(40)
         #sendToWheels(data['r'])
         #datastring += "r" + data["r"]
