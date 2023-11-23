@@ -68,9 +68,9 @@ function calculateVectorInfo(x, y) {
       if (newDegrees != degrees){
           degrees = newDegrees
           console.log("degrees")
-          console.log(directionFromDegrees(Math.round(degrees/11.25)))
+          console.log(Math.round(degrees/11.25))
           console.log(Math.round(speed*6)*+32)
-          sendWheel('m',directionFromDegrees(Math.round(degrees/11.25)))
+          sendWheel('m',Math.round(degrees/11.25))
           isMoving = true;
           sendWheel('m',Math.round(speed*6)*+32)
 
