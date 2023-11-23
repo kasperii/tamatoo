@@ -129,7 +129,13 @@ def wheels():
     print(data)
     datastring = ""
     if('r' in data):
-        sendToWheels(data['r'])
+        if(data['r'] = 'L'):
+            sendToWheels(41)
+        if(data['r'] = 'R'):
+            sendToWheels(39)
+        if(data['r'] = 'M'):
+            sendToWheels(40)
+        #sendToWheels(data['r'])
         #datastring += "r" + data["r"]
     if('m' in data):
         sendToWheels(data['m'])
@@ -141,9 +147,10 @@ def wheels():
     
     return make_response(jsonify("success"), 201)
 
-def sendToWheels(message):
-    serWheels.reset_input_buffer()
-    print(message.encode('utf-8'))
+def sendToWheels(value):
+    #serWheels.reset_input_buffer()
+    #print(message.encode('utf-8'))
+    message = chr(value)
     while True:
         serWheels.write(message.encode('utf-8'))
         line = serWheels.readline().decode('utf-8').rstrip()
