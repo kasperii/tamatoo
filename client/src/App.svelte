@@ -41,11 +41,17 @@ let isMoving = false;
  }
 
 function calculateVectorInfo(x, y) {
-    // Calculate the angle in radians
-    let angleRadians = Math.atan2(y, x);
+     // Calculate the angle in radians
+     console.log("Calc vector info")
+     console.log(x)
+     console.log(y)
+     console.log("STATE:")
+     console.log(state)
 
-    // Convert radians to degrees
-    let angleDegrees = (angleRadians * 180) / Math.PI;
+     let angleRadians = Math.atan2(y, x);
+
+     // Convert radians to degrees
+     let angleDegrees = (angleRadians * 180) / Math.PI;
 
     // Ensure the angle is between 0 and 360 degrees
     angleDegrees = (angleDegrees + 360) % 360;
@@ -54,6 +60,7 @@ function calculateVectorInfo(x, y) {
     let vectorLength = Math.sqrt(x * x + y * y);
 
     // Return the result
+    console.log(angleDegrees)
     return {
         angleDegrees: angleDegrees,
         vectorLength: vectorLength
@@ -67,9 +74,6 @@ function calculateVectorInfo(x, y) {
       newDegrees = (Math.round((newDegrees+90)/11.25)*11.25)%360
       if (newDegrees != degrees){
           degrees = newDegrees
-          console.log("degrees")
-          console.log(Math.round(degrees/11.25))
-          console.log(Math.round(speed*6)+32)
           sendWheel('m',Math.round(degrees/11.25))
           isMoving = true;
           sendWheel('m',Math.round(speed*6)+32)

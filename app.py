@@ -152,14 +152,8 @@ def sendToWheels(value):
     #print(message.encode('utf-8'))
     message = chr(value+32)
     while True:
-        print("Wheel debug message")
-        print(value)
-        print(message)
-        print(message.encode())
         serWheels.write(message.encode())
         line = serWheels.readline().decode('utf-8').rstrip()
-        print(line)
-        time.sleep(1)
         break
 
 
