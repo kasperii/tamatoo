@@ -42,11 +42,6 @@ let isMoving = false;
 
 function calculateVectorInfo(x, y) {
      // Calculate the angle in radians
-     console.log("Calc vector info")
-     console.log(x)
-     console.log(y)
-     console.log("STATE:")
-     console.log(state)
 
      let angleRadians = Math.atan2(y, x);
 
@@ -60,7 +55,6 @@ function calculateVectorInfo(x, y) {
     let vectorLength = Math.sqrt(x * x + y * y);
 
     // Return the result
-    console.log(angleDegrees)
     return {
         angleDegrees: angleDegrees,
         vectorLength: vectorLength
@@ -70,19 +64,24 @@ function calculateVectorInfo(x, y) {
   $: {
       // This reactive statement will run whenever myObject changes
       let newDegrees = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).angleDegrees
-      let speed = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).vectorLength
+      let newSpeed = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).vectorLength
+      console.log("newDegrees")
+      console.log(newDegrees)
       newDegrees = (Math.round((newDegrees+90)/11.25)*11.25)%360
       if (newDegrees != degrees){
           degrees = newDegrees
           sendWheel('m',Math.round(degrees/11.25))
-          isMoving = true;
-          sendWheel('m',Math.round(speed*6)+32)
 
       }
-    if (speed==0 && isMoving){
-        isMoving = false;
+      if (newSpeed==0 && isMoving){
+          speed = newSpeed
+          isMoving = false;
         sendWheel('r',)
-    }
+      }else if(Math.abs(speed-newSpeed)>0.1){
+          speed = newSpeed
+          sendWheel('m',Math.round(speed*6)+32)
+          isMoving = true;
+      }
   }
 
  let movement = 'r0';
