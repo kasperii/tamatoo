@@ -68,20 +68,24 @@ function calculateVectorInfo(x, y) {
       let newSpeed = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).vectorLength
       console.log("newDegrees")
       console.log(newDegrees)
+      if(newSpeed == 0){
+          if(isMoving){
+              speed = 0
+              isMoving = false
+              sendWheel('m',32)
+              degrees = 0
+              sendWheel('m',0)
+          }
+      }
+      if(Math.abs(speed-newSpeed)>0.1){
+          speed = newSpeed
+          sendWheel('m',Math.round(speed*6)+32)
+          isMoving = true;
+      }
       newDegrees = (Math.round((newDegrees+90)/11.25)*11.25)%360
       if (newDegrees != degrees){
           degrees = newDegrees
           sendWheel('m',Math.round(degrees/11.25))
-
-      }
-      if (newSpeed==0 && isMoving){
-          speed = 0
-          isMoving = false;
-        sendWheel('r',)
-      }else if(Math.abs(speed-newSpeed)>0.1){
-          speed = newSpeed
-          sendWheel('m',Math.round(speed*6)+32)
-          isMoving = true;
       }
   }
 
