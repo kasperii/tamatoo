@@ -9,6 +9,7 @@
     buttons: {}
  };
  let degrees = 0;
+ let speed = 0;
 let isMoving = false;
  let compass = ['r','t','y','g','h','j','b','v','c','x','z','a','s','d','w','e','r']
 
@@ -74,7 +75,7 @@ function calculateVectorInfo(x, y) {
 
       }
       if (newSpeed==0 && isMoving){
-          speed = newSpeed
+          speed = 0
           isMoving = false;
         sendWheel('r',)
       }else if(Math.abs(speed-newSpeed)>0.1){
