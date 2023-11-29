@@ -4,13 +4,13 @@
  import Gamepad from "./Gamepad.svelte";
 
  let state = {
-    leftAxis: { x: 0, y: 0 },
-    rightAxis: { x: 0, y: 0 },
-    buttons: {}
+     leftAxis: { x: 0, y: 0 },
+     rightAxis: { x: 0, y: 0 },
+     buttons: {}
  };
  let degrees = 0;
  let speed = 0;
-let isMoving = false;
+ let isMoving = false;
  let compass = ['r','t','y','g','h','j','b','v','c','x','z','a','s','d','w','e','r']
 
  function directionFromDegrees(d){
@@ -20,28 +20,28 @@ let isMoving = false;
  }
 
  function gamepadConnected(event) {
-    console.log(`app: gamepad ${event.detail.gamepadIndex} connected`);
-  }
-  function APressed(event) {
-    state.buttons["A"] = event.detail;
-    console.log("A pressed");
-  }
-
-  function RTPressed(event) {
-    state.buttons["RT"] = event.detail;
-    console.log("RT pressed");
-  }
-
-  function LeftStick(event) {
-    state.leftAxis = event.detail;
-
-  }
-
- function RightStick(event) {
-    state.rightAxis = event.detail;
+     console.log(`app: gamepad ${event.detail.gamepadIndex} connected`);
+ }
+ function APressed(event) {
+     state.buttons["A"] = event.detail;
+     console.log("A pressed");
  }
 
-function calculateVectorInfo(x, y) {
+ function RTPressed(event) {
+     state.buttons["RT"] = event.detail;
+     console.log("RT pressed");
+ }
+
+ function LeftStick(event) {
+     state.leftAxis = event.detail;
+
+ }
+
+ function RightStick(event) {
+     state.rightAxis = event.detail;
+ }
+
+ function calculateVectorInfo(x, y) {
      // Calculate the angle in radians
 
      let angleRadians = Math.atan2(y, x);
@@ -49,45 +49,45 @@ function calculateVectorInfo(x, y) {
      // Convert radians to degrees
      let angleDegrees = (angleRadians * 180) / Math.PI;
 
-    // Ensure the angle is between 0 and 360 degrees
-    angleDegrees = (angleDegrees + 360) % 360;
+     // Ensure the angle is between 0 and 360 degrees
+     angleDegrees = (angleDegrees + 360) % 360;
 
-    // Calculate the length of the vector
-    let vectorLength = Math.sqrt(x * x + y * y);
+     // Calculate the length of the vector
+     let vectorLength = Math.sqrt(x * x + y * y);
 
-    // Return the result
-    return {
-        angleDegrees: angleDegrees,
-        vectorLength: vectorLength
-    };
+     // Return the result
+     return {
+         angleDegrees: angleDegrees,
+         vectorLength: vectorLength
+     };
  }
 
-  $: {
-      // This reactive statement will run whenever myObject changes
-      let newDegrees = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).angleDegrees
-      let newSpeed = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).vectorLength
-      console.log("newDegrees")
-      console.log(newDegrees)
-      if(newSpeed == 0){
-          if(isMoving){
-              speed = 0
-              isMoving = false
-              sendWheel('m',32)
-              degrees = 0
-              sendWheel('m',0)
-          }
-      }
-      if(Math.abs(speed-newSpeed)>0.1){
-          speed = newSpeed
-          sendWheel('m',Math.round(speed*6)+32)
-          isMoving = true;
-      }
-      newDegrees = (Math.round((newDegrees+90)/11.25)*11.25)%360
-      if (newDegrees != degrees){
-          degrees = newDegrees
-          sendWheel('m',Math.round(degrees/11.25))
-      }
-  }
+ $: {
+     // This reactive statement will run whenever myObject changes
+     let newDegrees = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).angleDegrees
+     let newSpeed = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).vectorLength
+     console.log("newDegrees")
+     console.log(newDegrees)
+     if(newSpeed == 0){
+         if(isMoving){
+             speed = 0
+             isMoving = false
+             sendWheel('m',32)
+             degrees = 0
+             sendWheel('m',0)
+         }
+     }
+     if(Math.abs(speed-newSpeed)>0.1){
+         speed = newSpeed
+         sendWheel('m',Math.round(speed*6)+32)
+         isMoving = true;
+     }
+     newDegrees = (Math.round((newDegrees+90)/11.25)*11.25)%360
+     if (newDegrees != degrees){
+         degrees = newDegrees
+         sendWheel('m',Math.round(degrees/11.25))
+     }
+ }
 
  let movement = 'r0';
  let collist= [{
@@ -147,7 +147,7 @@ function calculateVectorInfo(x, y) {
      const json = await res.json()
 	 console.log(JSON.stringify(json))
  }
-  async function sendGaze(gaze) {
+ async function sendGaze(gaze) {
      var obj = {'g': gaze}
 
          var dataToSend = new FormData();
@@ -157,9 +157,9 @@ function calculateVectorInfo(x, y) {
          method: "POST",
          body: dataToSend
      })
-      const json = await res.json()
-	  console.log(JSON.stringify(json))
-  }
+     const json = await res.json()
+	 console.log(JSON.stringify(json))
+ }
 
  async function sendWheel(action,direction) {
      var obj = {[action]: direction}
@@ -197,6 +197,20 @@ function calculateVectorInfo(x, y) {
      sendGaze(angles)
  };
 
+ function onMouseMove (event) {
+     getPoint(event)
+ }
+
+ function onMouseDown (event) {
+     addEventListener('mousemove', onMouseMove)
+     addEventListener('mouseup', onMouseUp)
+ }
+
+ function onMouseUp () {
+     removeEventListener('mousemove', onMouseMove)
+     removeEventListener('mouseup', onMouseUp)
+ }
+
 
 </script>
 <Tama />
@@ -223,7 +237,7 @@ function calculateVectorInfo(x, y) {
     on:LeftStick={LeftStick}
     on:RightStick={RightStick}
 />
-<img id="tamaview" src="./video_feed" on:click={getPoint} width="1296px" height="972px">
+<img id="tamaview" src="./video_feed" on:mousedown={onMouseDown} width="1296px" height="972px">
 
 {#each wheellist as dir}
     <button on:click={() => sendWheel(dir.id)}>{dir.name}</button>
@@ -271,6 +285,7 @@ function calculateVectorInfo(x, y) {
      -moz-transform: rotate(180deg);
      -o-transform: rotate(180deg);
      transform: rotate(180deg);
+     -webkit-user-drag: none;
 
      filter: FlipH;
      -ms-filter: "FlipH";
