@@ -19,6 +19,9 @@
 
  }
 
+ function printFunc(text){
+     console.log(text)
+ }
  function gamepadConnected(event) {
      console.log(`app: gamepad ${event.detail.gamepadIndex} connected`);
  }
@@ -236,7 +239,15 @@
     on:RT={RTPressed}
     on:LeftStick={LeftStick}
     on:RightStick={RightStick}
-/>
+    on:LB={ () => printFunc("LB")}
+    on:RB={ () => printFunc("RB")}
+    on:RT={ () => printFunc("RT")}
+    on:LT={ () => printFunc("LT")}
+    on:RS={ () => printFunc("RS")}
+    on:LS={ () => printFunc("LS")}
+    on:DPadUp={ () => printFunc("DPadUp")}
+
+    />
 <img id="tamaview" src="./video_feed" on:mousedown={onMouseDown} width="1296px" height="972px">
 
 {#each wheellist as dir}
