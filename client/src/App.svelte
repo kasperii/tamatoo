@@ -208,7 +208,7 @@
      console.log([prcX,prcY]);
 
 
-     blurPoint = [100-(prcX+.5)*100,100-(prcY+0.5)*100];
+     blurPoint = [50-(prcX+.5)*100,100-(prcY+0.5)*100];
 
      let aX = Math.floor(prcX*50);
      let aY = Math.floor((45-prcY*45));
@@ -273,7 +273,7 @@
     />
     <div class="blur-container">
         <img class="underlay" id="tamaview" src="./video_feed">
-        <img class="overlay" id="tamaview" src="./video_feed" style="clip-path: circle(20% at {blurPoint[0]}% {blurPoint[1]}%)">
+        <img class="overlay" id="tamaview" src="./video_feed" style="clip-path: circle(40% at {blurPoint[0]}% {blurPoint[1]}%)">
         <img class="overlay" on:mousedown={onMouseDown}>
     </div>
 {#each wheellist as dir}
@@ -330,9 +330,7 @@
      filter: FlipH;
      -ms-filter: "FlipH";
  }
- .container img.overlay {
-     filter: blur(10px);
- }
+
  .blur-container {
      position: relative;
      width: 1296px;
