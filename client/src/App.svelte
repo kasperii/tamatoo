@@ -200,11 +200,20 @@
 
      var imgX = Math.floor(domX * ratioX);
      var imgY = Math.floor(domY * ratioY);
-     let aX = Math.floor((imgX/e.target.width-.5)*50)
-     let aY = Math.floor((45-(imgY/e.target.height)*45))
-     angles = "p" + aX + "t" + aY
+
+     var prcX = (imgX/e.target.width-.5);
+     var prcY = (imgX/e.target.width-.5);
+
+     console.log([prcX,prcY]);
+
+     blurPoint = [prcX*100,prcY*100];
+
+     let aX = Math.floor(prcX*50);
+     let aY = Math.floor((45-prcY*45));
+
+     angles = "p" + aX + "t" + aY;
      console.log(aX, aY);
-     console.log(angles)
+     console.log(angles);
 
      sendGaze(angles)
  };
@@ -262,7 +271,8 @@
     />
     <div class="blur-container">
         <img class="underlay" id="tamaview" src="./video_feed">
-        <img class="overlay" id="tamaview" src="./video_feed" on:mousedown={onMouseDown} style="clip-path: circle(20% at {blurPoint[0]}% {blurPoint[1]}%)">
+        <img class="overlay" id="tamaview" src="./video_feed" style="clip-path: circle(20% at {blurPoint[0]}% {blurPoint[1]}%)">
+        <img class="overlay" on:mousedown={onMouseDown}>
     </div>
 {#each wheellist as dir}
     <button on:click={() => sendWheel(dir.id)}>{dir.name}</button>
@@ -309,7 +319,6 @@
      width: 100%;
      height: 100%;
      object-fit: cover;
-     filter: blur(10px);
      -webkit-transform: rotate(180deg);
      -moz-transform: rotate(180deg);
      -o-transform: rotate(180deg);
