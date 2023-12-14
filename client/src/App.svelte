@@ -205,6 +205,18 @@
 
      console.log(e)
      console.log(e.pageX)
+     console.log(e.pageY)
+
+     console.log("target")
+     console.log(e.target.width)
+     console.log(e.target.height)
+
+     console.log("e")
+     console.log(e.x)
+     console.log(e.y)
+     console.log("img")
+     console.log(imgX)
+     console.log(imgY)
      console.log("prc");
      console.log([prcX,prcY]);
 
