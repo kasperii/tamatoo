@@ -185,6 +185,8 @@
 	 console.log(JSON.stringify(json))
  }
 
+ let blurPoint = [50,50]
+
  function getPoint(e){
      let view = document.getElementById('tamaview')
      let angles =""
@@ -258,8 +260,10 @@
     on:DPadRight={ () => dpad("R")}
 
     />
-<img id="tamaview" src="./video_feed" on:mousedown={onMouseDown} width="1296px" height="972px">
-
+    <div class="blur-container">
+        <img class="underlay" id="tamaview" src="./video_feed">
+        <img class="overlay" id="tamaview" src="./video_feed" on:mousedown={onMouseDown} style="clip-path: circle(20% at {blurPoint[0]}% {blurPoint[1]}%)">
+    </div>
 {#each wheellist as dir}
     <button on:click={() => sendWheel(dir.id)}>{dir.name}</button>
 {/each}
@@ -302,6 +306,10 @@
      float: left;
  }
  img {
+     width: 100%;
+     height: 100%;
+     object-fit: cover;
+     filter: blur(10px);
      -webkit-transform: rotate(180deg);
      -moz-transform: rotate(180deg);
      -o-transform: rotate(180deg);
@@ -310,5 +318,32 @@
 
      filter: FlipH;
      -ms-filter: "FlipH";
+ }
+ .container img.overlay {
+     filter: blur(10px);
+ }
+ .blur-container {
+     position: relative;
+     width: 1296px;
+     height: 972px;
+     overflow: hidden;
+ }
+
+ .blur-container img {
+     width: 100%;
+     height: 100%;
+     object-fit: cover;
+
+ }
+ .blur-container .underlay {
+     position: absolute;
+ 	 top: 0;
+  	 left: 0;
+     filter: blur(3px);
+ }
+ .circle-crop .overlay {
+     position: absolute;
+ 	 top: 0;
+  	 left: 0;
  }
 </style>
