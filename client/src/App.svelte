@@ -188,6 +188,7 @@
  let blurPoint = [50,50]
 
  function getPoint(e){
+     // This takes in the point and moves the gaze, but also the unblurred point in the image prob could be done better (this i am translating values back and forth in a weird way), but it works
      let view = document.getElementById('tamaview')
      let angles =""
      var ratioX = e.target.width / e.target.offsetWidth;
@@ -202,11 +203,12 @@
      var imgY = Math.floor(domY * ratioY);
 
      var prcX = (imgX/e.target.width-.5);
-     var prcY = (imgX/e.target.width-.5);
+     var prcY = (imgY/e.target.width-.5);
 
      console.log([prcX,prcY]);
 
-     blurPoint = [prcX*100,prcY*100];
+
+     blurPoint = [100-(prcX+.5)*100,100-(prcY+0.5)*100];
 
      let aX = Math.floor(prcX*50);
      let aY = Math.floor((45-prcY*45));
@@ -350,7 +352,7 @@
   	 left: 0;
      filter: blur(3px);
  }
- .circle-crop .overlay {
+ .blur-container .overlay {
      position: absolute;
  	 top: 0;
   	 left: 0;
