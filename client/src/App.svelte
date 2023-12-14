@@ -6,7 +6,9 @@
  let state = {
      leftAxis: { x: 0, y: 0 },
      rightAxis: { x: 0, y: 0 },
-     buttons: {}
+     dpad: {}
+     buttons: {},
+
  };
  let degrees = 0;
  let speed = 0;
@@ -19,9 +21,16 @@
 
  }
 
- function printFunc(text){
-     console.log(text)
+ function gamepadChangeState(button){
+     console.log(button)
+     state.buttons["button"] = button.detail;
+     console.log(state.buttons)
  }
+
+ function dpad(direction){
+     state.buttons[text] = button.detail;
+ }
+
  function gamepadConnected(event) {
      console.log(`app: gamepad ${event.detail.gamepadIndex} connected`);
  }
@@ -69,8 +78,6 @@
      // This reactive statement will run whenever myObject changes
      let newDegrees = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).angleDegrees
      let newSpeed = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).vectorLength
-     console.log("newDegrees")
-     console.log(newDegrees)
      if(newSpeed == 0){
          if(isMoving){
              speed = 0
@@ -239,13 +246,16 @@
     on:RT={RTPressed}
     on:LeftStick={LeftStick}
     on:RightStick={RightStick}
-    on:LB={ () => printFunc("LB")}
-    on:RB={ () => printFunc("RB")}
-    on:RT={ () => printFunc("RT")}
-    on:LT={ () => printFunc("LT")}
-    on:RS={ () => printFunc("RS")}
-    on:LS={ () => printFunc("LS")}
-    on:DPadUp={ () => printFunc("DPadUp")}
+    on:LB={ () => gamepadChangeState("LB")}
+    on:RB={ () => gamepadChangeState("RB")}
+    on:RT={ () => gamepadChangeState("RT")}
+    on:LT={ () => gamepadChangeState("LT")}
+    on:RS={ () => gamepadChangeState("RS")}
+    on:LS={ () => gamepadChangeState(LS)}
+    on:DPadUp={ () => dpad("U")}
+    on:DPadDown={ () => dpad("D")}
+    on:DPadLeft={ () => dpad("L")}
+    on:DPadRight={ () => dpad("R")}
 
     />
 <img id="tamaview" src="./video_feed" on:mousedown={onMouseDown} width="1296px" height="972px">
