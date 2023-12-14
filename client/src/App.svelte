@@ -208,7 +208,7 @@
      console.log([prcX,prcY]);
 
 
-     blurPoint = [50-(prcX+.5)*100,100-(prcY+0.5)*100];
+     blurPoint = [(1-prcX)*100,(1.5-prcY)*100];
 
      let aX = Math.floor(prcX*50);
      let aY = Math.floor((45-prcY*45));
