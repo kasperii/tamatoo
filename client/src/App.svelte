@@ -194,17 +194,25 @@
      var ratioX = e.target.width / e.target.offsetWidth;
      var ratioY = e.target.height / e.target.offsetHeight;
 
+     console.log("ratio");
+     console.log([ratioX,ratioY]);
 
      var domX = e.x + window.pageXOffset - e.target.offsetLeft;
      var domY = e.y + window.pageYOffset - e.target.offsetTop;
 
+     console.log("dom");
+     console.log([domX,domY]);
+
+
 
      var imgX = Math.floor(domX * ratioX);
      var imgY = Math.floor(domY * ratioY);
-
+     console.log("img");
+     console.log([imgX,imgY]);
      var prcX = (imgX/e.target.width-.5);
      var prcY = (imgY/e.target.width-.5);
 
+     console.log("prc");
      console.log([prcX,prcY]);
 
 
@@ -217,7 +225,7 @@
      console.log(aX, aY);
      console.log(angles);
 
-     sendGaze(angles)
+     //sendGaze(angles)
  };
 
  function onMouseMove (event) {
