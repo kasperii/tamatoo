@@ -6,7 +6,7 @@
  let state = {
      leftAxis: { x: 0, y: 0 },
      rightAxis: { x: 0, y: 0 },
-     dpad: {}
+     dpad: {},
      buttons: {},
 
  };
