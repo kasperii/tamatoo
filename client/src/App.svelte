@@ -200,9 +200,7 @@
 
 
      angles = "p" + aX + "t" + aY;
-
-
-     //sendGaze(angles)
+     sendGaze(angles)
  };
 
  function onMouseMove (event) {
