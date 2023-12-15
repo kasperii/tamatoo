@@ -196,7 +196,7 @@
      blurPoint = [clickPoint[0]*100,clickPoint[1]*120];
 
      let aX = Math.floor((clickPoint[0]-.5)*50);
-     let aY = Math.floor((60-(clickPoint[1])*60));
+     let aY = Math.floor((clickPoint[1])*60);
 
 
      angles = "p" + aX + "t" + aY;
