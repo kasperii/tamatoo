@@ -185,67 +185,40 @@
 	 console.log(JSON.stringify(json))
  }
 
- let blurPoint = [50,50]
+ let blurPoint = [50,50];
+ let clickPoint = [.5,.5];
 
  function getPoint(e){
      // This takes in the point and moves the gaze, but also the unblurred point in the image prob could be done better (this i am translating values back and forth in a weird way), but it works
-     let view = document.getElementById('tamaview')
+     let view = document.getElementById('tamaview');
+	 clickPoint = [e.offsetX/e.target.width,e.offsetY/e.target.height]
      let angles =""
-     var ratioX = e.target.width / e.target.offsetWidth;
-     var ratioY = e.target.height / e.target.offsetHeight;
+     blurPoint = [clickPoint[0]*100,clickPoint[1]*100];
 
-     var domX = e.x + window.pageXOffset - e.target.offsetLeft;
-     var domY = e.y + window.pageYOffset - e.target.offsetTop;
-
-     var imgX = Math.floor(domX * ratioX);
-     var imgY = Math.floor(domY * ratioY);
-
-     var prcX = (imgX/e.target.width-.5);
-     var prcY = (imgY/e.target.width-.5);
-
-     console.log(e)
-     console.log(e.pageX)
-     console.log(e.pageY)
-
-     console.log("target")
-     console.log(e.target.width)
-     console.log(e.target.height)
-
-     console.log("e")
-     console.log(e.x)
-     console.log(e.y)
-     console.log("img")
-     console.log(imgX)
-     console.log(imgY)
-     console.log("prc");
-     console.log([prcX,prcY]);
-
-
-     blurPoint = [(1-prcX)*100,(1.5-prcY)*100];
-
-     let aX = Math.floor(prcX*50);
-     let aY = Math.floor((45-prcY*45));
+     let aX = Math.floor((clickPoint[0]-.5)*50);
+     let aY = Math.floor((45-(clickPoint[1]-.5)*45));
 
 
      angles = "p" + aX + "t" + aY;
-     console.log(aX, aY);
-     console.log(angles);
+
 
      //sendGaze(angles)
  };
 
  function onMouseMove (event) {
-     getPoint(event)
+     //getPoint(event)
  }
 
  function onMouseDown (event) {
      addEventListener('mousemove', onMouseMove)
      addEventListener('mouseup', onMouseUp)
+     getPoint(event)
  }
 
  function onMouseUp () {
      removeEventListener('mousemove', onMouseMove)
      removeEventListener('mouseup', onMouseUp)
+     //getPoint(event)
  }
 
 
@@ -287,7 +260,7 @@
     />
     <div class="blur-container">
         <img class="underlay" id="tamaview" src="./video_feed">
-        <img class="overlay" id="tamaview" src="./video_feed" style="clip-path: circle(40% at {blurPoint[0]}% {blurPoint[1]}%)">
+        <img class="overlay" src="./video_feed" style="clip-path: circle(40% at {blurPoint[0]}% {blurPoint[1]}%)">
         <img class="overlay" on:mousedown={onMouseDown}>
     </div>
 {#each wheellist as dir}
