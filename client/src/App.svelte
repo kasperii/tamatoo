@@ -193,10 +193,10 @@
      let view = document.getElementById('tamaview');
 	 clickPoint = [e.offsetX/e.target.width,e.offsetY/e.target.height]
      let angles =""
-     blurPoint = [clickPoint[0]*100,clickPoint[1]*100];
+     blurPoint = [clickPoint[0]*100,clickPoint[1]*120];
 
      let aX = Math.floor((clickPoint[0]-.5)*50);
-     let aY = Math.floor((45-(clickPoint[1]-.5)*45));
+     let aY = Math.floor(((clickPoint[1]-.5)*30));
 
 
      angles = "p" + aX + "t" + aY;
