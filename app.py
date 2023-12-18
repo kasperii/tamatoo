@@ -29,7 +29,7 @@ import time
 
 @app.route("/ffmpeg")
 def ffmpegstream():
-    ffmpeg_command = ["ffmpeg", "-f", "alsa", "-channels", "4", "-sample_rate", "15000" "-i", "hw:3", "-f", "mpeg", "pipe:stdout"]
+    ffmpeg_command = ["ffmpeg", "-f", "alsa", "-channels", "6", "-sample_rate", "16000" "-i", "hw:3", "-f", "mp3", "pipe:stdout"]
     #ffmpeg -f alsa -ac 4 -i default
     process = subprocess.Popen(ffmpeg_command, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, bufsize = -1)
 
@@ -110,7 +110,7 @@ def audio():
         CHUNK = 1024
         sampleRate = 16000
         bitsPerSample = 16
-        channels = 2
+        channels = 6
         wav_header = genHeader(sampleRate, bitsPerSample, channels)
 
         stream = audio1.open(format=FORMAT, channels=CHANNELS,
