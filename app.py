@@ -50,7 +50,7 @@ def ffmpegstream():
                 sentBurst = True
 
                 for i in range(0, len(buffer) - 2):
-                    print "Send initial burst #", i
+                    print("Send initial burst #", i)
                     yield buffer.pop(0)
 
             elif time.time() > startTime + 3 and len(buffer) > 0:
