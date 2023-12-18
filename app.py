@@ -59,10 +59,15 @@ def ffmpegstream():
             process.poll()
             if isinstance(process.returncode, int):
                 if process.returncode > 0:
-                    print 'FFmpeg Error', p.returncode
+                    print('FFmpeg Error', process.returncode)
                 break
 
-    return Response(stream_with_context(generate()), mimetype = "audio/mpeg")
+    response = Response(stream_with_context(generate()), mimetype = "audio/mpeg")
+
+    @response.call_on_close
+    def on_close():
+        process.kill()
+    return response
 
 
 
