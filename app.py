@@ -29,7 +29,7 @@ import time
 
 @app.route("/ffmpeg")
 def ffmpegstream():
-    ffmpeg_command = ["ffmpeg", "-f", "alsa", "-ac", "4", "-i", "default", "-f", "mpeg", "pipe:stdout"]
+    ffmpeg_command = ["ffmpeg", "-f", "alsa", "-channels", "4", "-sample_rate", "15000" "-i", "hw:3", "-f", "mpeg", "pipe:stdout"]
     #ffmpeg -f alsa -ac 4 -i default
     process = subprocess.Popen(ffmpeg_command, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, bufsize = -1)
 
