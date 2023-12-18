@@ -197,8 +197,8 @@
 
      let aX = Math.floor((clickPoint[0]-.5)*60);
      let aY = Math.floor((clickPoint[1])*60);
-     print("ax = " + aX)
-     print("ay = " + aY)
+     console.log("ax = " + aX)
+     console.log("ay = " + aY)
 
 
      angles = "p" + aX + "t" + aY;

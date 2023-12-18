@@ -29,7 +29,7 @@ CHANNELS = 2
 RATE = 44100
 CHUNK = 1024
 RECORD_SECONDS = 5
-
+audio1 = pyaudio.PyAudio()
 
 
 def genHeader(sampleRate, bitsPerSample, channels):
