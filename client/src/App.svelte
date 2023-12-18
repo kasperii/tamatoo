@@ -265,7 +265,7 @@
     </div>
     <audio controls>
         <source src="./ffmpeg" type="audio/mpeg">
-        // <source src="./audio" type="audio/x-wav;codec=pcm">
+       <!-- <source src="./audio" type="audio/x-wav;codec=pcm"> -->
         Your browser does not support the audio element.
     </audio>
     {#each wheellist as dir}
