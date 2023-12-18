@@ -264,7 +264,8 @@
         <img class="overlay" on:mousedown={onMouseDown}>
     </div>
     <audio controls>
-        <source src="./audio" type="audio/x-wav;codec=pcm">
+        <source src="./ffmpeg" type="audio/mpeg">
+        // <source src="./audio" type="audio/x-wav;codec=pcm">
         Your browser does not support the audio element.
     </audio>
     {#each wheellist as dir}
