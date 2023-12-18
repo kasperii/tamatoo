@@ -197,9 +197,11 @@
 
      let aX = Math.floor((clickPoint[0]-.5)*60);
      let aY = Math.floor((clickPoint[1])*60);
+     print("ax = " + aX)
+     print("ay = " + aY)
 
 
-     angles = "p" + aY + "t" + aX;
+     angles = "p" + aX + "t" + aY;
      sendGaze(angles)
  };
 
