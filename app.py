@@ -20,6 +20,52 @@ serTama = serial.Serial('/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A50285BI-if0
 pan = 0
 tilt = 0
 
+# ------------ffmpeg--------------
+#
+
+from flask import stream_with_context, request, Response
+import subprocess
+import time
+
+@app.route("/ffmpeg")
+def ffmpegstream():
+    ffmpeg_command = ["ffmpeg", "-f", "avfoundation", "-i", ":2", "-acodec", "libmp3lame", "-ab", "32k", "-ac", "1", "-f", "mpeg", "pipe:stdout"]
+    process = subprocess.Popen(ffmpeg_command, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, bufsize = -1)
+
+    def generate():
+        startTime = time.time()
+        buffer = []
+        sentBurst = False
+
+
+        while True:
+            # Get some data from ffmpeg
+            line = process.stdout.read(1024)
+
+            # We buffer everything before outputting it
+            buffer.append(line)
+
+            # Minimum buffer time, 3 seconds
+            if sentBurst is False and time.time() > startTime + 3 and len(buffer) > 0:
+                sentBurst = True
+
+                for i in range(0, len(buffer) - 2):
+                    print "Send initial burst #", i
+                    yield buffer.pop(0)
+
+            elif time.time() > startTime + 3 and len(buffer) > 0:
+                yield buffer.pop(0)
+
+            process.poll()
+            if isinstance(process.returncode, int):
+                if process.returncode > 0:
+                    print 'FFmpeg Error', p.returncode
+                break
+
+    return Response(stream_with_context(generate()), mimetype = "audio/mpeg")
+
+
+
 # -------------AUDIO---------------
 #
 
