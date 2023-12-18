@@ -263,7 +263,11 @@
         <img class="overlay" src="./video_feed" style="clip-path: circle(40% at {blurPoint[0]}% {blurPoint[1]}%)">
         <img class="overlay" on:mousedown={onMouseDown}>
     </div>
-{#each wheellist as dir}
+    <audio controls>
+        <source src="./audio" type="audio/x-wav;codec=pcm">
+        Your browser does not support the audio element.
+    </audio>
+    {#each wheellist as dir}
     <button on:click={() => sendWheel(dir.id)}>{dir.name}</button>
 {/each}
 
