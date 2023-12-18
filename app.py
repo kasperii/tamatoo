@@ -29,7 +29,8 @@ import time
 
 @app.route("/ffmpeg")
 def ffmpegstream():
-    ffmpeg_command = ["ffmpeg", "-f", "avfoundation", "-i", ":2", "-acodec", "libmp3lame", "-ab", "32k", "-ac", "1", "-f", "mpeg", "pipe:stdout"]
+    ffmpeg_command = ["ffmpeg", "-f", "alsa", "-ac", "4", "-i", "default", "-f", "mpeg", "pipe:stdout"]
+    #ffmpeg -f alsa -ac 4 -i default
     process = subprocess.Popen(ffmpeg_command, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, bufsize = -1)
 
     def generate():
