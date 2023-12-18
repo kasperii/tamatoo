@@ -180,13 +180,13 @@ def home(path):
 def hello():
     return str(random.randint(0, 100))
 
-@app.route('/audio')
-def audio():
-    try:
-       os.system ("ffmpeg -ar 44100 -ac 1 -f alsa -i plughw:3,0 -f mp3 -listen 1 tcp://0.0.0.0:5002")
-    except Exeption as e:
-        print(e)
-    return "Playing audio"
+#@app.route('/audio')
+#def audio():
+#    try:
+#       os.system ("ffmpeg -ar 44100 -ac 1 -f alsa -i plughw:3,0 -f mp3 -listen 1 tcp://0.0.0.0:5002")
+#    except Exeption as e:
+#        print(e)
+#    return "Playing audio"
 
 @app.route("/wheels", methods=["POST"])
 def wheels():
