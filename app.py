@@ -30,7 +30,7 @@ RATE = 44100
 CHUNK = 1024
 RECORD_SECONDS = 5
 audio1 = pyaudio.PyAudio()
-
+# ReSpeaker 4 Mic Array (UAC1.0): USB Audio (hw:3,0): 1
 
 def genHeader(sampleRate, bitsPerSample, channels):
     datasize = 2000*10**6
@@ -56,7 +56,7 @@ def audio():
     def sound():
 
         CHUNK = 1024
-        sampleRate = 44100
+        sampleRate = 16000
         bitsPerSample = 16
         channels = 2
         wav_header = genHeader(sampleRate, bitsPerSample, channels)
