@@ -30,6 +30,7 @@ import time
 @app.route("/ffmpeg")
 def ffmpegstream():
     ffmpeg_command = ["ffmpeg", "-f", "alsa", "-channels", "6", "-sample_rate", "16000" "-i", "hw:3", "-f", "mp3", "pipe:stdout"]
+    ffmpeg_command = ["ffmpeg", "-f",  "alsa",  "-channels", "6",  "-sample_rate",  "16000",  "-i",  "hw:3",  "-b:v",  "40M",  "-maxrate 50M",  "-bufsize 200M",  "-field_order",  "tt",  "-fflags",  "nobuffer",  "-threads",  "1",  "-vcodec",  "mpeg4",  "-g",  "100",  "-r",  "30",  "-bf",  "0",  "-mbd",  "bits",  "-flags",  "+aic+mv4+low_delay",  "-thread_type",  "slice",  "-slices",  "1",  "-level",  "32",  "-strict",  "experimental",  "-f_strict",  "experimental",  "-syncpoints",  "none", "pipe:stdout"]
     #ffmpeg -f alsa -ac 4 -i default
     process = subprocess.Popen(ffmpeg_command, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, bufsize = -1)
 
@@ -74,7 +75,7 @@ def ffmpegstream():
 
 # -------------AUDIO---------------
 #
-
+# ffmpeg -f  alsa -channels 6 -sample_rate 16000 -i hw:3   -b:v 40M -maxrate 50M -bufsize 200M     -field_order tt -fflags nobuffer -threads 1     -vcodec mpeg4 -g 100 -r 30 -bf 0 -mbd bits -flags +aic+mv4+low_delay     -thread_type slice -slices 1 -level 32 -strict experimental -f_strict experimental     -syncpoints none -f nut "tcp://10.10.0.238:1234"
 import pyaudio
 FORMAT = pyaudio.paInt16
 CHANNELS = 2
