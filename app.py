@@ -9,14 +9,28 @@ from flask_socketio import SocketIO,emit
 
 
 
-
+runningonmacdebug=False
 #from camera import VideoCamera
 
 app = Flask(__name__)
 
-serWheels = serial.Serial('/dev/serial/by-id/usb-Silicon_Labs_CP2104_USB_to_UART_Bridge_Controller_0178C8A8-if00-port0', 115200, timeout=1)
-serTama = serial.Serial('/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A50285BI-if00-port0', 9600, timeout=1)
+app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app,  cors_allowed_origins="*", async_mode='eventlet')
 
+@socketio.on('connect')
+def handle_connect():
+    print("SOCKET COONNNECTED!")
+
+@socketio.on('message')
+def handle_message(data):
+    print('received message: ' + data)
+
+try:
+    serWheels = serial.Serial('/dev/serial/by-id/usb-Silicon_Labs_CP2104_USB_to_UART_Bridge_Controller_0178C8A8-if00-port0', 115200, timeout=1)
+    serTama = serial.Serial('/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A50285BI-if00-port0', 9600, timeout=1)
+except:
+    print("ERROR WITH SERIAL")
+    runningonmacdebug=True
 pan = 0
 tilt = 0
 
@@ -26,6 +40,8 @@ tilt = 0
 from flask import stream_with_context, request, Response
 import subprocess
 import time
+
+
 
 @app.route("/ffmpeg")
 def ffmpegstream():
@@ -141,44 +157,49 @@ def audio():
 
 
 # ------ CAMERA funcs ------
-# import io
-# import logging
-# import socketserver
-# from http import server
-# from threading import Condition
-# from camera import VideoCamera
-
-import picamera2 #camera module for RPi camera
-from picamera2 import Picamera2
-from picamera2.encoders import JpegEncoder
-from picamera2.outputs import FileOutput
+import io
+import logging
+import socketserver
+from http import server
+from threading import Condition
+from camera import VideoCamera
+if(not runningonmacdebug):
+    import picamera2 #camera module for RPi camera
+    from picamera2 import Picamera2
+    from picamera2.encoders import JpegEncoder
+    from picamera2.outputs import FileOutput
 import io
 from threading import Condition
 
 
 class StreamingOutput(io.BufferedIOBase):
-    def __init__(self):
-        self.frame = None
-        self.condition = Condition()
+   def __init__(self):
+      self.frame = None
+      self.condition = Condition()
 
-    def write(self, buf):
-        with self.condition:
-            self.frame = buf
-            self.condition.notify_all()
+      def write(self, buf):
+          with self.condition:
+              self.frame = buf
+              self.condition.notify_all()
 
 def genFrames():
     #buffer = StreamingOutput()
-    with picamera2.Picamera2() as camera:
-        output = StreamingOutput()
-        camera.configure(camera.create_video_configuration(main={"size": (1296,972)}))
-        output = StreamingOutput()
-        camera.start_recording(JpegEncoder(), FileOutput(output))
-        while True:
-            with output.condition:
-                output.condition.wait()
-                frame = output.frame
-            yield (b'--frame\r\n'
-                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+    if not runningonmacdebug:
+        with picamera2.Picamera2() as camera:
+            output = StreamingOutput()
+            camera.configure(camera.create_video_configuration(main={"size": (1296,972)}))
+            output = StreamingOutput()
+            camera.start_recording(JpegEncoder(), FileOutput(output))
+            while True:
+                with output.condition:
+                    output.condition.wait()
+                    frame = output.frame
+                    yield (b'--frame\r\n'
+                           b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+    else:
+        return
+
+
 
 # picam2 = Picamera2()
 # camera_config = picam2.create_preview_configuration()
@@ -386,4 +407,5 @@ def separate_string(input_string):
 
 
 if __name__ == "__main__":
-    app.run(debug=True,threaded=True)
+    #app.run(debug=True,threaded=True)
+    socketio.run(app, debug=True)

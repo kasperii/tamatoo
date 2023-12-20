@@ -1,7 +1,10 @@
+
+
 <script>
  import Tama from './Tama.svelte';
  import Controller from './Controller.svelte';
  import Gamepad from "./Gamepad.svelte";
+ import Audio from "./Audio.svelte";
 
  let state = {
      leftAxis: { x: 0, y: 0 },
@@ -14,6 +17,12 @@
  let speed = 0;
  let isMoving = false;
  let compass = ['r','t','y','g','h','j','b','v','c','x','z','a','s','d','w','e','r']
+
+ var socket = io();
+ socket.on('connect', function() {
+      console.log("CONNECTED SOCKET")
+      socket.emit('my event', {data: 'I\'m connected!'});
+  });
 
  function directionFromDegrees(d){
      // the 16- is because I messed up the degrees in the arduino code.. Should be changed later
@@ -200,7 +209,6 @@
      console.log("ax = " + aX)
      console.log("ay = " + aY)
 
-
      angles = "p" + aX + "t" + aY;
      sendGaze(angles)
  };
@@ -222,7 +230,180 @@
  }
 
 
+
+
+
+
+
+
+
+ // GET AUDIO FROM GGOOGLES EXAMPLE: https://github.com/webrtc/samples/blob/gh-pages/src/content/getusermedia/audio/js/main.js
+
+
+
+ 'use strict';
+
+ // Put variables in global scope to make them available to the browser console.
+ const audio = document.querySelector('audio');
+
+ const constraints = window.constraints = {
+     audio: true,
+     video: false
+ };
+
+ 
+ function handleSuccess(stream) {
+     const audioTracks = stream.getAudioTracks();
+     console.log('Got stream with constraints:', constraints);
+     console.log('Using audio device: ' + audioTracks[0].label);
+     stream.oninactive = function() {
+         console.log('Stream ended');
+     };
+     window.stream = stream; // make variable available to browser console
+     audio.srcObject = stream;
+ }
+
+ function handleError(error) {
+     const errorMessage = 'navigator.MediaDevices.getUserMedia error: ' + error.message + ' ' + error.name;
+     document.getElementById('errorMsg').innerText = errorMessage;
+     console.log(errorMessage);
+ }
+
+ navigator.mediaDevices.getUserMedia(constraints).then(handleSuccess).catch(handleError);
+
+
+
+
+
+ // socker audio sending
+ //
+ // var recording_button = document.getElementById('record');
+ // var socket = io.connect('http://' + document.domain + ':' + location.port);
+ //
+ //
+ //  socket.on('add-wavefile', function(url) {
+ //      // add new recording to page
+ //      //audio = document.createElement('p');
+ //      audio.innerHTML = '<audio src="' + url + '" controls>';
+ //      // document.getElementById('wavefiles').appendChild(audio);
+ //      document.getElementById('wavefiles').innerHTML = audio.innerHTML
+ //  });
+ //
+ //
+ //
+ //  socket.on('model-output', function(curr_audio_state){
+ //      console.log('output socket is invoked finally')
+ //      document.getElementById("audio_state").innerHTML = curr_audio_state;
+ //  });
+ //
+ //  socket.on('connect', function() {
+ //      console.log('CONNECTION ESTABLISHED !!')
+     //  });
+
+
+
+ // function convertToMono( input ) {
+ //     var splitter = audioContext.createChannelSplitter(2);
+ //     var merger = audioContext.createChannelMerger(2);
+ //
+ //     input.connect( splitter );
+ //     splitter.connect( merger, 0, 0 );
+ //     splitter.connect( merger, 0, 1 );
+ //     return merger;
+ // }
+ //
+ // function gotStream(stream) {
+ //     // inputPoint = audioContext.createGain();
+ //
+ //     // Create an AudioNode from the stream.
+ //     realAudioInput = audioContext.createMediaStreamSource(stream);
+ //     audioInput = realAudioInput;
+ //
+ //     audioInput = convertToMono( audioInput );
+ //     // audioInput.connect(inputPoint);
+ //
+ //     analyserNode = audioContext.createAnalyser();
+ //     analyserNode.fftSize = 2048;
+ //     // inputPoint.connect( analyserNode );
+ //     audioInput.connect( analyserNode );
+ //
+ //     scriptNode = (audioContext.createScriptProcessor || audioContext.createJavaScriptNode).call(audioContext, 1024, 1, 1);
+ //     scriptNode.onaudioprocess = function (audioEvent) {
+ //         if (recording) {
+ //             input = audioEvent.inputBuffer.getChannelData(0);
+ //
+ //             // convert float audio data to 16-bit PCM
+ //             var buffer = new ArrayBuffer(input.length * 2)
+ //             var output = new DataView(buffer);
+ //
+ //             for (var i = 0, offset = 0; i < input.length; i++, offset += 2) {
+ //                 var s = Math.max(-1, Math.min(1, input[i]));
+ //                 output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+ //             }
+ //             socket.emit('write-audio', buffer);
+ //         }
+ //     }
+ //     audioInput.connect(scriptNode);
+ //     scriptNode.connect(audioContext.destination);
+ //
+ //     // zeroGain = audioContext.createGain();
+ //     // zeroGain.gain.value = 0.0;
+ //     // inputPoint.connect( zeroGain );
+ //     // audioInput.connect( audioContext.destination );
+ // }
+
+ // function initAudio() {
+ //     if (!navigator.getUserMedia)
+ //         navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+ //     if (!navigator.cancelAnimationFrame)
+ //         navigator.cancelAnimationFrame = navigator.webkitCancelAnimationFrame || navigator.mozCancelAnimationFrame;
+ //     if (!navigator.requestAnimationFrame)
+ //         navigator.requestAnimationFrame = navigator.webkitRequestAnimationFrame || navigator.mozRequestAnimationFrame;
+ //
+ //     navigator.getUserMedia({audio: true}, gotStream, function(e) {
+ //         alert('Error getting audio');
+ //         console.log(e);
+ //     });
+ // }
+ //
+ //
+ // // Additional Function to glow image, and add recording css style
+ // function toggleRecording( e ) {
+ //     if (e.classList.contains('recording')) {
+ //         console.log('END RECORDING INITIAZIED .. DELETING session')
+ //         // stop recording
+ //         e.classList.remove('recording');
+ //         recording = false;
+ //         socket.emit('end-recording');
+ //     } else {
+ //         // start recording
+ //         console.log(' emmiting at start-recording');
+ //         e.classList.add('recording');
+ //         recording = true;
+ //         socket.emit('start-recording', {numChannels: 1, bps: 16, fps: parseInt(audioContext.sampleRate)});
+ //     }
+ // }
+ //
+ // window.addEventListener('load', initAudio );
+ //
+ // // One-liner to resume playback only when user interacted with the page, we don't want js to automatically record audio when mic access is given .. more secure !!
+ // recording_button.addEventListener('click', function() {
+ //     audioContext.resume().then(() => {
+ //         console.log('Initializing Recording')
+ //         toggleRecording(this);
+ //     });
+ // });
+ //
+ //
+ //
+ //
+
+
+
 </script>
+
+
+
 <Tama />
 
 <div class="row">
@@ -263,11 +444,12 @@
         <img class="overlay" src="./video_feed" style="clip-path: circle(40% at {blurPoint[0]}% {blurPoint[1]}%)">
         <img class="overlay" on:mousedown={onMouseDown}>
     </div>
-    <audio controls>
-        <source src="./ffmpeg" type="audio/mpeg">
-       <!-- <source src="./audio" type="audio/x-wav;codec=pcm"> -->
-        Your browser does not support the audio element.
-    </audio>
+    <!-- <audio controls>
+         <source src="./ffmpeg" type="audio/mpeg">
+         <source src="./audio" type="audio/x-wav;codec=pcm">
+         Your browser does not support the audio element.
+         </audio> -->
+    <audio id="gum-local" controls autoplay></audio>
     {#each wheellist as dir}
     <button on:click={() => sendWheel(dir.id)}>{dir.name}</button>
 {/each}
