@@ -30,7 +30,7 @@ try:
     serTama = serial.Serial('/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A50285BI-if00-port0', 9600, timeout=1)
 except:
     print("ERROR WITH SERIAL")
-    runningonmacdebug=True
+    #runningonmacdebug=True
 pan = 0
 tilt = 0
 
@@ -93,6 +93,7 @@ def ffmpegstream():
 #
 # ffmpeg -f  alsa -channels 6 -sample_rate 16000 -i hw:3   -b:v 40M -maxrate 50M -bufsize 200M     -field_order tt -fflags nobuffer -threads 1     -vcodec mpeg4 -g 100 -r 30 -bf 0 -mbd bits -flags +aic+mv4+low_delay     -thread_type slice -slices 1 -level 32 -strict experimental -f_strict experimental     -syncpoints none -f nut "tcp://10.10.0.238:1234"
 import pyaudio
+import sounddevice
 FORMAT = pyaudio.paInt16
 CHANNELS = 2
 RATE = 16000
@@ -168,16 +169,15 @@ if(not runningonmacdebug):
     from picamera2 import Picamera2
     from picamera2.encoders import JpegEncoder
     from picamera2.outputs import FileOutput
-
+import io
 from threading import Condition
 
 
 class StreamingOutput(io.BufferedIOBase):
-   def __init__(self):
-      self.frame = None
-      self.condition = Condition()
-
-      def write(self, buf):
+    def __init__(self):
+        self.frame = None
+        self.condition = Condition()
+        def write(self, buf):
           with self.condition:
               self.frame = buf
               self.condition.notify_all()
