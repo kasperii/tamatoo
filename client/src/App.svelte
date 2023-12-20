@@ -33,6 +33,8 @@
      console.log(button)
      state.buttons["button"] = button.detail;
      console.log(state.buttons)
+     while(Gamepad."button")
+
  }
 
  function dpad(direction){

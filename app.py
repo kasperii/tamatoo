@@ -158,17 +158,17 @@ def audio():
 
 # ------ CAMERA funcs ------
 import io
-import logging
-import socketserver
-from http import server
-from threading import Condition
-from camera import VideoCamera
+#import logging
+#import socketserver
+#from http import server
+#from threading import Condition
+#from camera import VideoCamera
 if(not runningonmacdebug):
     import picamera2 #camera module for RPi camera
     from picamera2 import Picamera2
     from picamera2.encoders import JpegEncoder
     from picamera2.outputs import FileOutput
-import io
+
 from threading import Condition
 
 
