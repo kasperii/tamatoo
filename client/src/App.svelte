@@ -4,7 +4,6 @@
  import Tama from './Tama.svelte';
  import Controller from './Controller.svelte';
  import Gamepad from "./Gamepad.svelte";
- import Audio from "./Audio.svelte";
 
  let state = {
      leftAxis: { x: 0, y: 0 },
