@@ -4,7 +4,7 @@ import sys
 import json
 import serial
 import time
-from flask_socketio import SocketIO,emit
+from flask_socketio import SocketIO,emit,send
 import platform
 mac = False
 if (platform.system() == "Darwin"):
@@ -19,8 +19,20 @@ if (platform.system() == "Darwin"):
 
 app = Flask(__name__)
 
-# app.config['SECRET_KEY'] = 'secret!'
-# socketio = SocketIO(app,  cors_allowed_origins="*", async_mode='eventlet') #
+
+############## SOCKETS AND WEBRTC
+rooms_sid = {}
+names_sid = {}
+app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app,  cors_allowed_origins="*", async_mode='eventlet') #
+#
+#
+#
+
+@socketio.on('message')
+def handle_message(data):
+    print('received message: ' + data)
+    send(data)
 
 # @socketio.on('connect')
 # def handle_connect():
@@ -411,5 +423,5 @@ def separate_string(input_string):
 
 
 if __name__ == "__main__":
-    app.run(debug=True,threaded=True)
-    #socketio.run(app, debug=True)
+    #app.run(debug=True,threaded=True)
+    socketio.run(app, host='0.0.0.0', debug=True)
