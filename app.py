@@ -6,6 +6,7 @@ import serial
 import time
 from flask_socketio import SocketIO,emit,send
 import platform
+from flask_cors import CORS
 mac = False
 if (platform.system() == "Darwin"):
     mac = True
@@ -22,15 +23,17 @@ app = Flask(__name__)
 
 ############## SOCKETS AND WEBRTC
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app,  cors_allowed_origins="*", async_mode='eventlet', logger=True, engineio_logger=True) #
+socketio = SocketIO(app,  cors_allowed_origins="*", async_mode='eventlet') #
 #
 #
 #
 
-@socketio.on('message')
-def handle_message(data):
-    print('received message: ' + data)
-    send(data)
+@socketio.on("connect")
+def connected():
+    """event listener when client connects to the server"""
+    print(request.sid)
+    print("client has connected")
+    emit("connect",{"data":f"id: {request.sid} is connected"})
 
 # @socketio.on('connect')
 # def handle_connect():
