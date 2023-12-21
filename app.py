@@ -425,4 +425,4 @@ def separate_string(input_string):
 
 if __name__ == "__main__":
     #app.run(debug=True,threaded=True)
-    socketio.run(app, host='0.0.0.0', debug=True)
+    socketio.run(app, debug=True)
