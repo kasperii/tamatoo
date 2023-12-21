@@ -418,7 +418,6 @@ var Constraints = {
          Your browser does not support the audio element.
          </audio> -->
     <audio id="gum-local" controls autoplay></audio>
-{/each}
 
 <style>
  main {
