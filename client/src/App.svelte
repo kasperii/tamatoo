@@ -16,43 +16,122 @@
  let speed = 0;
  let isMoving = false;
  let compass = ['r','t','y','g','h','j','b','v','c','x','z','a','s','d','w','e','r']
-
- var socket = io();
- socket.on('connect', function() {
-      console.log("CONNECTED SOCKET")
-      socket.emit('my event', {data: 'I\'m connected!'});
-  });
-
+ // Variable to toggle slow movement
+ let speedmulti = 1
+ // var socket = io();
+ // socket.on('connect', function() {
+ //      console.log("CONNECTED SOCKET")
+ //      socket.emit('my event', {data: 'I\'m connected!'});
+ //  });
+ //
  function directionFromDegrees(d){
      // the 16- is because I messed up the degrees in the arduino code.. Should be changed later
      return compass[16-Math.floor((d+11.25)/22.5)]
 
  }
 
+
+
+
  function gamepadChangeState(button){
-     console.log(button)
-     state.buttons["button"] = button.detail;
-     console.log(state.buttons)
-     while(Gamepad."button")
+     state[buttons][button] = button.detail;
 
  }
 
  function dpad(direction){
-     state.buttons[text] = button.detail;
+     state.buttons[direction] = button.detail;
  }
 
  function gamepadConnected(event) {
      console.log(`app: gamepad ${event.detail.gamepadIndex} connected`);
  }
  function APressed(event) {
+     if (state.buttons["A"] != event.detail){
      state.buttons["A"] = event.detail;
-     console.log("A pressed");
+         if(state.buttons["A"]==null){
+             return
+         }
+         else{
+             return
+         }
+
+     }
+
  }
 
  function RTPressed(event) {
+     if (state.buttons["RT"] != event.detail){
      state.buttons["RT"] = event.detail;
-     console.log("RT pressed");
+         if(state.buttons["RT"]==null){
+             sendWheel("r","L")
+
+         }
+         else{
+             sendWheel("r","M")
+         }
+
+     }
+
  }
+
+  function LTPressed(event) {
+     if (state.buttons["LT"] != event.detail){
+     state.buttons["LT"] = event.detail;
+         if(state.buttons["LT"]==null){
+             sendWheel("r","L")
+         }
+         else{
+             sendWheel("r","M")
+         }
+
+     }
+
+  }
+
+  function RBPressed(event) {
+     if (state.buttons["RB"] != event.detail){
+     state.buttons["RB"] = event.detail;
+         if(state.buttons["RB"]==null){
+             sendWheel("r","R")
+         }
+         else{
+             sendWheel("r","M")
+         }
+
+     }
+
+  }
+
+  function LBPressed(event) {
+     if (state.buttons["LB"] != event.detail){
+     state.buttons["LB"] = event.detail;
+         if(state.buttons["LB"]==null){
+             sendWheel("r","L")
+         }
+         else{
+             sendWheel("r","M")
+         }
+
+     }
+
+  }
+
+   function RSPressed(event) {
+     if (state.buttons["RS"] != event.detail){
+     state.buttons["RS"] = event.detail;
+         if(state.buttons["RS"]==null){
+             return
+         }
+         else if(speedmulti == 1){
+             speedmulti=0.25
+         }
+         else{
+             speedmulti=1
+         }
+
+     }
+
+   }
 
  function LeftStick(event) {
      state.leftAxis = event.detail;
@@ -99,7 +178,7 @@
      }
      if(Math.abs(speed-newSpeed)>0.1){
          speed = newSpeed
-         sendWheel('m',Math.round(speed*6)+32)
+         sendWheel('m',Math.round(speed*6)+32*speedmulti)
          isMoving = true;
      }
      newDegrees = (Math.round((newDegrees+90)/11.25)*11.25)%360
@@ -428,12 +507,12 @@
     on:RT={RTPressed}
     on:LeftStick={LeftStick}
     on:RightStick={RightStick}
-    on:LB={ () => gamepadChangeState("LB")}
-    on:RB={ () => gamepadChangeState("RB")}
-    on:RT={ () => gamepadChangeState("RT")}
-    on:LT={ () => gamepadChangeState("LT")}
-    on:RS={ () => gamepadChangeState("RS")}
-    on:LS={ () => gamepadChangeState(LS)}
+    on:LB={LBPressed)}
+    on:RB={RBPressed}
+    on:RT={RTPressed}
+    on:LT={LTPressed}
+    on:RS={RSPressed}
+    on:LS={LSPressed}
     on:DPadUp={ () => dpad("U")}
     on:DPadDown={ () => dpad("D")}
     on:DPadLeft={ () => dpad("L")}
@@ -441,8 +520,8 @@
 
     />
     <div class="blur-container">
-        <img class="underlay" id="tamaview" src="./video_feed">
-        <img class="overlay" src="./video_feed" style="clip-path: circle(40% at {blurPoint[0]}% {blurPoint[1]}%)">
+        <img class="underlay" id="tamaview" src="http://10.10.0.163:8080/stream/video.mjpeg">
+        <img class="overlay" src="http://10.10.0.163:8080/stream/video.mjpeg" style="clip-path: circle(40% at {blurPoint[0]}% {blurPoint[1]}%)">
         <img class="overlay" on:mousedown={onMouseDown}>
     </div>
     <!-- <audio controls>
@@ -496,10 +575,10 @@
      width: 100%;
      height: 100%;
      object-fit: cover;
-     -webkit-transform: rotate(180deg);
-     -moz-transform: rotate(180deg);
-     -o-transform: rotate(180deg);
-     transform: rotate(180deg);
+     /* -webkit-transform: rotate(180deg);
+        -moz-transform: rotate(180deg);
+        -o-transform: rotate(180deg);
+        transform: rotate(180deg); */
      -webkit-user-drag: none;
 
      filter: FlipH;

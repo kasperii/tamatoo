@@ -5,25 +5,30 @@ import json
 import serial
 import time
 from flask_socketio import SocketIO,emit
+import platform
+mac = False
+if (platform.system() == "Darwin"):
+    mac = True
 
 
 
+# START UV4L Work:
+# uv4l --driver raspicam --server-option '--use-ssl=yes' --server-option '-ssl-private-key-file='home/pi/selfsign.key' --enable-usermedia-screen-capturing --server-option 'ssl-certificate-file=/home/pi/selfsign.crt
 
-runningonmacdebug=False
 #from camera import VideoCamera
 
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app,  cors_allowed_origins="*", async_mode='eventlet')
+# app.config['SECRET_KEY'] = 'secret!'
+# socketio = SocketIO(app,  cors_allowed_origins="*", async_mode='eventlet') #
 
-@socketio.on('connect')
-def handle_connect():
-    print("SOCKET COONNNECTED!")
+# @socketio.on('connect')
+# def handle_connect():
+#     print("SOCKET COONNNECTED!")
 
-@socketio.on('message')
-def handle_message(data):
-    print('received message: ' + data)
+# @socketio.on('message')
+# def handle_message(data):
+#     print('received message: ' + data)
 
 try:
     serWheels = serial.Serial('/dev/serial/by-id/usb-Silicon_Labs_CP2104_USB_to_UART_Bridge_Controller_0178C8A8-if00-port0', 115200, timeout=1)
@@ -37,115 +42,115 @@ tilt = 0
 # ------------ffmpeg--------------
 #
 
-from flask import stream_with_context, request, Response
-import subprocess
-import time
+# from flask import stream_with_context, request, Response
+# import subprocess
+# import time
 
 
 
-@app.route("/ffmpeg")
-def ffmpegstream():
-    ffmpeg_command = ["ffmpeg", "-f", "alsa", "-channels", "6", "-sample_rate", "16000" "-i", "hw:3", "-f", "mp3", "pipe:stdout"]
-    ffmpeg_command = ["ffmpeg", "-f",  "alsa",  "-channels", "6",  "-sample_rate",  "16000",  "-i",  "hw:3",  "-b:v",  "40M",  "-maxrate 50M",  "-bufsize 200M",  "-field_order",  "tt",  "-fflags",  "nobuffer",  "-threads",  "1",  "-vcodec",  "mpeg4",  "-g",  "100",  "-r",  "30",  "-bf",  "0",  "-mbd",  "bits",  "-flags",  "+aic+mv4+low_delay",  "-thread_type",  "slice",  "-slices",  "1",  "-level",  "32",  "-strict",  "experimental",  "-f_strict",  "experimental",  "-syncpoints",  "none", "pipe:stdout"]
-    #ffmpeg -f alsa -ac 4 -i default
-    process = subprocess.Popen(ffmpeg_command, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, bufsize = -1)
+# @app.route("/ffmpeg")
+# def ffmpegstream():
+#     ffmpeg_command = ["ffmpeg", "-f", "alsa", "-channels", "6", "-sample_rate", "16000" "-i", "hw:3", "-f", "mp3", "pipe:stdout"]
+#     ffmpeg_command = ["ffmpeg", "-f",  "alsa",  "-channels", "6",  "-sample_rate",  "16000",  "-i",  "hw:3",  "-b:v",  "40M",  "-maxrate 50M",  "-bufsize 200M",  "-field_order",  "tt",  "-fflags",  "nobuffer",  "-threads",  "1",  "-vcodec",  "mpeg4",  "-g",  "100",  "-r",  "30",  "-bf",  "0",  "-mbd",  "bits",  "-flags",  "+aic+mv4+low_delay",  "-thread_type",  "slice",  "-slices",  "1",  "-level",  "32",  "-strict",  "experimental",  "-f_strict",  "experimental",  "-syncpoints",  "none", "pipe:stdout"]
+#     #ffmpeg -f alsa -ac 4 -i default
+#     process = subprocess.Popen(ffmpeg_command, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, bufsize = -1)
 
-    def generate():
-        startTime = time.time()
-        buffer = []
-        sentBurst = False
+#     def generate():
+#         startTime = time.time()
+#         buffer = []
+#         sentBurst = False
 
 
-        while True:
-            # Get some data from ffmpeg
-            line = process.stdout.read(1024)
+#         while True:
+#             # Get some data from ffmpeg
+#             line = process.stdout.read(1024)
 
-            # We buffer everything before outputting it
-            buffer.append(line)
+#             # We buffer everything before outputting it
+#             buffer.append(line)
 
-            # Minimum buffer time, 3 seconds
-            if sentBurst is False and time.time() > startTime + 3 and len(buffer) > 0:
-                sentBurst = True
+#             # Minimum buffer time, 3 seconds
+#             if sentBurst is False and time.time() > startTime + 3 and len(buffer) > 0:
+#                 sentBurst = True
 
-                for i in range(0, len(buffer) - 2):
-                    print("Send initial burst #", i)
-                    yield buffer.pop(0)
+#                 for i in range(0, len(buffer) - 2):
+#                     print("Send initial burst #", i)
+#                     yield buffer.pop(0)
 
-            elif time.time() > startTime + 3 and len(buffer) > 0:
-                yield buffer.pop(0)
+#             elif time.time() > startTime + 3 and len(buffer) > 0:
+#                 yield buffer.pop(0)
 
-            process.poll()
-            if isinstance(process.returncode, int):
-                if process.returncode > 0:
-                    print('FFmpeg Error', process.returncode)
-                break
+#             process.poll()
+#             if isinstance(process.returncode, int):
+#                 if process.returncode > 0:
+#                     print('FFmpeg Error', process.returncode)
+#                 break
 
-    response = Response(stream_with_context(generate()), mimetype = "audio/mpeg")
+#     response = Response(stream_with_context(generate()), mimetype = "audio/mpeg")
 
-    @response.call_on_close
-    def on_close():
-        process.kill()
-    return response
+#     @response.call_on_close
+#     def on_close():
+#         process.kill()
+#     return response
 
 
 
 # -------------AUDIO---------------
 #
 # ffmpeg -f  alsa -channels 6 -sample_rate 16000 -i hw:3   -b:v 40M -maxrate 50M -bufsize 200M     -field_order tt -fflags nobuffer -threads 1     -vcodec mpeg4 -g 100 -r 30 -bf 0 -mbd bits -flags +aic+mv4+low_delay     -thread_type slice -slices 1 -level 32 -strict experimental -f_strict experimental     -syncpoints none -f nut "tcp://10.10.0.238:1234"
-import pyaudio
-import sounddevice
-FORMAT = pyaudio.paInt16
-CHANNELS = 2
-RATE = 16000
-CHUNK = 1024
-RECORD_SECONDS = 5
-audio1 = pyaudio.PyAudio()
-# ReSpeaker 4 Mic Array (UAC1.0): USB Audio (hw:3,0): 1
+# import pyaudio
+# import sounddevice
+# FORMAT = pyaudio.paInt16
+# CHANNELS = 2
+# RATE = 16000
+# CHUNK = 1024
+# RECORD_SECONDS = 5
+# audio1 = pyaudio.PyAudio()
+# # ReSpeaker 4 Mic Array (UAC1.0): USB Audio (hw:3,0): 1
 
-def genHeader(sampleRate, bitsPerSample, channels):
-    datasize = 2000*10**6
-    o = bytes("RIFF",'ascii')                                               # (4byte) Marks file as RIFF
-    o += (datasize + 36).to_bytes(4,'little')                               # (4byte) File size in bytes excluding this and RIFF marker
-    o += bytes("WAVE",'ascii')                                              # (4byte) File type
-    o += bytes("fmt ",'ascii')                                              # (4byte) Format Chunk Marker
-    o += (16).to_bytes(4,'little')                                          # (4byte) Length of above format data
-    o += (1).to_bytes(2,'little')                                           # (2byte) Format type (1 - PCM)
-    o += (channels).to_bytes(2,'little')                                    # (2byte)
-    o += (sampleRate).to_bytes(4,'little')                                  # (4byte)
-    o += (sampleRate * channels * bitsPerSample // 8).to_bytes(4,'little')  # (4byte)
-    o += (channels * bitsPerSample // 8).to_bytes(2,'little')               # (2byte)
-    o += (bitsPerSample).to_bytes(2,'little')                               # (2byte)
-    o += bytes("data",'ascii')                                              # (4byte) Data Chunk Marker
-    o += (datasize).to_bytes(4,'little')                                    # (4byte) Data size in bytes
-    return o
+# def genHeader(sampleRate, bitsPerSample, channels):
+#     datasize = 2000*10**6
+#     o = bytes("RIFF",'ascii')                                               # (4byte) Marks file as RIFF
+#     o += (datasize + 36).to_bytes(4,'little')                               # (4byte) File size in bytes excluding this and RIFF marker
+#     o += bytes("WAVE",'ascii')                                              # (4byte) File type
+#     o += bytes("fmt ",'ascii')                                              # (4byte) Format Chunk Marker
+#     o += (16).to_bytes(4,'little')                                          # (4byte) Length of above format data
+#     o += (1).to_bytes(2,'little')                                           # (2byte) Format type (1 - PCM)
+#     o += (channels).to_bytes(2,'little')                                    # (2byte)
+#     o += (sampleRate).to_bytes(4,'little')                                  # (4byte)
+#     o += (sampleRate * channels * bitsPerSample // 8).to_bytes(4,'little')  # (4byte)
+#     o += (channels * bitsPerSample // 8).to_bytes(2,'little')               # (2byte)
+#     o += (bitsPerSample).to_bytes(2,'little')                               # (2byte)
+#     o += bytes("data",'ascii')                                              # (4byte) Data Chunk Marker
+#     o += (datasize).to_bytes(4,'little')                                    # (4byte) Data size in bytes
+#     return o
 
 
-@app.route('/audio')
-def audio():
-    # start Recording
-    def sound():
+# @app.route('/audio')
+# def audio():
+#     # start Recording
+#     def sound():
 
-        CHUNK = 1024
-        sampleRate = 16000
-        bitsPerSample = 16
-        channels = 6
-        wav_header = genHeader(sampleRate, bitsPerSample, channels)
+#         CHUNK = 1024
+#         sampleRate = 16000
+#         bitsPerSample = 16
+#         channels = 6
+#         wav_header = genHeader(sampleRate, bitsPerSample, channels)
 
-        stream = audio1.open(format=FORMAT, channels=CHANNELS,
-                        rate=RATE, input=True,input_device_index=1,
-                        frames_per_buffer=CHUNK)
-        print("recording...")
-        #frames = []
-        first_run = True
-        while True:
-           if first_run:
-               data = wav_header + stream.read(CHUNK)
-               first_run = False
-           else:
-               data = stream.read(CHUNK)
-           yield(data)
+#         stream = audio1.open(format=FORMAT, channels=CHANNELS,
+#                         rate=RATE, input=True,input_device_index=1,
+#                         frames_per_buffer=CHUNK)
+#         print("recording...")
+#         #frames = []
+#         first_run = True
+#         while True:
+#            if first_run:
+#                data = wav_header + stream.read(CHUNK)
+#                first_run = False
+#            else:
+#                data = stream.read(CHUNK)
+#            yield(data)
 
-    return Response(sound())
+#     return Response(sound())
 
 # from picamera2 import Picamera2, Preview
 # picam2 = Picamera2()
@@ -158,46 +163,45 @@ def audio():
 
 
 # ------ CAMERA funcs ------
-import io
-import logging
-import socketserver
-from http import server
-from threading import Condition
-from camera import VideoCamera
-if(not runningonmacdebug):
-    import picamera2 #camera module for RPi camera
-    from picamera2 import Picamera2
-    from picamera2.encoders import JpegEncoder
-    from picamera2.outputs import FileOutput
-import io
-from threading import Condition
+# import io
+# import logging
+# import socketserver
+# from http import server
+# from threading import Condition
+# from camera import VideoCamera
+# if(not mac):
+#     import picamera2 #camera module for RPi camera
+#     from picamera2 import Picamera2
+#     from picamera2.encoders import JpegEncoder
+#     from picamera2.outputs import FileOutput
+# import io
+# from threading import Condition
 
 
-class StreamingOutput(io.BufferedIOBase):
-    def __init__(self):
-        self.frame = None
-        self.condition = Condition()
-        def write(self, buf):
-          with self.condition:
-              self.frame = buf
-              self.condition.notify_all()
+# class StreamingOutput(io.BufferedIOBase):
+#     def __init__(self):
+#         self.frame = None
+#         self.condition = Condition()
+#         def write(self, buf):
+#           with self.condition:
+#               self.frame = buf
+#               self.condition.notify_all()
 
-def genFrames():
-    #buffer = StreamingOutput()
-    if not runningonmacdebug:
-        with picamera2.Picamera2() as camera:
-            output = StreamingOutput()
-            camera.configure(camera.create_video_configuration(main={"size": (1296,972)}))
-            output = StreamingOutput()
-            camera.start_recording(JpegEncoder(), FileOutput(output))
-            while True:
-                with output.condition:
-                    output.condition.wait()
-                    frame = output.frame
-                    yield (b'--frame\r\n'
-                           b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-    else:
-        return
+# def genFrames():
+#     #buffer = StreamingOutput()
+#     if not mac:
+#         with picamera2.Picamera2() as camera:
+#             camera.configure(camera.create_video_configuration(main={"size": (1296,972)}))
+#             output = StreamingOutput()
+#             camera.start_recording(JpegEncoder(), FileOutput(output))
+#             while True:
+#                 with output.condition:
+#                     output.condition.wait()
+#                     frame = output.frame
+#                     yield (b'--frame\r\n'
+#                            b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+#     else:
+#         return
 
 
 
@@ -224,10 +228,10 @@ def genFrames():
 #                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n'
 #               )
 
-@app.route('/video_feed')
-def video_feed():
-    return Response(genFrames(),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
+# @app.route('/video_feed')
+# def video_feed():
+#     return Response(genFrames(),
+#                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
     #buffer = StreamingOutput()
     # while True:
@@ -407,5 +411,5 @@ def separate_string(input_string):
 
 
 if __name__ == "__main__":
-    #app.run(debug=True,threaded=True)
-    socketio.run(app, debug=True)
+    app.run(debug=True,threaded=True)
+    #socketio.run(app, debug=True)
