@@ -6,7 +6,7 @@ import serial
 import time
 from flask_socketio import SocketIO,emit,send
 import platform
-from flask_cors import CORS
+
 mac = False
 if (platform.system() == "Darwin"):
     mac = True
