@@ -263,7 +263,7 @@
      tamaview.addEventListener('play', function () {
          // Every 33 milliseconds copy the video image to the canvas
          setInterval(function () {
-             if (tamaview.paused || video.ended) {
+             if (tamaview.paused || tamaview.ended) {
                  return;
          }
 
