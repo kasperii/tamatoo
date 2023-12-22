@@ -205,7 +205,7 @@
      start.addEventListener('click', function (e) {
          var address = signalling_server_address
          var protocol = location.protocol === "https:" ? "wss:" : "ws:";
-         var wsurl = protocol + '//' + address;
+         var wsurl = protocol + '//' + address + '/stream/webrtc';
 
          if (!isStreaming) {
              signalObj = new signal(wsurl,
