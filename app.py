@@ -12,22 +12,28 @@ if (platform.system() == "Darwin"):
     mac = True
 
 
-
+# this server works in parallel with uv4L which handles the
+# webRTC for the raspberry pi, it should start when powered on, but I
+# used this to start it as well..
+#
 # START UV4L Work:
+#
 # uv4l --driver raspicam --server-option '--use-ssl=yes' --server-option '-ssl-private-key-file='home/pi/selfsign.key' --enable-usermedia-screen-capturing --server-option 'ssl-certificate-file=/home/pi/selfsign.crt
 
-#from camera import VideoCamera
+
 
 app = Flask(__name__)
 
 
-############## SOCKETS AND WEBRTC
+############## SOCKETS AND WEBRTC ##############
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app,  cors_allowed_origins="*", async_mode='eventlet') #
-#
-#
-#
 
+# this is the placeholder data for the handshake betweeen
+# the uv4l and the client side javascript
+data = {}
+
+# checking if connected
 @socketio.on("connect")
 def connected():
     """event listener when client connects to the server"""
@@ -35,22 +41,44 @@ def connected():
     print("client has connected")
     emit("connect",{"data":f"id: {request.sid} is connected"})
 
-# @socketio.on('connect')
-# def handle_connect():
-#     print("SOCKET COONNNECTED!")
+@socketio.on("offer")
+def offer():
+    if request.form["type"] == "offer":
+        data["offer"] = {"id" : request.form['id'], "type" : request.form['type'], "sdp" : request.form['sdp']}
+        return Response(status=200)
+    else:
+        return Response(status=400)
 
-# @socketio.on('message')
-# def handle_message(data):
-#     print('received message: ' + data)
+socketio.on("answer")
+def answer():
+    if request.form["type"] == "answer":
+        data["answer"] = {"id" : request.form['id'], "type" : request.form['type'], "sdp" : request.form['sdp']}
+        return Response(status=200)
+    else:
+        return Response(status=400)
 
-try:
-    serWheels = serial.Serial('/dev/serial/by-id/usb-Silicon_Labs_CP2104_USB_to_UART_Bridge_Controller_0178C8A8-if00-port0', 115200, timeout=1)
-    serTama = serial.Serial('/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A50285BI-if00-port0', 9600, timeout=1)
-except:
-    print("ERROR WITH SERIAL")
-    #runningonmacdebug=True
-pan = 0
-tilt = 0
+
+socketio.on("get_offer")
+def getOffer():
+    if "offer" in data:
+        j = json.dumps(data["offer"])
+        del data["offer"]
+        return Response(j, status=200, mimetype='application/json')
+    else:
+        return Response(status=503)
+
+socketio.on("get_answer")
+def getAnswer():
+    if "answer" in data:
+        j = json.dumps(data["answer"])
+        del data["answer"]
+        return Response(j, status=200, mimetype='application/json')
+    else:
+        return Response(status=503)
+
+
+
+
 
 # ------------ffmpeg--------------
 #
@@ -257,6 +285,12 @@ tilt = 0
 
 
 
+
+
+
+############ MAIN SVELTE AND WEBSITE
+
+
 # Path for our main Svelte page
 @app.route("/")
 def base():
@@ -267,6 +301,7 @@ def base():
 def home(path):
     return send_from_directory('client/public', path)
 
+# old test
 @app.route("/rand")
 def hello():
     return str(random.randint(0, 100))
@@ -279,6 +314,28 @@ def hello():
 #        print(e)
 #    return "Playing audio"
 
+
+
+
+################# TAMA CONTROLS
+
+# these are the usb connections to the wheels and the head
+try:
+    serWheels = serial.Serial('/dev/serial/by-id/usb-Silicon_Labs_CP2104_USB_to_UART_Bridge_Controller_0178C8A8-if00-port0', 115200, timeout=1)
+    serTama = serial.Serial('/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A50285BI-if00-port0', 9600, timeout=1)
+except:
+    print("ERROR WITH SERIAL")
+    #runningonmacdebug=True
+
+
+
+
+# ------ TAMA WHEELS ------
+
+# this is the channel in for controlling the wheels
+# the input is between 0-x for moving
+# speed is between y-z
+# and turing is R: 39, M: 40, L: 41
 @app.route("/wheels", methods=["POST"])
 def wheels():
 
@@ -317,6 +374,9 @@ def sendToWheels(value):
 
 # ------ TAMA HEAD ------
 
+
+pan = 0
+tilt = 0
 
 
 def sendToTama(message):
@@ -402,8 +462,9 @@ def separate_string(input_string):
         result_dict[letter] = int(number)
 
     return result_dict
+
 # THIS is just old code that could go into the def color as a way of setting the color more specifically
-# elif m == 'C':
+#
 #         print("input Right Red value(0-255)")
 #         rr = int(input())
 #         print("input Right Green value(0-255)")
@@ -425,4 +486,4 @@ def separate_string(input_string):
 
 if __name__ == "__main__":
     #app.run(debug=True,threaded=True)
-    socketio.run(app, host='0.0.0.0', debug=True)
+    socketio.run(app, host='0.0.0.0', debug=True,port=5050)

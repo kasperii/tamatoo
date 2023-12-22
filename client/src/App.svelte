@@ -18,36 +18,45 @@
  let compass = ['r','t','y','g','h','j','b','v','c','x','z','a','s','d','w','e','r']
  // Variable to toggle slow movement
  let speedmulti = 1
- // var socket = io();
- // socket.on('connect', function() {
- //      console.log("CONNECTED SOCKET")
- //      socket.emit('my event', {data: 'I\'m connected!'});
- //  });
- //
 
 
 
- //////////////////WEBRTC AND SOCKETS
-let raspi;
 
 
-var myID;
-var _peer_list = {};
+ // ################ WEBSOCKETS
 
-// socketio
-var protocol = window.location.protocol;
-var socket = io(protocol + '//' + document.domain + ':' + location.port, {autoConnect: true});
+ var raspi;
+ var myID;
 
-var Constraints = {
-    audio: true,
-    video: false
+
+ // socketio
+ var protocol = window.location.protocol;
+ var socket = io(protocol + '//' + document.domain + ':' + location.port, {autoConnect: true});
+
+ // Send audio but not video to tamatoo
+ var Constraints = {
+     audio: true,
+     video: false
  }
 
-
+// connect to socket server
  socket = io.connect();
  socket.on('connect', function() {
-        socket.emit('my event', {data: 'I\'m connected!'});
+     socket.emit('my event', {data: 'I\'m connected!'});
  });
+
+
+
+
+
+
+
+
+
+
+
+
+ // ################ GETTING THE MIC FROM THE LAPTOP
 
  // GET AUDIO FROM GGOOGLES EXAMPLE: https://github.com/webrtc/samples/blob/gh-pages/src/content/getusermedia/audio/js/main.js
 
@@ -83,18 +92,17 @@ var Constraints = {
 
  navigator.mediaDevices.getUserMedia(constraints).then(handleSuccess).catch(handleError);
 
-/////////////////////
 
 
 
- /////////////////BUTTONS N STUFF
- function directionFromDegrees(d){
-     // the 16- is because I messed up the degrees in the arduino code.. Should be changed later
-     return compass[16-Math.floor((d+11.25)/22.5)]
-
- }
 
 
+
+
+
+
+
+ // ################ GAMEPAD DETECTORS CONTROLLERs
 
 
  function gamepadChangeState(button){
@@ -111,7 +119,7 @@ var Constraints = {
  }
  function APressed(event) {
      if (state.buttons["A"] != event.detail){
-     state.buttons["A"] = event.detail;
+         state.buttons["A"] = event.detail;
          if(state.buttons["A"]==null){
              return
          }
@@ -125,7 +133,7 @@ var Constraints = {
 
  function RTPressed(event) {
      if (state.buttons["RT"] != event.detail){
-     state.buttons["RT"] = event.detail;
+         state.buttons["RT"] = event.detail;
          if(state.buttons["RT"]==null){
              sendWheel("r","L")
 
@@ -138,9 +146,9 @@ var Constraints = {
 
  }
 
-  function LTPressed(event) {
+ function LTPressed(event) {
      if (state.buttons["LT"] != event.detail){
-     state.buttons["LT"] = event.detail;
+         state.buttons["LT"] = event.detail;
          if(state.buttons["LT"]==null){
              sendWheel("r","L")
          }
@@ -150,11 +158,11 @@ var Constraints = {
 
      }
 
-  }
+ }
 
-  function RBPressed(event) {
+ function RBPressed(event) {
      if (state.buttons["RB"] != event.detail){
-     state.buttons["RB"] = event.detail;
+         state.buttons["RB"] = event.detail;
          if(state.buttons["RB"]==null){
              sendWheel("r","R")
          }
@@ -164,11 +172,11 @@ var Constraints = {
 
      }
 
-  }
+ }
 
-  function LBPressed(event) {
+ function LBPressed(event) {
      if (state.buttons["LB"] != event.detail){
-     state.buttons["LB"] = event.detail;
+         state.buttons["LB"] = event.detail;
          if(state.buttons["LB"]==null){
              sendWheel("r","L")
          }
@@ -178,11 +186,11 @@ var Constraints = {
 
      }
 
-  }
+ }
 
-   function RSPressed(event) {
+ function RSPressed(event) {
      if (state.buttons["RS"] != event.detail){
-     state.buttons["RS"] = event.detail;
+         state.buttons["RS"] = event.detail;
          if(state.buttons["RS"]==null){
              return
          }
@@ -195,7 +203,12 @@ var Constraints = {
 
      }
 
-   }
+ }
+
+
+// ################ WHEELS CONTROLLERs
+
+
 
  function LeftStick(event) {
      state.leftAxis = event.detail;
@@ -228,7 +241,7 @@ var Constraints = {
  }
 
  $: {
-     // This reactive statement will run whenever myObject changes
+     // This reactive statement will run whenever the state changes
      let newDegrees = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).angleDegrees
      let newSpeed = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).vectorLength
      if(newSpeed == 0){
@@ -254,17 +267,24 @@ var Constraints = {
 
  let movement = 'r0';
 
- let collist= [{
-	 id: "R",
-	 name: 'Red'
- }, {
-	 id: "G",
-	 name: 'Green'
- }, {
-	 id: "B",
-	 name: 'Blue'
- }];
+// sedning stuff down for the wheels!
 
+ async function sendWheel(action,direction) {
+     var obj = {[action]: direction}
+
+         var dataToSend = new FormData();
+     dataToSend.append( "json", JSON.stringify( obj ) );
+
+     const res = await fetch('./wheels', {
+         method: "POST",
+         body: dataToSend
+     })
+     const json = await res.json()
+	 console.log(JSON.stringify(json))
+ }
+
+
+ // just debugging aand test
 
  function debut(){
      console.log(movement)
@@ -284,6 +304,69 @@ var Constraints = {
          .then(d => d.text())
          .then(d => (rand = d));
  }
+
+
+
+ // ################ GAZE CONTROLLERs
+
+ // These are the blurring and gaze clicking functions
+
+
+ let blurPoint = [50,50];
+ let clickPoint = [.5,.5];
+
+ function getPoint(e){
+     // This takes in the point and moves the gaze, but also the unblurred point in the image prob could be done better (this i am translating values back and forth in a weird way), but it works
+     let view = document.getElementById('tamaview');
+	 clickPoint = [e.offsetX/e.target.width,e.offsetY/e.target.height]
+     let angles =""
+     blurPoint = [clickPoint[0]*100,clickPoint[1]*100];
+
+     let aX = Math.floor((clickPoint[0]-.5)*60);
+     let aY = Math.floor((clickPoint[1])*60);
+     console.log("ax = " + aX)
+     console.log("ay = " + aY)
+
+     angles = "p" + aX + "t" + aY;
+     sendGaze(angles)
+ };
+
+// tried to use this for more continious moving gaze if the user
+// was using a touchscrene, but the eyes were a bit to slow for it
+// maybe can be tested again!
+
+ function onMouseMove (event) {
+     //getPoint(event)
+ }
+
+ function onMouseDown (event) {
+     addEventListener('mousemove', onMouseMove)
+     addEventListener('mouseup', onMouseUp)
+     getPoint(event)
+ }
+
+ function onMouseUp () {
+     removeEventListener('mousemove', onMouseMove)
+     removeEventListener('mouseup', onMouseUp)
+     //getPoint(event)
+ }
+
+
+
+ let collist= [{
+	 id: "R",
+	 name: 'Red'
+ }, {
+	 id: "G",
+	 name: 'Green'
+ }, {
+	 id: "B",
+	 name: 'Blue'
+ }];
+
+
+ // sending stuff down to the server!
+
  async function sendCol(color) {
      console.log(color)
      var obj = {'c': color}
@@ -312,66 +395,16 @@ var Constraints = {
 	 console.log(JSON.stringify(json))
  }
 
- async function sendWheel(action,direction) {
-     var obj = {[action]: direction}
-
-         var dataToSend = new FormData();
-     dataToSend.append( "json", JSON.stringify( obj ) );
-
-     const res = await fetch('./wheels', {
-         method: "POST",
-         body: dataToSend
-     })
-     const json = await res.json()
-	 console.log(JSON.stringify(json))
- }
-
- let blurPoint = [50,50];
- let clickPoint = [.5,.5];
-
- function getPoint(e){
-     // This takes in the point and moves the gaze, but also the unblurred point in the image prob could be done better (this i am translating values back and forth in a weird way), but it works
-     let view = document.getElementById('tamaview');
-	 clickPoint = [e.offsetX/e.target.width,e.offsetY/e.target.height]
-     let angles =""
-     blurPoint = [clickPoint[0]*100,clickPoint[1]*100];
-
-     let aX = Math.floor((clickPoint[0]-.5)*60);
-     let aY = Math.floor((clickPoint[1])*60);
-     console.log("ax = " + aX)
-     console.log("ay = " + aY)
-
-     angles = "p" + aX + "t" + aY;
-     sendGaze(angles)
- };
-
- function onMouseMove (event) {
-     //getPoint(event)
- }
-
- function onMouseDown (event) {
-     addEventListener('mousemove', onMouseMove)
-     addEventListener('mouseup', onMouseUp)
-     getPoint(event)
- }
-
- function onMouseUp () {
-     removeEventListener('mousemove', onMouseMove)
-     removeEventListener('mouseup', onMouseUp)
-     //getPoint(event)
- }
-
-
-
 
 
 
 </script>
 
-
+<!-- just a logo -->
 
 <Tama />
 
+<!-- old controller, but also start call and hangup button -->
 <div class="row">
       <div class="column" id="text">
           {#each collist as col}
@@ -388,6 +421,13 @@ var Constraints = {
 <button on:click={debut}>Debug</button>
 <button id="startButton"> start </button>
 <button id="hangupButton"> hang up </button>
+
+
+<!--
+     The controller detector, when pn clicked
+     it triggers the corresponding fuctions in the scripts above
+-->
+
 <Gamepad
     gamepadIndex={0}
     on:Connected={gamepadConnected}
@@ -401,12 +441,20 @@ var Constraints = {
     on:LT={LTPressed}
     on:RS={RSPressed}
     on:LS={LSPressed}
-    on:DPadUp={ () => dpad("U")}
-    on:DPadDown={ () => dpad("D")}
-    on:DPadLeft={ () => dpad("L")}
-    on:DPadRight={ () => dpad("R")}
+    <!-- on:DPadUp={ () => dpad("U")}
+         on:DPadDown={ () => dpad("D")}
+         on:DPadLeft={ () => dpad("L")}
+         on:DPadRight={ () => dpad("R")} -->
 
     />
+
+    <!--
+         THe first layer is the unblurred livestream
+         The second is blurred, with a circle clippath
+         that is changed when clickin on the third layer
+         w is only there for detecting onmousedown
+    -->
+
     <div class="blur-container">
         <img class="underlay" id="tamaview" src="http://10.10.0.163:8080/stream/video.mjpeg">
         <img class="overlay" id="tamablur" src="http://10.10.0.163:8080/stream/video.mjpeg" style="clip-path: circle(40% at {blurPoint[0]}% {blurPoint[1]}%)">
@@ -417,7 +465,21 @@ var Constraints = {
          <source src="./audio" type="audio/x-wav;codec=pcm">
          Your browser does not support the audio element.
          </audio> -->
+
+
+
     <audio id="gum-local" controls autoplay></audio>
+
+
+
+
+
+
+
+
+
+
+
 
 <style>
  main {
