@@ -203,7 +203,7 @@
      var stop = document.getElementById('stop');
      var video = document.getElementById('v');
      start.addEventListener('click', function (e) {
-         var address = document.getElementById('address').value;
+         var address = signalling_server_address
          var protocol = location.protocol === "https:" ? "wss:" : "ws:";
          var wsurl = protocol + '//' + address;
 
