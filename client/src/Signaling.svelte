@@ -4,11 +4,10 @@
  RTCIceCandidate = /*window.mozRTCIceCandidate ||*/ window.RTCIceCandidate;
 
 
- window.addEventListener('DOMContentLoaded', function () {
-     var video = document.getElementById('v');
-     var signalObj = null;
+ var video = document.getElementById('v');
+ var signalObj = null;
 
-     var signalling_server_hostname = location.hostname || "192.168.1.8";
+ var signalling_server_hostname = location.hostname || "192.168.1.8";
  var signalling_server_address = signalling_server_hostname + ':' + (9000 || (location.protocol === 'https:' ? 443 : 80));
  var isStreaming = false;
 
@@ -199,46 +198,47 @@
      }
  }
 
- function startByClick(){
-     var protocol = location.protocol === "https:" ? "wss:" : "ws:";
-     var wsurl = protocol + '//' + signalling_server_address + '/stream/webrtc';
+ window.addEventListener('DOMContentLoaded', function () {
+     var start = document.getElementById('start');
+     var stop = document.getElementById('stop');
+     var video = document.getElementById('v');
+     start.addEventListener('click', function (e) {
+         var address = document.getElementById('address').value;
+         var protocol = location.protocol === "https:" ? "wss:" : "ws:";
+         var wsurl = protocol + '//' + address;
 
-     if (!isStreaming) {
-         signalObj = new signal(wsurl,
-                                function (stream) {
-                                    console.log('got a stream!');
-                                    console.log(stream)
-                                    //var url = window.URL || window.webkitURL;
-                                    //video.src = url ? url.createObjectURL(stream) : stream; // deprecated
-                                    video.srcObject = stream;
-                                    video.play();
-                                },
-                                function (error) {
-                                    alert(error);
-                                },
-                                function () {
-                                    console.log('websocket closed. bye bye!');
-                                    video.srcObject = null;
-                                    //video.src = ''; // deprecated
-                                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                                    isStreaming = false;
-                                },
-                                function (message) {
-                                    alert(message);
-                                }
-         );
-     }
+         if (!isStreaming) {
+             signalObj = new signal(wsurl,
+                                    function (stream) {
+                                        console.log('got a stream!');
+                                        //var url = window.URL || window.webkitURL;
+                                        //video.src = url ? url.createObjectURL(stream) : stream; // deprecated
+                                        video.srcObject = stream;
+                                        video.play();
+                                    },
+                                    function (error) {
+                                        alert(error);
+                                    },
+                                    function () {
+                                        console.log('websocket closed. bye bye!');
+                                        video.srcObject = null;
+                                        //video.src = ''; // deprecated
+                                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                                        isStreaming = false;
+                                    },
+                                    function (message) {
+                                        alert(message);
+                                    }
+             );
+         }
+     }, false);
 
- }
-
-
-
- function stopByClick(){
-      if (signalObj) {
-         signalObj.hangup();
-         signalObj = null;
-      }
- }
+     stop.addEventListener('click', function (e) {
+         if (signalObj) {
+             signalObj.hangup();
+             signalObj = null;
+         }
+     }, false);
 
      // Wait until the video stream can play
      video.addEventListener('canplay', function (e) {
@@ -274,6 +274,6 @@
 <video id='v'></video>
 
 <div>
-    <button id='start' on:click={startByClick} title="If you do not see any video stream, make sure your browser supports the codec used within this demo (see the source code for details, or try Firefox or Chrome)">Start Streaming</button>i
-    <button id='stop' on:click={stopByClick}> Stop Streaming </button>
+    <button id='start' title="If you do not see any video stream, make sure your browser supports the codec used within this demo (see the source code for details, or try Firefox or Chrome)">Start Streaming</button>i
+    <button id='stop'> Stop Streaming </button>
 </div>
