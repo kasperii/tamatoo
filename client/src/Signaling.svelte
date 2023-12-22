@@ -217,10 +217,10 @@
                                         //var url = window.URL || window.webkitURL;
                                         //video.src = url ? url.createObjectURL(stream) : stream; // deprecated
                                         tamaview.srcObject = stream;
-                                        tamablur.srcObject = stream;
+                                        //                                         tamablur.srcObject = stream;
                                         tamaview.play();
-                                        tamablur.play();
-                                        tamablur.volume = 0;
+                                        //                                         tamablur.play();
+                                        //                                         tamablur.volume = 0;
                                         //video.srcObject = stream;
                                         //video.play();
                                     },
@@ -231,7 +231,7 @@
                                         console.log('websocket closed. bye bye!');
                                         //video.srcObject = null;
                                         tamaview.srcObject = null;
-                                        tamablur.srcObject = null;
+                                        //                                         itamablur.srcObject = null;
                                         //video.src = ''; // deprecated
                                         //ctx.clearRect(0, 0, canvas.width, canvas.height);
                                         isStreaming = false;
