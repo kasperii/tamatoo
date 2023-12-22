@@ -3,6 +3,10 @@
  RTCSessionDescription = /*window.mozRTCSessionDescription ||*/ window.RTCSessionDescription;
  RTCIceCandidate = /*window.mozRTCIceCandidate ||*/ window.RTCIceCandidate;
 
+
+var signalling_server_hostname = location.hostname || "192.168.1.8";
+var signalling_server_address = signalling_server_hostname + ':' + (9000 || (location.protocol === 'https:' ? 443 : 80));
+
  function signal(url, onStream, onError, onClose, onMessage) {
      if ("WebSocket" in window) {
          console.log("opening web socket: " + url);
@@ -188,13 +192,10 @@
          onError("Sorry, this browser does not support Web Sockets. Bye.");
      }
  }
- var signalling_server_hostname = location.hostname || "192.168.1.8";
- var signalling_server_address = signalling_server_hostname + ':' + (9000 || (location.protocol === 'https:' ? 443 : 80));
 
  function startByClick(){
-     var address = document.getElementById('address').value;
      var protocol = location.protocol === "https:" ? "wss:" : "ws:";
-     var wsurl = protocol + '//' + address;
+     var wsurl = protocol + '//' + signalling_server_address;
 
      if (!isStreaming) {
          signalObj = new signal(wsurl,
