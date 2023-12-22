@@ -204,9 +204,12 @@
      }
 
  }
+ function LSPressed(event) {
+    return
 
+ }
 
-// ################ WHEELS CONTROLLERs
+ // ################ WHEELS CONTROLLERs
 
 
 
@@ -441,10 +444,10 @@
     on:LT={LTPressed}
     on:RS={RSPressed}
     on:LS={LSPressed}
-    <!-- on:DPadUp={ () => dpad("U")}
-         on:DPadDown={ () => dpad("D")}
-         on:DPadLeft={ () => dpad("L")}
-         on:DPadRight={ () => dpad("R")} -->
+    on:DPadUp={ () => dpad("U")}
+    on:DPadDown={ () => dpad("D")}
+    on:DPadLeft={ () => dpad("L")}
+    on:DPadRight={ () => dpad("R")}
 
     />
 
