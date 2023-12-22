@@ -229,6 +229,6 @@
 <video id='v'></video>
 
 <div>
-    <button id='start' title="If you do not see any video stream, make sure your browser supports the codec used within this demo (see the source code for details, or try Firefox or Chrome)">Start Streaming</button>
+    <button id='start' on:click={startByClick} title="If you do not see any video stream, make sure your browser supports the codec used within this demo (see the source code for details, or try Firefox or Chrome)">Start Streaming</button>i
     <button id='stop'>Stop Streaming</button>
 </div>
