@@ -6,6 +6,7 @@
 
 var signalling_server_hostname = location.hostname || "192.168.1.8";
 var signalling_server_address = signalling_server_hostname + ':' + (9000 || (location.protocol === 'https:' ? 443 : 80));
+ var isStreaming = false;
 
  function signal(url, onStream, onError, onClose, onMessage) {
      if ("WebSocket" in window) {
@@ -195,7 +196,7 @@ var signalling_server_address = signalling_server_hostname + ':' + (9000 || (loc
 
  function startByClick(){
      var protocol = location.protocol === "https:" ? "wss:" : "ws:";
-     var wsurl = protocol + '//' + signalling_server_address;
+     var wsurl = protocol + '//' + signalling_server_address + '/stream/webrtc';
 
      if (!isStreaming) {
          signalObj = new signal(wsurl,
