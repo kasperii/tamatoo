@@ -87,8 +87,8 @@
                      // If forced, the hardware codec depends on the arch.
                      // (e.g. it's H264 on the Raspberry Pi)
                      // Make sure the browser supports the codec too.
-                     force_hw_vcodec: true,
-                     vformat: 70, /* 30=640x480, 30 fps */
+                     // force_hw_vcodec: true,
+                     //                      vformat: 70, /* 30=640x480, 30 fps */
                      trickle_ice: true
                  }
              };
