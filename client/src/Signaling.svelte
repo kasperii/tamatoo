@@ -202,6 +202,9 @@
      var start = document.getElementById('start');
      var stop = document.getElementById('stop');
      var video = document.getElementById('v');
+     var tamaview = document.getElementById('tamaview');
+     var tamablur = document.getElementById('tamablur');
+
      start.addEventListener('click', function (e) {
          var address = signalling_server_address
          var protocol = location.protocol === "https:" ? "wss:" : "ws:";
@@ -213,8 +216,6 @@
                                         console.log('got a stream!');
                                         //var url = window.URL || window.webkitURL;
                                         //video.src = url ? url.createObjectURL(stream) : stream; // deprecated
-                                        var tamaview = document.getElementById('tamaview');
-                                        var tamablur = document.getElementById('tamablur');
                                         tamaview.srcObject = stream;
                                         tamablur.srcObject = stream;
                                         tamaview.play();
@@ -228,7 +229,9 @@
                                     },
                                     function () {
                                         console.log('websocket closed. bye bye!');
-                                        video.srcObject = null;
+                                        //video.srcObject = null;
+                                        tamaview.srcObject = null;
+                                        tamablur.srcObject = null;
                                         //video.src = ''; // deprecated
                                         //ctx.clearRect(0, 0, canvas.width, canvas.height);
                                         isStreaming = false;
@@ -248,7 +251,7 @@
      }, false);
 
      // Wait until the video stream can play
-     video.addEventListener('canplay', function (e) {
+     tamaview.addEventListener('canplay', function (e) {
          if (!isStreaming) {
          //canvas.setAttribute('width', video.videoWidth);
          //canvas.setAttribute('height', video.videoHeight);
@@ -256,15 +259,13 @@
      }
  }, false);
 
- // Wait for the video to start to play
- video.addEventListener('play', function () {
-     // Every 33 milliseconds copy the video image to the canvas
-     setInterval(function () {
+     // Wait for the video to start to play
+     tamaview.addEventListener('play', function () {
+         // Every 33 milliseconds copy the video image to the canvas
+         setInterval(function () {
          if (video.paused || video.ended) {
              return;
          }
-         var tamaview = document.getElementById('tamaview');
-         var tamablur = document.getElementById('tamablur');
 
          //var w = canvas.getAttribute('width');
          //var h = canvas.getAttribute('height');
@@ -279,7 +280,7 @@
 </script>
 
 
-<video id='v'></video>
+<!-- <video id='v'></video> -->
 
 <div>
     <button id='start' title="If you do not see any video stream, make sure your browser supports the codec used within this demo (see the source code for details, or try Firefox or Chrome)">Start Streaming</button>i
