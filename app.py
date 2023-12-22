@@ -21,7 +21,7 @@ if (platform.system() == "Darwin"):
 # uv4l --driver raspicam --server-option '--use-ssl=yes' --server-option '-ssl-private-key-file='home/pi/selfsign.key' --enable-usermedia-screen-capturing --server-option 'ssl-certificate-file=/home/pi/selfsign.crt
 
 # sudo uv4l --sched-rr --driver raspicam --auto-video_nr --encoding h264 --width 1920 --height 1080 --server-option '--port=9000'
-
+# uv4l --auto-video_nr --driver raspicam --encoding h264 --server-option '--port=9000'
 
 app = Flask(__name__)
 

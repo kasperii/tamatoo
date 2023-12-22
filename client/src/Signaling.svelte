@@ -204,6 +204,7 @@
          signalObj = new signal(wsurl,
                                 function (stream) {
                                     console.log('got a stream!');
+                                    console.log(stream)
                                     //var url = window.URL || window.webkitURL;
                                     //video.src = url ? url.createObjectURL(stream) : stream; // deprecated
                                     video.srcObject = stream;
@@ -226,6 +227,42 @@
      }
 
  }
+
+ document.getElementById('stop').addEventListener('click', function (e) {
+        if (signalObj) {
+         signalObj.hangup();
+         signalObj = null;
+     }
+ }, false);
+
+
+ // Wait until the video stream can play
+ video.addEventListener('canplay', function (e) {
+     if (!isStreaming) {
+         canvas.setAttribute('width', video.videoWidth);
+         canvas.setAttribute('height', video.videoHeight);
+         isStreaming = true;
+     }
+ }, false);
+
+ // Wait for the video to start to play
+ video.addEventListener('play', function () {
+     // Every 33 milliseconds copy the video image to the canvas
+     setInterval(function () {
+         if (video.paused || video.ended) {
+             return;
+         }
+         var w = canvas.getAttribute('width');
+         var h = canvas.getAttribute('height');
+         ctx.fillRect(0, 0, w, h);
+         ctx.drawImage(video, 0, 0, w, h);
+         if (isEffectActive) {
+             detectFace(canvas);
+         }
+     }, 33);
+ }, false);
+
+
 
 </script>
 
