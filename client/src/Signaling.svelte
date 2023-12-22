@@ -3,10 +3,12 @@
  RTCSessionDescription = /*window.mozRTCSessionDescription ||*/ window.RTCSessionDescription;
  RTCIceCandidate = /*window.mozRTCIceCandidate ||*/ window.RTCIceCandidate;
 
+ var signalObj = null;
 
-var signalling_server_hostname = location.hostname || "192.168.1.8";
-var signalling_server_address = signalling_server_hostname + ':' + (9000 || (location.protocol === 'https:' ? 443 : 80));
+ var signalling_server_hostname = location.hostname || "192.168.1.8";
+ var signalling_server_address = signalling_server_hostname + ':' + (9000 || (location.protocol === 'https:' ? 443 : 80));
  var isStreaming = false;
+ var video = document.getElementById('v');
 
  function signal(url, onStream, onError, onClose, onMessage) {
      if ("WebSocket" in window) {
