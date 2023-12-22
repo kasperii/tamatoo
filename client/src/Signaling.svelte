@@ -188,6 +188,8 @@
          onError("Sorry, this browser does not support Web Sockets. Bye.");
      }
  }
+ var signalling_server_hostname = location.hostname || "192.168.1.8";
+ var signalling_server_address = signalling_server_hostname + ':' + (9000 || (location.protocol === 'https:' ? 443 : 80));
 
  function startByClick(){
      var address = document.getElementById('address').value;
