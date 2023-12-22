@@ -8,7 +8,7 @@
  var signalling_server_hostname = location.hostname || "192.168.1.8";
  var signalling_server_address = signalling_server_hostname + ':' + (9000 || (location.protocol === 'https:' ? 443 : 80));
  var isStreaming = false;
- var video = document.getElementById('v');
+
 
  function signal(url, onStream, onError, onClose, onMessage) {
      if ("WebSocket" in window) {
@@ -236,10 +236,12 @@
          signalObj = null;
       }
  }
+ window.addEventListener('DOMContentLoaded', function () {
+     var video = document.getElementById('v');
 
- // Wait until the video stream can play
- video.addEventListener('canplay', function (e) {
-     if (!isStreaming) {
+     // Wait until the video stream can play
+     video.addEventListener('canplay', function (e) {
+         if (!isStreaming) {
          canvas.setAttribute('width', video.videoWidth);
          canvas.setAttribute('height', video.videoHeight);
          isStreaming = true;
@@ -263,7 +265,7 @@
      }, 33);
  }, false);
 
-
+};
 
 </script>
 
