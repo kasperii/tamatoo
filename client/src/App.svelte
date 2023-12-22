@@ -512,7 +512,7 @@ function onTrack(event) {
     <div class="blur-container">
         <video class="underlay" id="tamaview"> </video>
         <!-- <video class="overlay" id="tamablur" style="clip-path: circle(40% at {blurPoint[0]}% {blurPoint[1]}%)"></video> -->
-        <div class="focus"></div>
+        <div class="focus" style="-webkit-mask: radial-gradient(circle at {blurPoint[0]}% {blurPoint[1]}%, #00000000 250px, rgba(0, 0, 0, 0.9) 0px);"></div>
         <img class="overlay" on:mousedown={onMouseDown}>
     </div>
     <!-- <audio controls>
@@ -605,7 +605,7 @@ function onTrack(event) {
      position: absolute;
  	 top: 0;
   	 left: 0;
-     filter: blur(3px);
+
      transform: scale(1.06);
  }
  .blur-container .overlay {
@@ -618,8 +618,5 @@ function onTrack(event) {
      width: 100%;
      height: 100%;
      backdrop-filter: blur(4px);
-     -webkit-mask-position-x: 100%;
-     -webkit-mask-position-y: 50%;
-     -webkit-mask: radial-gradient(circle, #00000000 150px, rgba(0, 0, 0, 0.9) 0px);
  }
 </style>
