@@ -53,7 +53,7 @@
                          what: "addIceCandidate",
                          data: JSON.stringify(candidate)
                      };
-                     ws.send(JSON.stringify(request));
+                  ws.send(JSON.stringify(request));
                  } else {
                      console.log("end of candidates.");
                  }
@@ -228,13 +228,14 @@
 
  }
 
- document.getElementById('stop').addEventListener('click', function (e) {
-        if (signalObj) {
+
+
+ function stopByClick(){
+      if (signalObj) {
          signalObj.hangup();
          signalObj = null;
-     }
- }, false);
-
+      }
+ }
 
  // Wait until the video stream can play
  video.addEventListener('canplay', function (e) {
@@ -271,5 +272,5 @@
 
 <div>
     <button id='start' on:click={startByClick} title="If you do not see any video stream, make sure your browser supports the codec used within this demo (see the source code for details, or try Firefox or Chrome)">Start Streaming</button>i
-    <button id='stop'>Stop Streaming</button>
+    <button id='stop' on:click={stopByClick}> Stop Streaming </button>
 </div>
