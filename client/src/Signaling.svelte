@@ -44,7 +44,7 @@
                      };
                      var request = {
                          what: "addIceCandidate",
-                         data: <JSON class="stringify"></JSON>
+                         data: JSON.stringify(candidate)
                      };
                      ws.send(JSON.stringify(request));
                  } else {

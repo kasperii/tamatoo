@@ -85,6 +85,7 @@
                     OfferToReceiveAudio: false,
                     OfferToReceiveVideo: true
                 }
+ }
 
 
 var calldata = {
