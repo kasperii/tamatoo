@@ -88,7 +88,7 @@
                      // (e.g. it's H264 on the Raspberry Pi)
                      // Make sure the browser supports the codec too.
                      force_hw_vcodec: true,
-                     vformat: 30, /* 30=640x480, 30 fps */
+                     vformat: 70, /* 30=640x480, 30 fps */
                      trickle_ice: true
                  }
              };
