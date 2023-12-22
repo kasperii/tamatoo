@@ -511,7 +511,7 @@ function onTrack(event) {
 
     <div class="blur-container">
         <video class="underlay" id="tamaview"> </video>
-        <video class="overlay" id="tamablur" style="clip-path: circle(40% at {blurPoint[0]}% {blurPoint[1]}%)"></video>
+        <!-- <video class="overlay" id="tamablur" style="clip-path: circle(40% at {blurPoint[0]}% {blurPoint[1]}%)"></video> -->
         <img class="overlay" on:mousedown={onMouseDown}>
     </div>
     <!-- <audio controls>
