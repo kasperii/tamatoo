@@ -486,4 +486,5 @@ def separate_string(input_string):
 
 if __name__ == "__main__":
     #app.run(debug=True,threaded=True)
-    socketio.run(app, host='0.0.0.0', debug=True,port=5050)
+    context = ('local.crt', 'local.key')
+    socketio.run(app, host='0.0.0.0', debug=True,port=5050, ssl_context=context)
