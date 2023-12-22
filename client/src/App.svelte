@@ -475,8 +475,6 @@ function onTrack(event) {
 <!-- <h1>Your number is {rand}!</h1> -->
 <button on:click={getRand}>Get a random number</button>
 <button on:click={debut}>Debug</button>
-<button id="startButton"> start </button>
-<button id="hangupButton"> hang up </button>
 
 
 <!--
@@ -512,8 +510,8 @@ function onTrack(event) {
     -->
 
     <div class="blur-container">
-        <img class="underlay" id="tamaview" src="http://10.10.0.163:8080/stream/video.mjpeg">
-        <img class="overlay" id="tamablur" src="http://10.10.0.163:8080/stream/video.mjpeg" style="clip-path: circle(40% at {blurPoint[0]}% {blurPoint[1]}%)">
+        <video class="underlay" id="tamaview">
+        <video class="overlay" id="tamablur" style="clip-path: circle(40% at {blurPoint[0]}% {blurPoint[1]}%)">
         <img class="overlay" on:mousedown={onMouseDown}>
     </div>
     <!-- <audio controls>
@@ -575,7 +573,7 @@ function onTrack(event) {
  .column {
      float: left;
  }
- img {
+ video {
      width: 100%;
      height: 100%;
      object-fit: cover;

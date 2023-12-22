@@ -213,8 +213,15 @@
                                         console.log('got a stream!');
                                         //var url = window.URL || window.webkitURL;
                                         //video.src = url ? url.createObjectURL(stream) : stream; // deprecated
-                                        video.srcObject = stream;
-                                        video.play();
+                                        var tamaview = document.getElementById('tamaview');
+                                        var tamablur = document.getElementById('tamablur');
+                                        tamaview.srcObject = stream;
+                                        tamablur.srcObject = stream;
+                                        tamaview.play();
+                                        tamablur.play();
+                                        tamablur.volume = 0;
+                                        //video.srcObject = stream;
+                                        //video.play();
                                     },
                                     function (error) {
                                         alert(error);
@@ -223,7 +230,7 @@
                                         console.log('websocket closed. bye bye!');
                                         video.srcObject = null;
                                         //video.src = ''; // deprecated
-                                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                                        //ctx.clearRect(0, 0, canvas.width, canvas.height);
                                         isStreaming = false;
                                     },
                                     function (message) {
@@ -243,8 +250,8 @@
      // Wait until the video stream can play
      video.addEventListener('canplay', function (e) {
          if (!isStreaming) {
-         canvas.setAttribute('width', video.videoWidth);
-         canvas.setAttribute('height', video.videoHeight);
+         //canvas.setAttribute('width', video.videoWidth);
+         //canvas.setAttribute('height', video.videoHeight);
          isStreaming = true;
      }
  }, false);
@@ -256,13 +263,14 @@
          if (video.paused || video.ended) {
              return;
          }
-         var w = canvas.getAttribute('width');
-         var h = canvas.getAttribute('height');
-         ctx.fillRect(0, 0, w, h);
-         ctx.drawImage(video, 0, 0, w, h);
-         if (isEffectActive) {
-             detectFace(canvas);
-         }
+         var tamaview = document.getElementById('tamaview');
+         var tamablur = document.getElementById('tamablur');
+
+         //var w = canvas.getAttribute('width');
+         //var h = canvas.getAttribute('height');
+         //ctx.fillRect(0, 0, w, h);
+         //ctx.drawImage(video, 0, 0, w, h);
+
      }, 33);
  }, false);
 
