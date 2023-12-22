@@ -4,7 +4,7 @@
  import Tama from './Tama.svelte';
  import Controller from './Controller.svelte';
  import Gamepad from "./Gamepad.svelte";
-
+ import Signaling from './Signaling.svelte';
  let state = {
      leftAxis: { x: 0, y: 0 },
      rightAxis: { x: 0, y: 0 },
@@ -45,6 +45,59 @@
      socket.emit('my event', {data: 'I\'m connected!'});
  });
 
+ var signalling_server_hostname = location.hostname || "192.168.1.8";
+ var signalling_server_address = signalling_server_hostname + ':' + (9000 || (location.protocol === 'https:' ? 443 : 80));
+
+
+ function createPeerConnection() {
+    try {
+        var pcConfig_ = pcConfig;
+        try {
+            ice_servers = document.getElementById('ice_servers').value;
+            if (ice_servers) {
+                pcConfig_.iceServers = JSON.parse(ice_servers);
+            }
+        } catch (e) {
+            alert(e + "\nExample: "
+                    + '\n[ {"urls": "stun:stun1.example.net"}, {"urls": "turn:turn.example.org", "username": "user", "credential": "myPassword"} ]'
+                    + "\nContinuing with built-in RTCIceServer array");
+        }
+        console.log(JSON.stringify(pcConfig_));
+        pc = new RTCPeerConnection(pcConfig_, pcOptions);
+        pc.onicecandidate = onIceCandidate;
+        if ('ontrack' in pc) {
+            pc.ontrack = onTrack;
+        } else {
+            pc.onaddstream = onRemoteStreamAdded; // deprecated
+        }
+        pc.onremovestream = onRemoteStreamRemoved;
+        pc.ondatachannel = onDataChannel;
+        console.log("peer connection successfully created!");
+    } catch (e) {
+        console.error("createPeerConnection() failed");
+    }
+ }
+
+
+ var MEDIA_CONSTRAINTS = {
+     optional: [],
+     mandatory: {
+                    OfferToReceiveAudio: false,
+                    OfferToReceiveVideo: true
+                }
+
+
+var calldata = {
+         what: "call",
+         options: {
+      force_hw_vcodec: true,
+      vformat: 30,
+      trickle_ice: true
+   }
+ }
+function onTrack(event) {
+                REMOTE_VIDEO_ELEMENT.srcObject = event.streams[0];
+}
 
 
 
@@ -55,17 +108,16 @@
 
 
 
+     // ################ GETTING THE MIC FROM THE LAPTOP
 
- // ################ GETTING THE MIC FROM THE LAPTOP
-
- // GET AUDIO FROM GGOOGLES EXAMPLE: https://github.com/webrtc/samples/blob/gh-pages/src/content/getusermedia/audio/js/main.js
-
+     // GET AUDIO FROM GGOOGLES EXAMPLE: https://github.com/webrtc/samples/blob/gh-pages/src/content/getusermedia/audio/js/main.js
 
 
- 'use strict';
 
- // Put variables in global scope to make them available to the browser console.
- const audio = document.querySelector('audio');
+     'use strict';
+
+     // Put variables in global scope to make them available to the browser console.
+     const audio = document.querySelector('audio');
 
  const constraints = window.constraints = {
      audio: true,
@@ -473,6 +525,7 @@
 
     <audio id="gum-local" controls autoplay></audio>
 
+    <Signaling />
 
 
 
