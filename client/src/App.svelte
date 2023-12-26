@@ -387,8 +387,8 @@ function onTrack(event) {
      let angles =""
      blurPoint = [clickPoint[0]*100,clickPoint[1]*100];
 
-     let aX = Math.floor((clickPoint[0]-.5)*60);
-     let aY = Math.floor((clickPoint[1])*60);
+     let aX = Math.floor((.5-clickPoint[0])*60);
+     let aY = Math.floor((1-clickPoint[1])*60);
      console.log("ax = " + aX)
      console.log("ay = " + aY)
 
