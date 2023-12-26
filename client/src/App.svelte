@@ -323,7 +323,7 @@ function onTrack(event) {
          sendWheel('m',Math.round(speed*6)+32*speedmulti)
          isMoving = true;
      }
-     newDegrees = (Math.round((newDegrees+90)/11.25)*11.25)%360
+     newDegrees = (Math.round((270-newDegrees)/11.25)*11.25)%360
      if (newDegrees != degrees){
          degrees = newDegrees
          sendWheel('m',Math.round(degrees/11.25))
