@@ -186,7 +186,6 @@ function onTrack(event) {
 
  function RTPressed(event) {
      if (state.buttons["RT"] != event.detail){
-         state.buttons["RT"] = event.detail;
          if(state.buttons["RT"]==null){
              sendWheel("r","R")
              console.log("rotate R")
@@ -197,13 +196,14 @@ function onTrack(event) {
              console.log("rotate M")
          }
 
+         state.buttons["RT"] = event.detail;
+
      }
 
  }
 
  function LTPressed(event) {
      if (state.buttons["LT"] != event.detail){
-         state.buttons["LT"] = event.detail;
          if(state.buttons["LT"]==null){
              sendWheel("r","L")
              console.log("rotate L")
@@ -212,6 +212,7 @@ function onTrack(event) {
              sendWheel("r","M")
              console.log("rotate M")
          }
+         state.buttons["LT"] = event.detail;
 
      }
 
@@ -219,7 +220,6 @@ function onTrack(event) {
 
  function RBPressed(event) {
      if (state.buttons["RB"] != event.detail){
-         state.buttons["RB"] = event.detail;
          if(state.buttons["RB"]==null){
              sendWheel("r","R")
              console.log("rotate R")
@@ -228,6 +228,7 @@ function onTrack(event) {
              sendWheel("r","M")
              console.log("rotate M")
          }
+         state.buttons["RB"] = event.detail;
 
      }
 
@@ -235,7 +236,6 @@ function onTrack(event) {
 
  function LBPressed(event) {
      if (state.buttons["LB"] != event.detail){
-         state.buttons["LB"] = event.detail;
          if(state.buttons["LB"]==null){
              sendWheel("r","L")
              console.log("rotate L")
@@ -244,6 +244,7 @@ function onTrack(event) {
              sendWheel("r","M")
              console.log("rotate M")
          }
+         state.buttons["LB"] = event.detail;
 
      }
 
