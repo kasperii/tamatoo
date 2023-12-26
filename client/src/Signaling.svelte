@@ -36,6 +36,10 @@
              }
          }
 
+         function addAudio(audiostream){
+             pc.addTrack(audiostream)
+         }
+
          ws.onopen = function () {
              /* First we create a peer connection */
              var config = {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]};
@@ -198,10 +202,43 @@
      }
  }
 
+
+const audio = document.querySelector('audio');
+
+ const constraints = window.constraints = {
+     audio: true,
+     video: false
+ };
+
+
+
+ function handleSuccess(stream) {
+     const audioTracks = stream.getAudioTracks();
+     console.log('Got stream with constraints:', constraints);
+     console.log('Using audio device: ' + audioTracks[0].label);
+     stream.oninactive = function() {
+         console.log('Stream ended');
+     };
+     window.stream = stream; // make variable available to browser console
+     audio.srcObject = stream;
+     return stream
+ }
+
+ function handleError(error) {
+     const errorMessage = 'navigator.MediaDevices.getUserMedia error: ' + error.message + ' ' + error.name;
+     document.getElementById('errorMsg').innerText = errorMessage;
+     console.log(errorMessage);
+     return null
+ }
+
+
+
+
  window.addEventListener('DOMContentLoaded', function () {
      var start = document.getElementById('start');
      var stop = document.getElementById('stop');
      var video = document.getElementById('v');
+     var audStart = document.getElementById('audStart');
      var tamaview = document.getElementById('tamaview');
      var tamablur = document.getElementById('tamablur');
 
@@ -219,10 +256,14 @@
                                         tamaview.srcObject = stream;
                                         //                                         tamablur.srcObject = stream;
                                         tamaview.play();
+
+
+
                                         //                                         tamablur.play();
                                         //                                         tamablur.volume = 0;
                                         //video.srcObject = stream;
                                         //video.play();
+
                                     },
                                     function (error) {
                                         alert(error);
@@ -249,6 +290,11 @@
              signalObj = null;
          }
      }, false);
+
+     audStart.addEventListener('click', function (e){
+         audiostream = navigator.mediaDevices.getUserMedia(constraints).then(handleSuccess).catch(handleError);
+         signalObj.addAudio(audiostream)
+     })
 
      // Wait until the video stream can play
      tamaview.addEventListener('canplay', function (e) {
@@ -285,4 +331,5 @@
 <div>
     <button id='start' title="If you do not see any video stream, make sure your browser supports the codec used within this demo (see the source code for details, or try Firefox or Chrome)">Start Streaming</button>i
     <button id='stop'> Stop Streaming </button>
+    <button id='audStart'> start sending audio </button>
 </div>

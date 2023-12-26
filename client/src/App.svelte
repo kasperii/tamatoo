@@ -125,28 +125,28 @@ function onTrack(event) {
      video: false
  };
 
-
- function handleSuccess(stream) {
-     const audioTracks = stream.getAudioTracks();
-     console.log('Got stream with constraints:', constraints);
-     console.log('Using audio device: ' + audioTracks[0].label);
-     stream.oninactive = function() {
-         console.log('Stream ended');
-     };
-     window.stream = stream; // make variable available to browser console
-     audio.srcObject = stream;
- }
-
- function handleError(error) {
-     const errorMessage = 'navigator.MediaDevices.getUserMedia error: ' + error.message + ' ' + error.name;
-     document.getElementById('errorMsg').innerText = errorMessage;
-     console.log(errorMessage);
- }
-
- navigator.mediaDevices.getUserMedia(constraints).then(handleSuccess).catch(handleError);
-
-
-
+ //
+ //  function handleSuccess(stream) {
+ //      const audioTracks = stream.getAudioTracks();
+ //      console.log('Got stream with constraints:', constraints);
+ //      console.log('Using audio device: ' + audioTracks[0].label);
+ //      stream.oninactive = function() {
+ //          console.log('Stream ended');
+ //      };
+ //      window.stream = stream; // make variable available to browser console
+ //      audio.srcObject = stream;
+ //  }
+ //
+ //  function handleError(error) {
+ //      const errorMessage = 'navigator.MediaDevices.getUserMedia error: ' + error.message + ' ' + error.name;
+ //      document.getElementById('errorMsg').innerText = errorMessage;
+ //      console.log(errorMessage);
+ //  }
+ //
+ //  navigator.mediaDevices.getUserMedia(constraints).then(handleSuccess).catch(handleError);
+ //
+ //
+ //
 
 
 
@@ -188,11 +188,13 @@ function onTrack(event) {
      if (state.buttons["RT"] != event.detail){
          state.buttons["RT"] = event.detail;
          if(state.buttons["RT"]==null){
-             sendWheel("r","L")
+             sendWheel("r","R")
+             console.log("rotate R")
 
          }
          else{
              sendWheel("r","M")
+             console.log("rotate M")
          }
 
      }
@@ -204,9 +206,11 @@ function onTrack(event) {
          state.buttons["LT"] = event.detail;
          if(state.buttons["LT"]==null){
              sendWheel("r","L")
+             console.log("rotate L")
          }
          else{
              sendWheel("r","M")
+             console.log("rotate M")
          }
 
      }
@@ -218,9 +222,11 @@ function onTrack(event) {
          state.buttons["RB"] = event.detail;
          if(state.buttons["RB"]==null){
              sendWheel("r","R")
+             console.log("rotate R")
          }
          else{
              sendWheel("r","M")
+             console.log("rotate M")
          }
 
      }
@@ -232,9 +238,11 @@ function onTrack(event) {
          state.buttons["LB"] = event.detail;
          if(state.buttons["LB"]==null){
              sendWheel("r","L")
+             console.log("rotate L")
          }
          else{
              sendWheel("r","M")
+             console.log("rotate M")
          }
 
      }

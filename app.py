@@ -22,7 +22,10 @@ if (platform.system() == "Darwin"):
 
 # sudo uv4l --sched-rr --driver raspicam --auto-video_nr --encoding h264 --width 1920 --height 1080 --server-option '--port=9000'
 # uv4l --auto-video_nr --driver raspicam --encoding h264 --server-option '--port=9000'
+# sudo service uv4l_raspicam restart
 
+
+# https://wiki.seeedstudio.com/ReSpeaker-USB-Mic-Array/
 app = Flask(__name__)
 
 
@@ -81,6 +84,30 @@ def getAnswer():
 
 
 
+# ------------UV4L----------------
+# Start UV4L and stop
+
+def startUv4l():
+    setting = "uv4l --auto-video_nr \
+                --server-option '–-bind-host-address=localhost' \
+                --server-option '--port=9000' \
+                --driver raspicam \
+                --encoding h264 \
+                --server-option '--enable-webrtc=yes' \
+                --server-option '--enable-webrtc-video=yes' \
+                --server-option '--webrtc-receive-video=no' \
+                --server-option '--enable-webrtc-audio=yes' \
+                --server-option '--webrtc-receive-audio=yes' \
+                --server-option '--webrtc-recdevice-index=3' \
+                --server-option '--webrtc-vad=yes' \
+                --server-option '--webrtc-echo-cancellation=yes' \
+                --server-option '--enable-webrtc-datachannels=yes' \
+                --server-option '--webrtc-datachannel-label=uv4'"
+    subprocess.call(setting, shell=True)
+    return
+def stopUv4l():
+    subprocess.call("pkill uv4l", shell=True)
+    return
 # ------------ffmpeg--------------
 #
 
