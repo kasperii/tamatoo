@@ -216,12 +216,13 @@ const audio = document.querySelector('audio');
      const audioTracks = stream.getAudioTracks();
      console.log('Got stream with constraints:', constraints);
      console.log('Using audio device: ' + audioTracks[0].label);
+     signalObj.addAudio(stream)
      stream.oninactive = function() {
          console.log('Stream ended');
      };
      window.stream = stream; // make variable available to browser console
-     audio.srcObject = stream;
-     return stream
+     //      audio.srcObject = stream;
+     //      return stream
  }
 
  function handleError(error) {
@@ -292,8 +293,8 @@ const audio = document.querySelector('audio');
      }, false);
 
      audStart.addEventListener('click', function (e){
-         audiostream = navigator.mediaDevices.getUserMedia(constraints).then(handleSuccess).catch(handleError);
-         signalObj.addAudio(audiostream)
+         navigator.mediaDevices.getUserMedia(constraints).then(handleSuccess).catch(handleError);
+         //          signalObj.addAudio(audiostream)
      })
 
      // Wait until the video stream can play
