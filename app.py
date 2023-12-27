@@ -374,9 +374,9 @@ def wheels():
         if(data['r'] == 'L'):
             sendToWheels(41)
         if(data['r'] == 'R'):
-            sendToWheels(39)
+            sendToWheels(45)
         if(data['r'] == 'M'):
-            sendToWheels(40)
+            sendToWheels(49)
         #sendToWheels(data['r'])
         #datastring += "r" + data["r"]
     if('m' in data):
