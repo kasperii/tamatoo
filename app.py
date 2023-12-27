@@ -468,9 +468,16 @@ def gaze():
     pv = abs(p)
     tv = abs(t)
 
+
+
     tfs = 1
     tfv = 0
 
+    ## DEBUG SOLUTION
+    ##
+    tfv = tv/2
+    tv = 0
+    ## EDN OF DEBUG
     cmdbuff = [ord('M'),ps,pv,ts,tv,tfs,tfv,ord('\n')]#command,pan-sign,pan-val,tilt-sign,tilt-val,TF-sign,TF-val
 
     sendToTama(cmdbuff)
