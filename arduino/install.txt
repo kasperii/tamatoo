@@ -4,12 +4,71 @@ Install them
 Check the Silicon Labs USB to UART Bridge has a com port in Device Manager
 
 Install Arduino IDE
+Go to file->preferences and put this into Additional boards manager URLS: 
+http://arduino.esp8266.com/stable/package_esp8266com_index.json
+
 Install (via Board Managers) esp8266 by ESP8266
 
 Download the V-Duino libaries 
 https://github.com/vstoneofficial/V-duino
 Put the VS-RC202 folder in (on Windows)  <user>/Documents/Arduino/libraries 
 
-** it won't compile as-is
-Edit vs-rc202.cpp and make sure every non-void has a return value or find out how to change the error level for the platform. 
+**** it won't compile as-is ******
+
+OPTION 1:
+Go to 
+C:\Users\<user>\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\3.1.2
+edit platform.txt
+delete the two instances of 
+-Werror=return-type
+
+That compiles and uploads, but there is an exception boot loop on the arduino - need a plugin that doesn't work anymore to decode it?
+https://github.com/me-no-dev/EspExceptionDecoder?tab=readme-ov-file
+
+Same result changing change -Werror=return-type to -Wno-error=return-type
+
+OPTION 2:
+Go to
+C:\Users\<user>\OneDrive\Documents\Arduino\libraries\VS-RC202
+Change the 3 functions powerOff, moveServo, stopServo to return 0
+
+Compiles, uploads, seems to run, but doesn't move the wheels.
+
+
+OPTION 3:
+Go to
+C:\Users\<user>\OneDrive\Documents\Arduino\libraries\VS-RC202
+Change the 3 functions powerOff, moveServo, stopServo to return 1
+
+Compiles, uploads, seems to run, but doesn't move the wheels.
+
+
+OPTION 4:
+Go to
+C:\Users\<user>\OneDrive\Documents\Arduino\libraries\VS-RC202
+Change the 3 functions powerOff, moveServo, stopServo to be void
+
+Compiles, uploads, seems to run, but doesn't move the wheels.
+
+21:48:06.505 -> received val: 33
+21:48:06.505 -> s val: 100
+21:48:06.505 -> move motors100,-242,0
+21:48:06.505 -> received val: -22
+21:48:06.505 -> d val: -242
+21:48:19.099 -> received val: 41
+21:48:19.099 -> r val: 100
+21:48:19.099 -> move motors100,-242,100
+21:48:19.099 -> received val: -22
+21:48:19.099 -> d val: -242
+21:56:49.149 -> received val: 38
+21:56:49.149 -> s val: 600
+21:56:49.149 -> move motors600,0,0
+21:56:49.149 -> received val: -22
+21:56:49.149 -> d val: -242
+21:56:49.149 -> move motors600,-242,0
+21:57:19.288 -> received val: 35
+21:57:19.288 -> s val: 300
+21:57:19.288 -> move motors300,-242,0
+21:57:19.288 -> received val: -22
+21:57:19.288 -> d val: -242
 
