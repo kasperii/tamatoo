@@ -1,0 +1,15 @@
+Download the VCP Drivers
+https://jp.silabs.com/developers/usb-to-uart-bridge-vcp-drivers?tab=downloads
+Install them
+Check the Silicon Labs USB to UART Bridge has a com port in Device Manager
+
+Install Arduino IDE
+Install (via Board Managers) esp8266 by ESP8266
+
+Download the V-Duino libaries 
+https://github.com/vstoneofficial/V-duino
+Put the VS-RC202 folder in (on Windows)  <user>/Documents/Arduino/libraries 
+
+** it won't compile as-is
+Edit vs-rc202.cpp and make sure every non-void has a return value or find out how to change the error level for the platform. 
+
