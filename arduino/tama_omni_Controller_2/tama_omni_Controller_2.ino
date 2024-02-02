@@ -261,6 +261,9 @@ void getCommand() {
     //    }
     //
     if (c < 32) {
+      if (c<0){
+        c=0
+      }
       d = c * 11, 25;
       Serial.print("d val: ");
       Serial.println(d);
