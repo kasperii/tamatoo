@@ -6,7 +6,7 @@ import serial
 import time
 from flask_socketio import SocketIO,emit,send
 import platform
-
+import math
 mac = False
 if (platform.system() == "Darwin"):
     mac = True
@@ -356,14 +356,41 @@ except:
     #runningonmacdebug=True
 
 
-
-
 # ------ TAMA WHEELS ------
 
 # this is the channel in for controlling the wheels
 # the input is between 0-x for moving
 # speed is between y-z
 # and turing is R: 39, M: 40, L: 41
+@app.route("/wheels_unity", methods=["POST"])
+def wheels_unity():
+    data = request.get_json()
+    
+    if('r' in data):
+        if(data['r'] == 'L'):
+            writeToWheels(44)
+        if(data['r'] == 'R'):
+            writeToWheels(46)
+        if(data['r'] == "S"):
+            writeToWheels(45)
+            writeToWheels(32)
+    if('d' in data):
+        writeToWheels(int(data['d']))
+        print("direction: "+str(data['d'])) 
+    if('s' in data):
+        writeToWheels(int(data['s']))
+        print("linear speed: " + str(data['s']))
+    #sendToWheels(39)
+    
+    return make_response(jsonify("success"),201)
+
+def writeToWheels(value):
+    # sending a single command
+    message = chr(value + 32)
+    serWheels.write(message.encode())
+    print(serWheels.readline().decode('utf-8'))
+
+
 @app.route("/wheels", methods=["POST"])
 def wheels():
 
@@ -391,11 +418,14 @@ def wheels():
 
 def sendToWheels(value):
     #serWheels.reset_input_buffer()
-    #print(message.encode('utf-8'))
     message = chr(value+32)
+    #message = str(value)
+    #message = str(value+32)
+    print("send message to wheels: " + message)
     while True:
         serWheels.write(message.encode())
         line = serWheels.readline().decode('utf-8').rstrip()
+        print("response: "+ line)
         break
 
 
@@ -417,20 +447,45 @@ def sendToTama(message):
 
 @app.route("/color", methods=["POST"])
 def color():
+    print("PRE")
+    print(request)
+    print("POST")
     clr = 'W'
     ptn = 1
     frq = 0
-    data = json.loads(request.form['json'])
-    print(data)
-    print(data['c'])
-    print('color change!', file=sys.stderr)
-    clr = data['c']
-    cmdbuff = [ord('E'),ord(clr),ptn, frq, ord('\n')]#command,pan-sign,pan-val,tilt-sign,tilt-val,TF-sign,TF-val
+    ## need to use get_json for working with Unity
+    try:
+        data = request.get_json()
+        print(data)
+        clr=data['c']
+        cmdbuff = [ord('E'), ord(clr),ptn, frq, ord('\n')]
+    except:
+        print("request form: "+ request.form['json'])
+        data = json.loads(request.form['json'])
+        print(data)
+        print(data['c'])
+        print('color change!', file=sys.stderr)
+        clr = data['c']
+        cmdbuff = [ord('E'),ord(clr),ptn, frq, ord('\n')]#command,pan-sign,pan-val,tilt-sign,tilt-val,TF-sign,TF-val
     # clr = eye color(R/ G/ B/ Y/ P/ C/ W/ N)
     # ptn = blink pattern (0=off/ 1=on/ 2=blink/ 3=wink)
 
     sendToTama(cmdbuff)
     return make_response(jsonify("success"), 201)
+
+@app.route("/eyexr", methods=["POST"])
+def eyexr():
+    data = request.get_json()
+    print(data)
+    clr = 'W'
+    ptn = 1
+    clr = data['c']
+    ptn = data['p']
+    frq = 1
+    cmdbuff = [ord('E'), ord(clr), ptn, frq, ord('\n')]
+
+    sendToTama(cmdbuff)
+    return make_response(jsonify("success"),201)
 
 @app.route("/eyes", methods=["POST"])
 def eye():
@@ -447,6 +502,38 @@ def mysplit(s):
     tail = s[len(head):]
     return head, tail
 
+@app.route("/gazexr", methods=["POST"])
+def gazexr():    
+    
+    data = request.get_json()
+    
+    #print("eye pan angle: " + str(data['eyePan']))
+    #print("head tilt angle: " + str(data['headTilt']))
+    
+    p = int(data['eyePan'])
+    t = int(data['headTilt'])
+    
+    ps = 1
+    p=p*-1
+
+    if(p<0):
+        ps = 255
+    
+    ts = 1
+    if(t<0):
+        ts = 255
+
+    pv = abs(p)
+    tv = abs(t)
+
+    tfs = 1
+    tfv = math.floor(tv/2)
+    tv = 0
+    cmdbuff =[ord('M'),ps, pv, ts, tv, tfs, tfv, ord('\n')]
+    
+    sendToTama(cmdbuff)
+    return make_response(jsonify("success"),201)
+
 @app.route("/gaze", methods=["POST"])
 def gaze():
 
@@ -458,9 +545,11 @@ def gaze():
     print(dataDict)
     p = dataDict['p']
     t = dataDict['t']
+
     ps = 1
+    p=p*-1
     if (p < 0):
-        ps = 255
+            ps = 255
     ts = 1
     if (t < 0):
         ts = 255
@@ -469,13 +558,12 @@ def gaze():
     tv = abs(t)
 
 
-
     tfs = 1
     tfv = 0
 
     ## DEBUG SOLUTION
     ##
-    tfv = tv/2
+    tfv = math.floor(tv/2)
     tv = 0
     ## EDN OF DEBUG
     cmdbuff = [ord('M'),ps,pv,ts,tv,tfs,tfv,ord('\n')]#command,pan-sign,pan-val,tilt-sign,tilt-val,TF-sign,TF-val
