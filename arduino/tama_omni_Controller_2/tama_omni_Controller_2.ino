@@ -82,57 +82,6 @@ void moveOmuni3(int velocity, int axis, int omega) {
   return;
 }
 
-// int home_position[1][11] = {
-//                       {800,0,0,0,0,0,0,0,0,0,0},
-//                     };
-
-// int go[6][11] = {
-//                   {300,0,0,800,0,0,0,0,0,0,0},
-//                   {300,-600,-600,800,0,0,0,0,0,0,0},
-//                   {300,-600,-600,0,0,0,0,0,0,0,0},
-//                   {300,-600,-600,-800,0,0,0,0,0,0,0},
-//                   {300,600,600,-800,0,0,0,0,0,0,0},
-//                   {300,600,600,0,0,0,0,0,0,0,0},
-//                 };
-
-
-// int left[5][11] = {
-//                     {300,0,0,-600,0,0,0,0,0,0,0},
-//                     {300,300,0,-600,0,0,0,0,0,0,0},
-//                     {500,300,0,600,0,0,0,0,0,0,0},
-//                     {300,0,0,600,0,0,0,0,0,0,0},
-//                     {300,0,0,0,0,0,0,0,0,0,0},
-//                     };
-
-
-// int right[5][11] = {
-//                     {300,0,0,600,0,0,0,0,0,0,0},
-//                     {300,0,-300,600,0,0,0,0,0,0,0},
-//                     {500,0,-300,-600,0,0,0,0,0,0,0},
-//                     {300,0,0,-600,0,0,0,0,0,0,0},
-//                     {300,0,0,0,0,0,0,0,0,0,0},
-//                     };
-
-// int back[6][11] = {
-//                   {300,0,0,-800,0,0,0,0,0,0,0},
-//                   {300,-600,-600,-800,0,0,0,0,0,0,0},
-//                   {300,-600,-600,0,0,0,0,0,0,0,0},
-//                   {300,-600,-600,800,0,0,0,0,0,0,0},
-//                   {300,600,600,800,0,0,0,0,0,0,0},
-//                   {300,600,600,0,0,0,0,0,0,0,0},
-//                 };
-
-// int f1[2][11] = {
-//                       {800,0,0,0,-1500,0,0,0,0,0,0},
-//                       {800,0,0,0,0},
-//                     };
-
-
-// int f2[2][11] = {
-//                       {800,0,0,0,1500,0,0,0,0,0,0},
-//                       {800,0,0,0,0,0,0,0,0,0,0},
-//                     };
-
 bool sendData(char e, char clr, int ptn, int frq) {
   int maxRetries = 3;
   bool responseReceived = false;
@@ -182,66 +131,6 @@ void selectMotion() {
   }
 }
 
-//void readTamaMovements(buff){
-//    ////motor control////
-//    if (buff[0] == 'M') {
-//      for (int i = 1; i < 7; i++) {//get value(buff[1-6])
-//        buff[i] = Serial.read();
-//        delay(10);
-//      }
-//
-//      ind_flag = 0; //0=eye, 1=directional, 2=not directonal
-//
-//      //pan motor
-//      if (buff[1] == 0) {} //if pan-sign(buf[1])==0, keep Pan target angle
-//      else {//update Pan target angle
-//        if (buff[1] == 1 && byte(buff[2]) > pan_MAX)P_V_ref = -1 * buff[1] * pan_MAX + pan_OFFSET; //if bigger than MAX, cutoff
-//        else if (buff[1] == -1 && -byte(buff[2]) < pan_MIN)P_V_ref = -1 * buff[1] * -1 * pan_MIN + pan_OFFSET; //if smaller than MIN, cut off
-//        else {
-//          P_V_ref = -1 * buff[1] * byte(buff[2]) + pan_OFFSET; //else, simply use the value
-//        }
-//      }
-//
-//      //tilt motor
-//      if (buff[3] == 0) {} //if tilt-sign(buf[3])==0, keep Tilt target angle(deg[1])
-//      else {//update Tilt target angle
-//        if (buff[4] > 20)buff[4] -= 20;
-//        else {
-//          buff[4] = 0;
-//        }
-//        if (buff[3] == 1 && byte(buff[4]) > tilt_MAX)deg[1] = tilt_OFFSET - 1 * buff[3] * tilt_MAX * 4 / 3; //if bigger than MAX, cutoff
-//        else if (buff[3] == -1 && -byte(buff[4]) < tilt_MIN)deg[1] = tilt_OFFSET - 1 * buff[3] * -1 * tilt_MIN * 4 / 3; //if smaller than MIN, cut off
-//        else {
-//          deg[1] = tilt_OFFSET - 1 * buff[3] * byte(buff[4]) * 4 / 3; //else, simply use the value
-//        }
-//      }
-//
-//      //TF motor
-//      if (buff[5] == 0) {} //if TF-sign(buf[5])==0, keep TF target angle
-//      else {
-//        if (buff[5] == 1 && byte(buff[6]) > TF_MAX)TF_V_ref = buff[5] * TF_MAX + TF_OFFSET;//if bigger than MAX, cutoff
-//        else if (buff[5] == -1 && -byte(buff[6]) < TF_MIN)TF_V_ref = buff[5] * -1 * TF_MIN + TF_OFFSET;//if smaller than MIN, cut off
-//        else {
-//          TF_V_ref = buff[5] * byte(buff[6]) + TF_OFFSET;//else, simply use the value
-//        }
-//      }
-//    }
-//
-//
-//}
-
-//long interval = 1000;
-//
-//bool checkInterval(){
-//  if((millis()-_last_time) > interval){
-//    _last_time = millis();
-//    return true;
-//  } else {
-//    return false;
-//  }
-//}
-
-
 
 void getCommand() {
   //0-31 are directions
@@ -268,6 +157,8 @@ void getCommand() {
       
       int rd = abs(c - 50);
 
+      //This makes a progression of:
+      //1, 6, 27, 64, 125, 216, 343, 512, 648, 800
       if(rd=0){
         r = 0;
       }else if (rd < 9){
@@ -281,42 +172,8 @@ void getCommand() {
     }
   }
 
-  //  // reset buffer
-  //  while(Serial.available()){
-  //    Serial.read();
-  //  }
 }
 
-
-void getTestCommand() {
-  //0-31 are directions
-  //  if(Serial.available() > 0 && checkInterval()){
-
-  if (Serial.available() > 0) {
-    char c = Serial.read();
-    //    int c = Serial.parseInt();
-    Serial.print("received test val: ");
-    Serial.println(c);
-
-    if(c=='w'){
-      d = 0;
-      s = 400;
-      r = 0;
-
-    }else if(c=='s'){
-      d = 180;
-      s = 400;
-      r = 0;
-
-    }else if(c=='d'){
-
-      d = 0;
-      s = 100;
-      r = 300;
-
-    }
-  }
-}
 
 void setup() {
   //debug
@@ -353,3 +210,9 @@ void loop() {
   //Play motion
   selectMotion();
 }
+
+
+
+
+
+
