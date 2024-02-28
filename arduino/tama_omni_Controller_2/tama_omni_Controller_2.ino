@@ -77,7 +77,7 @@ void moveOmuni3(int velocity, int axis, int omega) {
   setServoMovingTime(INTERVAL);  //Set moving time
   motion_time = 0;
   moveServo();
-  Serial.print(".");
+  //Serial.print(".");
 
   return;
 }
