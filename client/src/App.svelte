@@ -31,10 +31,14 @@
 			case "W":
                 console.log("pressed W");
 				 // forward
+                 e.preventDefault();
+
 				 break;
             case "w":
                 console.log("pressed w");
 				 // forward
+                 e.preventDefault();
+
 				 break;
             default:
                 console.log(e.key);
@@ -44,10 +48,14 @@
     function onKeyUp(e) {
 		 switch(e.key) {
             case "w":
-                console.log("let go w");				 
+                console.log("let go w");
+                e.preventDefault();
+				 
                 break;
             case "W":
-                console.log("let go W");				 
+                console.log("let go W");
+                e.preventDefault();
+				 
                 break;   
                 
 		 }
@@ -498,7 +506,11 @@ function onTrack(event) {
 </script>
 
 <!-- just a logo -->
-<svelte:window on:keydown|preventDefault={onKeyDown}></svelte:window>
+
+<svelte:window
+    on:keydown={onKeyDown}
+    on:keyup={onKeyUp}
+/>
 <Tama />
 
 <!-- old controller, but also start call and hangup button -->
