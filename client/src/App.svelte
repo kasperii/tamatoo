@@ -19,44 +19,156 @@
  // Variable to toggle slow movement
  let speedmulti = 1
 
+ let kmf, kmb, kml, kmr, krr, krl = false;  
 
+$: {
+    
+}
 
+// rotations:
+// sendWheel("r","L")
+// sendWheel("r","R")
+// sendWheel("r","M")
 
-
+// movements:
+// speed is 32-38, where 38 is full and 32 is stop
+// sendWheel('m',Math.round(speed*6)+32)
+// sendWheel('m',Math.round(degrees/11.25))
 
  // ################ Keyboard controller
-
+// On w -> update speed to 100, on up update 0 | add speed some other way | q = rotate and e is rotate
+let speedToggle = 1;
  function onKeyDown(e) {
-		 switch(e.key) {
+        if (e.repeat) return;
+
+		 switch(e.key.toUpperCase()) {
 			case "W":
                 console.log("pressed W");
 				 // forward
+                 kmf = true;
+                 sendWheel('m',32+speedToggle);
+                 sendWheel('m',0);
                  e.preventDefault();
 
 				 break;
-            case "w":
-                console.log("pressed w");
+            case "S":
+                console.log("pressed s");
 				 // forward
+                 kmb = true;
                  e.preventDefault();
 
-				 break;
+				 break;                 
+            case "A":
+                console.log("pressed s");
+				 // forward
+                 kml = true;
+                 e.preventDefault();
+
+				 break;                      
+            case "D":
+                console.log("pressed s");
+				 // forward
+                 kmr = true;
+                 e.preventDefault();
+
+				 break;    
+            case "Q":
+                console.log("pressed q");
+				 // forward
+                 krl = true;
+                 sendWheel("r","K");
+                 e.preventDefault();
+                 break;    
+
+            case "E":
+                console.log("pressed e");
+				 // forward
+                 sendWheel("r","T");
+                 krr = true;
+                 e.preventDefault();
+	            break;    
+ 
+            case "1":
+                console.log("pressed e");
+				 // forward
+                 speedToggle = 1;
+                 krr = true;
+                 e.preventDefault();
+	            break;      
+            case "2":
+                console.log("pressed e");
+				 // forward
+                 speedToggle = 3;
+                 krr = true;
+                 e.preventDefault();
+	            break;  
+            case "3":
+                console.log("pressed e");
+				 // forward
+                 speedToggle = 5;
+                 krr = true;
+                 e.preventDefault();
+	            break;  
+ 
+            case "1":
+                console.log("pressed e");
+				 // forward
+                 speedToggle = 1;
+                 krr = true;
+                 e.preventDefault();
+	            break;     
             default:
                 console.log(e.key);
 		 }
 	}
 
     function onKeyUp(e) {
-		 switch(e.key) {
-            case "w":
-                console.log("let go w");
-                e.preventDefault();
-				 
-                break;
+		 switch(e.key.toUpperCase()) {
             case "W":
-                console.log("let go W");
-                e.preventDefault();
-				 
-                break;   
+                console.log("pressed W");
+				 // forward
+                 sendWheel('m',32);
+                 kmf = false;
+                 e.preventDefault();
+
+				 break;
+            case "S":
+                console.log("pressed s");
+				 // forward
+                 kmb = false;
+                 e.preventDefault();
+
+				 break;                 
+            case "A":
+                console.log("pressed s");
+				 // forward
+                 kml = false;
+                 e.preventDefault();
+
+				 break;                      
+            case "D":
+                console.log("pressed s");
+				 // forward
+                 kmr = false;
+                 e.preventDefault();
+
+				 break;    
+            case "Q":
+                console.log("pressed q");
+				 // forward
+                 sendWheel("r","M")
+                 krl = false;
+                 e.preventDefault();
+                 break;    
+
+            case "E":
+                console.log("pressed e");
+				 // forward
+                 sendWheel("r","M")
+                 krr = false;
+                 e.preventDefault();
+	            break;    
+ 
                 
 		 }
 	}
@@ -358,7 +470,7 @@ function onTrack(event) {
      }
      if(Math.abs(speed-newSpeed)>0.1){
          speed = newSpeed
-         sendWheel('m',Math.round(speed*6)+32*speedmulti)
+         sendWheel('m',Math.round(speed*6)*speedmulti+32)
          isMoving = true;
      }
      newDegrees = (Math.round((270-newDegrees)/11.25)*11.25)%360
