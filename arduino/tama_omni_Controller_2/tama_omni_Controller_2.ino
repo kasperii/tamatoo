@@ -77,6 +77,7 @@ void moveOmuni3(int velocity, int axis, int omega) {
   setServoMovingTime(INTERVAL);  //Set moving time
   motion_time = 0;
   moveServo();
+  Serial.print(".");
 
   return;
 }
@@ -243,33 +244,26 @@ void selectMotion() {
 void getCommand() {
   //0-31 are directions
   //  if(Serial.available() > 0 && checkInterval()){
+
   if (Serial.available() > 0) {
     int c = (int)Serial.read() - 32;
     //    int c = Serial.parseInt();
     Serial.print("received val: ");
     Serial.println(c);
 
-    //    String line;
-    //    int line_len;
-    //    int c;
-    //
-    //    line = Serial.readStringUntil('\n');
-    //    line_len = line.length();
-    //    if(line_len > 0){
-    //      c = line.toInt();
-    //      Serial.println(c);
-    //    }
-    //
     if (c < 32) {
-      d = c * 11, 25;
+      if(c<0){
+        c = 0;
+      }
+      d = c * 11.25;
       Serial.print("d val: ");
       Serial.println(d);
     } else if (c < 39) {
       s = (c - 32) * 100;
       Serial.print("s val: ");
       Serial.println(s);
-    } else if (c < 42) {  // ASCII "G"
-      r = (c - 40) * 100;
+    } else if (c <50) {  // ASCII "G"
+      r = (c - 45) * 100;
       Serial.print("r val: ");
       Serial.println(r);
     }
@@ -279,6 +273,37 @@ void getCommand() {
   //  while(Serial.available()){
   //    Serial.read();
   //  }
+}
+
+
+void getTestCommand() {
+  //0-31 are directions
+  //  if(Serial.available() > 0 && checkInterval()){
+
+  if (Serial.available() > 0) {
+    char c = Serial.read();
+    //    int c = Serial.parseInt();
+    Serial.print("received test val: ");
+    Serial.println(c);
+
+    if(c=='w'){
+      d = 0;
+      s = 400;
+      r = 0;
+
+    }else if(c=='s'){
+      d = 180;
+      s = 400;
+      r = 0;
+
+    }else if(c=='d'){
+
+      d = 0;
+      s = 100;
+      r = 300;
+
+    }
+  }
 }
 
 void setup() {
@@ -311,7 +336,7 @@ void setup() {
 
 void loop() {
   if (Serial.available() > 0) {
-    getCommand();
+    getTestCommand();
   }
   //Play motion
   selectMotion();
