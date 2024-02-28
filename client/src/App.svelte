@@ -23,6 +23,36 @@
 
 
 
+
+ // ################ Keyboard controller
+
+ function onKeyDown(e) {
+		 switch(e.key) {
+			case "W":
+                console.log("pressed W");
+				 // forward
+				 break;
+            case "w":
+                console.log("pressed w");
+				 // forward
+				 break;
+            default:
+                console.log(e.key);
+		 }
+	}
+
+    function onKeyUp(e) {
+		 switch(e.key) {
+            case "w":
+                console.log("let go w");				 
+                break;
+            case "W":
+                console.log("let go W");				 
+                break;   
+                
+		 }
+	}
+
  // ################ WEBSOCKETS
 
  var raspi;
@@ -468,7 +498,7 @@ function onTrack(event) {
 </script>
 
 <!-- just a logo -->
-
+<svelte:window on:keydown|preventDefault={onKeyDown}
 <Tama />
 
 <!-- old controller, but also start call and hangup button -->
