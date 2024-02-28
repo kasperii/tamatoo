@@ -241,6 +241,8 @@ void selectMotion() {
 //  }
 //}
 
+
+
 void getCommand() {
   //0-31 are directions
   //  if(Serial.available() > 0 && checkInterval()){
@@ -248,24 +250,34 @@ void getCommand() {
   if (Serial.available() > 0) {
     int c = (int)Serial.read() - 32;
     //    int c = Serial.parseInt();
-    Serial.print("received val: ");
-    Serial.println(c);
+    //Serial.print("received val: ");
+    //Serial.println(c);
 
     if (c < 32) {
       if(c<0){
         c = 0;
       }
       d = c * 11.25;
-      Serial.print("d val: ");
-      Serial.println(d);
+      //Serial.print("d val: ");
+      //Serial.println(d);
     } else if (c < 39) {
       s = (c - 32) * 100;
-      Serial.print("s val: ");
-      Serial.println(s);
-    } else if (c <50) {  // ASCII "G"
-      r = (c - 45) * 100;
-      Serial.print("r val: ");
-      Serial.println(r);
+      //Serial.print("s val: ");
+      //Serial.println(s);
+    } else if (c <61) {  // ASCII "G"
+      
+      int rd = abs(c - 50);
+
+      if(rd=0){
+        r = 0;
+      }else if (rd < 9){
+        r = (c-50) * rd * rd;
+      }else {
+        r = (c-50) * rd * 8;
+      }
+      
+      //Serial.print("r val: ");
+      //Serial.println(r);
     }
   }
 
@@ -336,7 +348,7 @@ void setup() {
 
 void loop() {
   if (Serial.available() > 0) {
-    getTestCommand();
+    getCommand();
   }
   //Play motion
   selectMotion();
