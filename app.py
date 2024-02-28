@@ -371,8 +371,12 @@ def wheels():
     print(data)
     datastring = ""
     if('r' in data):
+        if(data['r'] == 'K'):
+            sendToWheels(43)
         if(data['r'] == 'L'):
             sendToWheels(41)
+        if(data['r'] == 'T'):
+            sendToWheels(47)
         if(data['r'] == 'R'):
             sendToWheels(49)
         if(data['r'] == 'M'):

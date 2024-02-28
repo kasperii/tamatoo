@@ -76,14 +76,14 @@ let speedToggle = 1;
                 console.log("pressed q");
 				 // forward
                  krl = true;
-                 sendWheel("r","L");
+                 sendWheel("r","K");
                  e.preventDefault();
                  break;    
 
             case "E":
                 console.log("pressed e");
 				 // forward
-                 sendWheel("r","R");
+                 sendWheel("r","T");
                  krr = true;
                  e.preventDefault();
 	            break;    
