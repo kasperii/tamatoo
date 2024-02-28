@@ -498,7 +498,7 @@ function onTrack(event) {
 </script>
 
 <!-- just a logo -->
-<svelte:window on:keydown|preventDefault={onKeyDown}
+<svelte:window on:keydown|preventDefault={onKeyDown}></svelte:window>
 <Tama />
 
 <!-- old controller, but also start call and hangup button -->
