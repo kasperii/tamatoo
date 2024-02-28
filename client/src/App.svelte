@@ -47,6 +47,7 @@ let speedToggle = 1;
 				 // forward
                  kmf = true;
                  sendWheel('m',32+speedToggle);
+                 sendWheel('m',0);
                  e.preventDefault();
 
 				 break;
@@ -87,7 +88,35 @@ let speedToggle = 1;
                  e.preventDefault();
 	            break;    
  
-                 
+            case "1":
+                console.log("pressed e");
+				 // forward
+                 speedToggle = 1;
+                 krr = true;
+                 e.preventDefault();
+	            break;      
+            case "2":
+                console.log("pressed e");
+				 // forward
+                 speedToggle = 3;
+                 krr = true;
+                 e.preventDefault();
+	            break;  
+            case "3":
+                console.log("pressed e");
+				 // forward
+                 speedToggle = 5;
+                 krr = true;
+                 e.preventDefault();
+	            break;  
+ 
+            case "1":
+                console.log("pressed e");
+				 // forward
+                 speedToggle = 1;
+                 krr = true;
+                 e.preventDefault();
+	            break;     
             default:
                 console.log(e.key);
 		 }
