@@ -372,11 +372,11 @@ def wheels():
     datastring = ""
     if('r' in data):
         if(data['r'] == 'K'):
-            sendToWheels(47)
+            sendToWheels(45)
         if(data['r'] == 'L'):
             sendToWheels(49)
         if(data['r'] == 'T'):
-            sendToWheels(51)
+            sendToWheels(55)
         if(data['r'] == 'R'):
             sendToWheels(54)
         if(data['r'] == 'M'):
