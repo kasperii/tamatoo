@@ -23,6 +23,9 @@
 
  let speedToggle = 1;
 
+ let right = 45
+ let left = 55
+
 function updateKeyMovement(){
     console.log("update key movement")
     let rr = right//"K";
@@ -155,7 +158,6 @@ function updateKeyMovement(){
 
                  left = 45
                  right = 55
-                 krr = true;
                  e.preventDefault();
 	             break;
             case "U":
@@ -163,7 +165,6 @@ function updateKeyMovement(){
 				 // forward
                  left = 46
                  right = 54
-                 krr = true;
                  e.preventDefault();
 	             break;
             case "I":
@@ -171,7 +172,6 @@ function updateKeyMovement(){
 				 // forward
                  left = 47
                  right = 53
-                 krr = true;
                  e.preventDefault();
 	             break;
             case "O":
@@ -179,7 +179,6 @@ function updateKeyMovement(){
 				 // forward
                  left = 48
                  right = 52
-                 krr = true;
                  e.preventDefault();
 	             break;
             case "P":
@@ -187,7 +186,6 @@ function updateKeyMovement(){
 				 // forward
                  left = 49
                  right = 51
-                 krr = true;
                  e.preventDefault();
 	             break;
              default:
