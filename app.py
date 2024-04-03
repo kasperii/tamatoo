@@ -381,6 +381,8 @@ def wheels():
             sendToWheels(54)
         if(data['r'] == 'M'):
             sendToWheels(50)
+        else:
+            sendToWheels(data['r'])
         #sendToWheels(data['r'])
         #datastring += "r" + data["r"]
     if('m' in data):

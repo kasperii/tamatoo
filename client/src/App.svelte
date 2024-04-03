@@ -37,6 +37,8 @@ $: {
 
  // ################ Keyboard controller
 // On w -> update speed to 100, on up update 0 | add speed some other way | q = rotate and e is rotate
+let left = 45
+let right = 55
 let speedToggle = 1;
  function onKeyDown(e) {
         if (e.repeat) return;
@@ -47,14 +49,16 @@ let speedToggle = 1;
 				 // forward
                  kmf = true;
                  sendWheel('m',32+speedToggle);
-                 sendWheel('m',0);
+                 //sendWheel('m',0);
                  e.preventDefault();
 
 				 break;
             case "S":
                 console.log("pressed s");
-				 // forward
+				 // stop
                  kmb = true;
+                 sendWheel('m',0);
+                 sendWheel("r","M");
                  e.preventDefault();
 
 				 break;                 
@@ -76,14 +80,14 @@ let speedToggle = 1;
                 console.log("pressed q");
 				 // forward
                  krl = true;
-                 sendWheel("r","K");
+                 sendWheel("r",left);
                  e.preventDefault();
                  break;    
 
             case "E":
                 console.log("pressed e");
 				 // forward
-                 sendWheel("r","T");
+                 sendWheel("r",right);
                  krr = true;
                  e.preventDefault();
 	            break;    
@@ -108,17 +112,49 @@ let speedToggle = 1;
                  speedToggle = 5;
                  krr = true;
                  e.preventDefault();
-	            break;  
- 
-            case "1":
+	            break;
+            case "T":
                 console.log("pressed e");
 				 // forward
-                 speedToggle = 1;
+                 left = 45
+                 right = 55
                  krr = true;
                  e.preventDefault();
-	            break;     
-            default:
-                console.log(e.key);
+	             break;
+            case "U":
+                console.log("pressed e");
+				 // forward
+                 left = 46
+                 right = 54
+                 krr = true;
+                 e.preventDefault();
+	             break;
+            case "I":
+                console.log("pressed e");
+				 // forward
+                 left = 47
+                 right = 53
+                 krr = true;
+                 e.preventDefault();
+	             break;
+            case "O":
+                console.log("pressed e");
+				 // forward
+                 left = 48
+                 right = 52
+                 krr = true;
+                 e.preventDefault();
+	             break;
+            case "P":
+                console.log("pressed e");
+				 // forward
+                 left = 49
+                 right = 51
+                 krr = true;
+                 e.preventDefault();
+	             break;
+             default:
+                 console.log(e.key);
 		 }
 	}
 
