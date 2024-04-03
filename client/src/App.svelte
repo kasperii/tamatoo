@@ -24,45 +24,45 @@
  let speedToggle = 1;
 
 function updateKeyMovement(){
-    let rr = 41//"K"; 
-    let rl = 59 //"T";
+    console.log("update key movement")
+    let rr = right//"K";
+    let rl = left //"T";
     if(kmf|kmb && krl|krr ){
         //if moving back or forward and rotating
         //speed modify the rotation 
-        rr = 53;
-        rl = 47;
+        //rr = 53;
+        //rl = 47;
 
     }
 
     if(kml|kmr && krl|krr ){
         //if moving right or left and rotating
         //speed modify the rotation -might be differnet thatn above?
-        rr = 53;
-        rl = 47;
+        //rr = 53;
+        //rl = 47;
     }
 
     if(kmb){
-        sendWheel('m',32-speedToggle);
-    }else{
         sendWheel('m',32);
+        sendWheel('r',50);
     }
 
     if(kmf){
         sendWheel('m',32+speedToggle);
-    }else{
+    }else {
         sendWheel('m',32);
     }
 
     if(krr){
-        sendWheel("r","K");
+        sendWheel("r",rr);
     }else{
-        sendWheel("r","M");
+        sendWheel("r",50);
     }
 
     if(krl){
-        sendWheel("r","T");
+        sendWheel("r",rl);
     }else{
-        sendWheel("r","M");
+        sendWheel("r",50);
     }
     
 }
@@ -79,8 +79,6 @@ function updateKeyMovement(){
 
  // ################ Keyboard controller
 // On w -> update speed to 100, on up update 0 | add speed some other way | q = rotate and e is
-let left = 45
-let right = 55
  function onKeyDown(e) {
         if (e.repeat) return;
 
@@ -89,7 +87,6 @@ let right = 55
                 console.log("pressed W");
 				 // forward
                  kmf = true;
-                 sendWheel('m',32+speedToggle);
                  //sendWheel('m',0);
                  e.preventDefault();
 
@@ -98,8 +95,7 @@ let right = 55
                 console.log("pressed s");
 				 // stop
                  kmb = true;
-                 sendWheel('m',0);
-                 sendWheel("r","M");
+
                  e.preventDefault();
 
 				 break;                 
@@ -121,14 +117,14 @@ let right = 55
                 console.log("pressed q");
 				 // forward
                  krl = true;
-                 sendWheel("r",left);
+
                  e.preventDefault();
                  break;    
 
             case "E":
                 console.log("pressed e");
 				 // forward
-                 sendWheel("r",right);
+
                  krr = true;
                  e.preventDefault();
 	            break;    
