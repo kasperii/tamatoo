@@ -21,7 +21,49 @@
 
  let kmf, kmb, kml, kmr, krr, krl = false;  
 
-$: {
+ let speedToggle = 1;
+
+function updateKeyMovement(){
+    let rr = 41//"K"; 
+    let rl = 59 //"T";
+    if(kmf|kmb && krl|krr ){
+        //if moving back or forward and rotating
+        //speed modify the rotation 
+        rr = 53;
+        rl = 47;
+
+    }
+
+    if(kml|kmr && krl|krr ){
+        //if moving right or left and rotating
+        //speed modify the rotation -might be differnet thatn above?
+        rr = 53;
+        rl = 47;
+    }
+
+    if(kmb){
+        sendWheel('m',32-speedToggle);
+    }else{
+        sendWheel('m',32);
+    }
+
+    if(kmf){
+        sendWheel('m',32+speedToggle);
+    }else{
+        sendWheel('m',32);
+    }
+
+    if(krr){
+        sendWheel("r","K");
+    }else{
+        sendWheel("r","M");
+    }
+
+    if(krl){
+        sendWheel("r","T");
+    }else{
+        sendWheel("r","M");
+    }
     
 }
 
@@ -36,10 +78,9 @@ $: {
 // sendWheel('m',Math.round(degrees/11.25))
 
  // ################ Keyboard controller
-// On w -> update speed to 100, on up update 0 | add speed some other way | q = rotate and e is rotate
+// On w -> update speed to 100, on up update 0 | add speed some other way | q = rotate and e is
 let left = 45
 let right = 55
-let speedToggle = 1;
  function onKeyDown(e) {
         if (e.repeat) return;
 
@@ -96,26 +137,26 @@ let speedToggle = 1;
                 console.log("pressed e");
 				 // forward
                  speedToggle = 1;
-                 krr = true;
+                 //krr = true;
                  e.preventDefault();
 	            break;      
             case "2":
                 console.log("pressed e");
 				 // forward
                  speedToggle = 3;
-                 krr = true;
+                 //krr = true;
                  e.preventDefault();
 	            break;  
             case "3":
                 console.log("pressed e");
 				 // forward
                  speedToggle = 5;
-                 krr = true;
+                 //krr = true;
                  e.preventDefault();
 	            break;
             case "T":
                 console.log("pressed e");
-				 // forward
+
                  left = 45
                  right = 55
                  krr = true;
@@ -156,6 +197,8 @@ let speedToggle = 1;
              default:
                  console.log(e.key);
 		 }
+
+        updateKeyMovement();
 	}
 
     function onKeyUp(e) {
@@ -163,7 +206,7 @@ let speedToggle = 1;
             case "W":
                 console.log("pressed W");
 				 // forward
-                 sendWheel('m',32);
+                 //sendWheel('m',32);
                  kmf = false;
                  e.preventDefault();
 
@@ -192,7 +235,7 @@ let speedToggle = 1;
             case "Q":
                 console.log("pressed q");
 				 // forward
-                 sendWheel("r","M")
+                 //sendWheel("r","M")
                  krl = false;
                  e.preventDefault();
                  break;    
@@ -200,13 +243,12 @@ let speedToggle = 1;
             case "E":
                 console.log("pressed e");
 				 // forward
-                 sendWheel("r","M")
+                 //sendWheel("r","M")
                  krr = false;
                  e.preventDefault();
 	            break;    
- 
-                
 		 }
+         updateKeyMovement();
 	}
 
  // ################ WEBSOCKETS
