@@ -373,13 +373,13 @@ def wheels():
     if('r' in data):
         if(data['r'] == 'K'):
             sendToWheels(45)
-        if(data['r'] == 'L'):
+        elif(data['r'] == 'L'):
             sendToWheels(49)
-        if(data['r'] == 'T'):
+        elif(data['r'] == 'T'):
             sendToWheels(55)
-        if(data['r'] == 'R'):
+        elif(data['r'] == 'R'):
             sendToWheels(54)
-        if(data['r'] == 'M'):
+        elif(data['r'] == 'M'):
             sendToWheels(50)
         else:
             print(data['r'])
