@@ -62,13 +62,10 @@ function updateKeyMovement(){
     }
 
     if(krr){
-        sendWheel('r',rr);
         sendWheel("r",rr);
     }else if(krl){
-        sendWheel('r',rl);
         sendWheel("r",rl);
     }else{
-        sendWheel('r',50);
         sendWheel("r",50);
     }
     
