@@ -443,7 +443,7 @@ function onTrack(event) {
  function RBPressed(event) {
      if (state.buttons["RB"] != event.detail){
          if(state.buttons["RB"]==null){
-             sendWheel("r","R")
+             sendWheel("r",right)
              console.log("rotate R")
          }
          else{
@@ -459,7 +459,7 @@ function onTrack(event) {
  function LBPressed(event) {
      if (state.buttons["LB"] != event.detail){
          if(state.buttons["LB"]==null){
-             sendWheel("r","L")
+             sendWheel("r",left)
              console.log("rotate L")
          }
          else{
@@ -553,7 +553,7 @@ function onTrack(event) {
      }
  }
 
- let movement = 'r0';
+ let movement = 'rM';
 
 // sedning stuff down for the wheels!
 let sendWheelCounter = 0;
@@ -581,11 +581,10 @@ let sendWheelCounter = 0;
  let rand = -1;
  $: {
      // console.log("OUTSIDe")
-      console.log(movement)
-      console.log(movement.substring(0, 1));
-      console.log(movement.substring(1));
-
-     sendWheel(movement.substring(0,1),movement.substring(1))
+    console.log(movement)
+    console.log(movement.substring(0, 1));
+    console.log(movement.substring(1));
+    sendWheel(movement.substring(0,1),movement.substring(1))
  }
 
  function getRand() {
