@@ -139,8 +139,8 @@ void getCommand() {
   if (Serial.available() > 0) {
     int c = (int)Serial.read() - 32;
     //    int c = Serial.parseInt();
-    //Serial.print("received val: ");
-    //Serial.println(c);
+    Serial.print("received val: ");
+    Serial.println(c);
 
     if (c < 32) {
       if(c<0){
@@ -156,18 +156,30 @@ void getCommand() {
     } else if (c <61) {  // ASCII "G"
       
       int rd = abs(c - 50);
+      Serial.print("rd val: ");
+      Serial.println(rd);
 
       //This makes a progression of:
       //1, 6, 27, 64, 125, 216, 343, 512, 648, 800
-      if(rd=0){
+      if(rd==0){
         r = 0;
       }else if (rd < 9){
         r = (c-50) * rd * rd;
       }else {
         r = (c-50) * rd * 8;
+        Serial.print("test vals: ");
+        Serial.print((c-50));
+        Serial.print(", ");
+         Serial.print((c-50) * rd);
+        Serial.print(", ");
+        Serial.print(rd);
+        Serial.print(", ");
+        Serial.print(r);
+        Serial.print(", ");
+        Serial.println((rd * 8));
       }
       
-      //Serial.print("r val: ");
+      Serial.print("r val: ");
       //Serial.println(r);
     }
   }
