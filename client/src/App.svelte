@@ -63,11 +63,15 @@ function updateKeyMovement(){
 
     if(krr){
         sendWheel('r',rr);
+        sendWheel("r",rr);
     }else if(krl){
         sendWheel('r',rl);
+        sendWheel("r",rl);
     }else{
         sendWheel('r',50);
+        sendWheel("r",50);
     }
+    
 }
 
 // rotations:
@@ -527,7 +531,6 @@ function onTrack(event) {
      };
  }
 
- // This is the reactive statement that sends movement based on moving the left stick
  $: {
      // This reactive statement will run whenever the state changes
      let newDegrees = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).angleDegrees
@@ -553,12 +556,11 @@ function onTrack(event) {
      }
  }
 
- let movement = 'r0';
+ let movement = 'rm';
 
 // sedning stuff down for the wheels!
-let sendWheelCounter = 0;
+
  async function sendWheel(action,direction) {
-    sendWheelCounter++
      var obj = {[action]: direction}
 
          var dataToSend = new FormData();
@@ -579,7 +581,7 @@ let sendWheelCounter = 0;
      console.log(movement)
  }
  let rand = -1;
- $: {
+ $: { //Binds to changes in movement
      // console.log("OUTSIDe")
       console.log(movement)
       console.log(movement.substring(0, 1));
@@ -714,7 +716,6 @@ let sendWheelCounter = 0;
 <!-- <h1>Your number is {rand}!</h1> -->
 <button on:click={getRand}>Get a random number</button>
 <button on:click={debut}>Debug</button>
-<p>Amount of times we send to wheels: {sendWheelCounter}</p>
 
 
 <!--
