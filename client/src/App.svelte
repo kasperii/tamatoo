@@ -62,11 +62,11 @@ function updateKeyMovement(){
     }
 
     if(krr){
-        sendWheel("r",rr);
+        sendWheel('r',rr);
     }else if(krl){
-        sendWheel("r",rl);
+        sendWheel('r',rl);
     }else{
-        sendWheel("r",50);
+        sendWheel('r',50);
     }
 }
 
@@ -527,6 +527,7 @@ function onTrack(event) {
      };
  }
 
+ // This is the reactive statement that sends movement based on moving the left stick
  $: {
      // This reactive statement will run whenever the state changes
      let newDegrees = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).angleDegrees
