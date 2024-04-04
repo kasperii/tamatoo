@@ -580,10 +580,10 @@ let sendWheelCounter = 0;
  let rand = -1;
  $: {
      // console.log("OUTSIDe")
-     // console.log(movement)
-     // console.log(movement.substring(0, 1));
-     // console.log(movement.substring(1));
-    
+      console.log(movement)
+      console.log(movement.substring(0, 1));
+      console.log(movement.substring(1));
+
      sendWheel(movement.substring(0,1),movement.substring(1))
  }
 
