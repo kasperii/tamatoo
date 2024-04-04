@@ -402,7 +402,8 @@ def sendToWheels(value):
     message = chr(value+32)
     while True:
         serWheels.write(message.encode())
-        line = serWheels.readline().decode('utf-8').rstrip()
+        #line = serWheels.readline().decode('utf-8').rstrip()
+        #print('NOT SENDING BUT WOULD BE')
         break
 
 
