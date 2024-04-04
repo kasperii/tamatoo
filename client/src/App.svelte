@@ -16,15 +16,17 @@
  let speed = 0;
  let isMoving = false;
  let compass = ['r','t','y','g','h','j','b','v','c','x','z','a','s','d','w','e','r']
+ 
+ 
+ 
  // Variable to toggle slow movement
  let speedmulti = 1
-
  let kmf, kmb, kml, kmr, krr, krl = false;  
-
  let speedToggle = 1;
-
  let right = 45
  let left = 55
+ let isKeyMoving = false
+
 
 function updateKeyMovement(){
     console.log("update key movement")
@@ -47,13 +49,16 @@ function updateKeyMovement(){
 
     if(kmb){
         sendWheel('m',32);
-        sendWheel('r',50);
-    }
-
-    if(kmf){
-        sendWheel('m',32+speedToggle);
-    }else {
+        isKeyMoving = false
+    } else if(kmf){
+        // adding a check to not double send forward when other buttons are pressed at the same time as w
+        if (!isKeyMoving){
+            sendWheel('m',32+speedToggle);
+            isKeyMoving = true
+        }    
+    } else {
         sendWheel('m',32);
+        isKeyMoving = false
     }
 
     if(krr){
