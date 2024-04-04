@@ -68,7 +68,6 @@ function updateKeyMovement(){
     }else{
         sendWheel("r",50);
     }
-    
 }
 
 // rotations:
@@ -556,8 +555,9 @@ function onTrack(event) {
  let movement = 'r0';
 
 // sedning stuff down for the wheels!
-
+let sendWheelCounter = 0;
  async function sendWheel(action,direction) {
+    sendWheelCounter++
      var obj = {[action]: direction}
 
          var dataToSend = new FormData();
@@ -713,6 +713,7 @@ function onTrack(event) {
 <!-- <h1>Your number is {rand}!</h1> -->
 <button on:click={getRand}>Get a random number</button>
 <button on:click={debut}>Debug</button>
+<p>Amount of times we send to wheels: {sendWheelCounter}</p>
 
 
 <!--
