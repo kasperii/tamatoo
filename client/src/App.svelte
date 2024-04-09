@@ -582,10 +582,11 @@ function onTrack(event) {
 
  async function sendOmniWheel(obj){//speed,direction,rotation) {
      //var obj = {s: speed,d: direction,r: rotation}
+     console.log(obj)
      var dataToSend = new FormData();
      dataToSend.append( "json", JSON.stringify( obj ) );
-
-     const res = await fetch('./wheels', {
+     console.log(dataToSend)
+     const res = await fetch('./omniwheels', {
          method: "POST",
          body: dataToSend
      })
@@ -713,6 +714,7 @@ function onTrack(event) {
 			let [key, value] = field
 			data[key] = value			
 		}
+        console.log(data)
 		sendOmniWheel(data)
 	}
 
