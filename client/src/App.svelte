@@ -157,29 +157,38 @@ function updateKeyMovement(){
             case "T":
                 console.log("pressed e");
 
-                 left = 45
-                 right = 55
+                 left = 40
+                 right = 59
                  e.preventDefault();
 	             break;
+                 
+            case "Y":
+                console.log("pressed e");
+
+                 left = 42
+                 right = 57
+                 e.preventDefault();
+	             break;
+                 
             case "U":
                 console.log("pressed e");
 				 // forward
-                 left = 46
-                 right = 54
+                 left = 44
+                 right = 55
                  e.preventDefault();
 	             break;
             case "I":
                 console.log("pressed e");
 				 // forward
-                 left = 47
-                 right = 53
+                 left = 45
+                 right = 55
                  e.preventDefault();
 	             break;
             case "O":
                 console.log("pressed e");
 				 // forward
-                 left = 48
-                 right = 52
+                 left = 47
+                 right = 53
                  e.preventDefault();
 	             break;
             case "P":
