@@ -133,24 +133,31 @@ function updateKeyMovement(){
                  e.preventDefault();
 	            break;    
  
-            case "1":
+            case "G":
                 console.log("pressed e");
 				 // forward
                  speedToggle = 1;
                  //krr = true;
                  e.preventDefault();
 	            break;      
-            case "2":
+            case "H":
                 console.log("pressed e");
 				 // forward
                  speedToggle = 3;
                  //krr = true;
                  e.preventDefault();
 	            break;  
-            case "3":
+            case "J":
                 console.log("pressed e");
 				 // forward
-                 speedToggle = 5;
+                 speedToggle = 6;
+                 //krr = true;
+                 e.preventDefault();
+	            break;
+            case "K":
+                console.log("pressed e");
+				 // forward
+                 speedToggle = 7;
                  //krr = true;
                  e.preventDefault();
 	            break;
@@ -712,7 +719,7 @@ function onTrack(event) {
 		let data = {s:0,d:0,r:0}	
 		for (let field of formData) {
 			let [key, value] = field
-			data[key] = value			
+			data[key] = parseInt(value)		
 		}
         console.log(data)
 		sendOmniWheel(data)
