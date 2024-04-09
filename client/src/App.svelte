@@ -580,6 +580,18 @@ function onTrack(event) {
 	 console.log(JSON.stringify(json))
  }
 
+ async function sendOmniWheel(obj){//speed,direction,rotation) {
+     //var obj = {s: speed,d: direction,r: rotation}
+     var dataToSend = new FormData();
+     dataToSend.append( "json", JSON.stringify( obj ) );
+
+     const res = await fetch('./wheels', {
+         method: "POST",
+         body: dataToSend
+     })
+     const json = await res.json()
+	 console.log(JSON.stringify(json))
+ }
 
  // just debugging aand test
 
@@ -693,7 +705,16 @@ function onTrack(event) {
 	 console.log(JSON.stringify(json))
  }
 
-
+// function to handle the form submit
+ function handleSubmit(e) {	
+		const formData = new FormData(e.target)
+		let data = {s:0,d:0,r:0}	
+		for (let field of formData) {
+			let [key, value] = field
+			data[key] = value			
+		}
+		sendOmniWheel(data)
+	}
 
 
 </script>
@@ -721,6 +742,12 @@ function onTrack(event) {
 <!-- <h1>Your number is {rand}!</h1> -->
 <button on:click={getRand}>Get a random number</button>
 <button on:click={debut}>Debug</button>
+<form on:submit|preventDefault={handleSubmit}>
+	<input name="s" placeholder="speed" />
+  <input name="d" placeholder="direction" />
+  <input name="r" placeholder="rotation" />
+	<input type="submit" value="create" />
+</form>
 
 
 <!--

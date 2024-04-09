@@ -403,9 +403,19 @@ def sendToWheels(value):
     while True:
         serWheels.write(message.encode())
         #line = serWheels.readline().decode('utf-8').rstrip()
-        #print('NOT SENDING BUT WOULD BE')
         break
 
+# –––––– Wheels raw ––––––
+
+@app.route("/omniwheels", methods=["POST"])
+def omniwheels():
+    rawdata = request.form['json']
+    data = json.loads(rawdata)
+    print("omniwheel test print")
+    print(rawdata)
+    print(data)
+    serWheels.write(bytearray(data))
+    return make_response(jsonify("success"), 201)
 
 
 # ------ TAMA HEAD ------
