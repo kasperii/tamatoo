@@ -9,6 +9,7 @@
 #include <Arduino.h>
 #include <FS.h>
 #include <math.h>
+#include <ArduinoJson.h>
 
 #define SLAVE_ADDRESS 0x04
 #define ACK 0x06
@@ -138,6 +139,7 @@ void getCommand() {
 
   if (Serial.available() > 0) {
     int c = (int)Serial.read() - 32;
+
     //    int c = Serial.parseInt();
     Serial.print("received val: ");
     Serial.println(c);
@@ -215,9 +217,32 @@ void setup() {
   setServoOffset(4, 0);
 }
 
+void getJSON() {
+  JsonDocument doc;
+  DeserializationError error = deserializeJson(doc, Serial);
+
+  if (error) {
+    Serial.print(F("Error: "));
+    Serial.println(error.c_str());
+    return;
+  }
+
+  s = doc["s"];
+  d = doc["d"];
+  r = doc["r"];
+}
+
+
 void loop() {
   if (Serial.available() > 0) {
-    getCommand();
+    int peek = (int)Serial.peek();
+    if(peek == 123){ //checks if the first char is { and assumes that means it is JSON
+      Serial.println("JSON");
+      getJSON();
+    }else{
+      Serial.println("CHAR STYLE");
+      getCommand();
+    }
   }
   //Play motion
   selectMotion();
