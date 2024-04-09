@@ -409,12 +409,13 @@ def sendToWheels(value):
 
 @app.route("/omniwheels", methods=["POST"])
 def omniwheels():
-    rawdata = request.form['json']
+    rawdata = str(request.form['json'])
     data = json.loads(rawdata)
     print("omniwheel test print")
     print(rawdata)
+    print(rawdata.encode())
     print(data)
-    serWheels.write(bytearray(data))
+    serWheels.write(rawdata.encode())
     return make_response(jsonify("success"), 201)
 
 
