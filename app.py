@@ -350,8 +350,7 @@ def hello():
 # these are the usb connections to the wheels and the head
 try:
     serWheels = serial.Serial('/dev/serial/by-id/pci-Silicon_Labs_CP2104_USB_to_UART_Bridge_Controller_0178CB43-if00-port0', 115200, timeout=1)
-    serTama = serial.Serial('/dev/serial/by-id/pci-FTDI_FT232R_USB_UART_A50285BI-if00-port0', 9600, timeout=1)
-                                                
+    serTama = serial.Serial('/dev/serial/by-id/pci-FTDI_FT232R_USB_UART_A50285BI-if00-port0', 9600, timeout=1)                                               
 except:
     print("ERROR WITH SERIAL")
     #runningonmacdebug=True
@@ -495,7 +494,7 @@ def gaze():
 
     ## DEBUG SOLUTION
     ##
-    tfv = tv/2
+    tfv = int(tv/2)
     tv = 0
     ## EDN OF DEBUG
     cmdbuff = [ord('M'),ps,pv,ts,tv,tfs,tfv,ord('\n')]#command,pan-sign,pan-val,tilt-sign,tilt-val,TF-sign,TF-val
