@@ -1,15 +1,19 @@
-
-
 <script>
+// just the logo
  import Tama from './Tama.svelte';
+ // This is the UI element on the site – hardly functional right now
  import Controller from './Controller.svelte';
+ // This is the module that takes the connected game controller inputs
  import Gamepad from "./Gamepad.svelte";
+ // This is for establishing connection with UV4L for video chat
  import Signaling from './Signaling.svelte';
+
  let state = {
      leftAxis: { x: 0, y: 0 },
      rightAxis: { x: 0, y: 0 },
      dpad: {},
      buttons: {},
+     rotation: {0}
 
  };
  let degrees = 0;
@@ -27,6 +31,9 @@
  let left = 55
  let isKeyMoving = false
 
+
+
+ // ################## KEYBOARD
 
 function updateKeyMovement(){
     console.log("update key movement")
@@ -364,33 +371,7 @@ function onTrack(event) {
      video: false
  };
 
- //
- //  function handleSuccess(stream) {
- //      const audioTracks = stream.getAudioTracks();
- //      console.log('Got stream with constraints:', constraints);
- //      console.log('Using audio device: ' + audioTracks[0].label);
- //      stream.oninactive = function() {
- //          console.log('Stream ended');
- //      };
- //      window.stream = stream; // make variable available to browser console
- //      audio.srcObject = stream;
- //  }
- //
- //  function handleError(error) {
- //      const errorMessage = 'navigator.MediaDevices.getUserMedia error: ' + error.message + ' ' + error.name;
- //      document.getElementById('errorMsg').innerText = errorMessage;
- //      console.log(errorMessage);
- //  }
- //
- //  navigator.mediaDevices.getUserMedia(constraints).then(handleSuccess).catch(handleError);
- //
- //
- //
-
-
-
-
-
+ 
 
 
 
@@ -426,13 +407,13 @@ function onTrack(event) {
  function RTPressed(event) {
      if (state.buttons["RT"] != event.detail){
          if(state.buttons["RT"]==null){
-             sendWheel("r","R")
+            state.rotation = 300
              console.log("rotate R")
 
          }
          else{
-             sendWheel("r","M")
-             console.log("rotate M")
+            state.rotation = 0
+            console.log("rotate M")
          }
 
          state.buttons["RT"] = event.detail;
@@ -444,12 +425,12 @@ function onTrack(event) {
  function LTPressed(event) {
      if (state.buttons["LT"] != event.detail){
          if(state.buttons["LT"]==null){
-             sendWheel("r","L")
-             console.log("rotate L")
+            state.rotation = -300
+            console.log("rotate L")
          }
          else{
-             sendWheel("r","M")
-             console.log("rotate M")
+            state.rotation = 0
+            console.log("rotate M")
          }
          state.buttons["LT"] = event.detail;
 
@@ -460,11 +441,11 @@ function onTrack(event) {
  function RBPressed(event) {
      if (state.buttons["RB"] != event.detail){
          if(state.buttons["RB"]==null){
-             sendWheel("r",right)
+            state.rotation = 400
              console.log("rotate R")
          }
          else{
-             sendWheel("r","M")
+            state.rotation = 0
              console.log("rotate M")
          }
          state.buttons["RB"] = event.detail;
@@ -476,7 +457,7 @@ function onTrack(event) {
  function LBPressed(event) {
      if (state.buttons["LB"] != event.detail){
          if(state.buttons["LB"]==null){
-             sendWheel("r",left)
+            state.rotation = 400
              console.log("rotate L")
          }
          else{
@@ -548,6 +529,7 @@ function onTrack(event) {
      // This reactive statement will run whenever the state changes
      let newDegrees = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).angleDegrees
      let newSpeed = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).vectorLength
+     let newRotation = state.rotation
      if(newSpeed == 0){
          if(isMoving){
              speed = 0
@@ -567,6 +549,7 @@ function onTrack(event) {
          degrees = newDegrees
          sendWheel('m',Math.round(degrees/11.25))
      }
+     
  }
 
  let movement = 'rM';
