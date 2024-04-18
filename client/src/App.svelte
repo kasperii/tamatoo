@@ -163,12 +163,12 @@ function RSPressed(event) {
      };
  }
 
-
+let speed = 600;
 
 $: {
      // This reactive statement will run whenever the state changes
      let newDegrees = calculateVectorInfo(stateGamepad.leftAxis['x'],stateGamepad.leftAxis['y']).angleDegrees
-     let newSpeed = Math.min(calculateVectorInfo(stateGamepad.leftAxis['x'],stateGamepad.leftAxis['y']).vectorLength*stateGamepad.speedtoggle,1)
+     let newSpeed = Math.min(calculateVectorInfo(stateGamepad.leftAxis['x'],stateGamepad.leftAxis['y']).vectorLength*stateGamepad.speedtoggle,1)*speed
      
 
      if(newSpeed == 0){
@@ -179,7 +179,7 @@ $: {
      }else{
         stateTama.rotation = (stateGamepad.right + stateGamepad.left)*0.75
      }
-     if(Math.abs(stateTama.speed-newSpeed)>0.1){
+     if(Math.abs(stateTama.speed-newSpeed)>(0.1*speed)){
         stateTama.speed = newSpeed
         //sendWheel('m',Math.round(speed*6)*speedmulti+32)
         //isMoving = true;
