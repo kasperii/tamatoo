@@ -29,9 +29,13 @@ let stateTama = {
     rotation: 0
 };
 
+let lastUpdate = {s: stateTama.speed,d: stateTama.direction,r: stateTama.rotation}
 $: {
     let obj = {s: stateTama.speed,d: stateTama.direction,r: stateTama.rotation};
-    sendOmniWheel(obj);
+    if (lastUpdate != obj){
+        sendOmniWheel(obj);
+        lastUpdate == obj;
+    }
 }
 
 async function sendOmniWheel(obj){//speed,direction,rotation) {
