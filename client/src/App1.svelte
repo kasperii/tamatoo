@@ -8,188 +8,89 @@
  // This is for establishing connection with UV4L for video chat
  import Signaling from './Signaling.svelte';
 
+ let state = {
+     leftAxis: { x: 0, y: 0 },
+     rightAxis: { x: 0, y: 0 },
+     dpad: {},
+     buttons: {},
+     rotation: 0
+
+ };
+ let degrees = 0;
+ let speed = 0;
+ let isMoving = false;
+ let compass = ['r','t','y','g','h','j','b','v','c','x','z','a','s','d','w','e','r']
+ 
+ 
+ 
+ // Variable to toggle slow movement
+ let speedmulti = 1
+ let kmf, kmb, kml, kmr, krr, krl = false;  
+ let speedToggle = 1;
+ let right = 45
+ let left = 55
+ let isKeyMoving = false
 
 
 
+ // ################## KEYBOARD
 
+function updateKeyMovement(){
+    console.log("update key movement")
+    let rr = right//"K";
+    let rl = left //"T";
+    if(kmf|kmb && krl|krr ){
+        //if moving back or forward and rotating
+        //speed modify the rotation 
+        //rr = 53;
+        //rl = 47;
 
+    }
 
+    if(kml|kmr && krl|krr ){
+        //if moving right or left and rotating
+        //speed modify the rotation -might be differnet thatn above?
+        //rr = 53;
+        //rl = 47;
+    }
 
+    if(kmb){
+        sendWheel('m',32);
+        isKeyMoving = false
+    } else if(kmf){
+        // adding a check to not double send forward when other buttons are pressed at the same time as w
+        if (!isKeyMoving){
+            sendWheel('m',32+speedToggle);
+            isKeyMoving = true
+        }    
+    } else {
+        sendWheel('m',32);
+        isKeyMoving = false
+    }
 
-
-
-
-
-
-// ################ TAMA ################
-
-let stateTama = {
-    speed: 0,
-    direction: 0,
-    rotation: 0
-};
-
-$: {
-    let obj = {s: stateTama.speed,d: stateTama.direction,r: stateTama.rotation};
-    sendOmniWheel(obj);
+    if(krr){
+        sendWheel("r",rr);
+    }else if(krl){
+        sendWheel("r",rl);
+    }else{
+        sendWheel("r",50);
+    }
+    
 }
 
-async function sendOmniWheel(obj){//speed,direction,rotation) {
-     //var obj = {s: speed,d: direction,r: rotation}
-     console.log(obj)
-     var dataToSend = new FormData();
-     dataToSend.append( "json", JSON.stringify( obj ) );
-     console.log(dataToSend)
-     const res = await fetch('./omniwheels', {
-         method: "POST",
-         body: dataToSend
-     })
-     const json = await res.json()
-	 console.log(JSON.stringify(json))
- }
+// rotations:
+// sendWheel("r","L")
+// sendWheel("r","R")
+// sendWheel("r","M")
 
- // Old version – sending actions letters r/m and numbers
- async function sendWheel(action,direction) {
-     var obj = {[action]: direction}
+// movements:
+// speed is 32-38, where 38 is full and 32 is stop
+// sendWheel('m',Math.round(speed*6)+32)
+// sendWheel('m',Math.round(degrees/11.25))
 
-         var dataToSend = new FormData();
-     dataToSend.append( "json", JSON.stringify( obj ) );
-
-     const res = await fetch('./wheels', {
-         method: "POST",
-         body: dataToSend
-     })
-     const json = await res.json()
-	 console.log(JSON.stringify(json))
- }
-
-// ################ GAMEPAD ################
-
-let stateGamepad = {
-    leftAxis: { x: 0, y: 0 },
-    rightAxis: { x: 0, y: 0 },
-    button: {right: null, left: null},
-    right: 0,
-    left: 0,
-    speedtoggle: 1
-
-};
-
-
-function gamepadConnected(event) {
-     console.log(`app: gamepad ${event.detail.gamepadIndex} connected`);
- }
-
-
-function LeftStick(event) { stateGamepad.leftAxis = event.detail; }
-
-function RightStick(event) { stateGamepad.rightAxis = event.detail; }
-
-function RSPressed(event) {
-    if (stateGamepad.speedtoggle = 1){
-        stateGamepad.speedtoggle = 0.5
-    }
-    else{
-        stateGamepad.speedtoggle = 1
-    }
-
- }
-
- $:{
-    console.log(stateGamepad.right)
- }
-
- function RBPressed(event) {
-    if (stateGamepad.button["right"] != event.detail){
-        if(stateGamepad.button["right"] == null){
-            stateGamepad.right = 400           
-        }    
-        stateGamepad.button["right"] == event.detail;
-    }else{
-        stateGamepad.right = 0
-        
-    }
-
-
- }
-
-
- function LBPressed(event) {
-    if (stateGamepad.button["left"] != event.detail){
-        if(stateGamepad.button["left"] == null){
-            stateGamepad.left = -400           
-        }    
-        stateGamepad.button["left"] == event.detail;
-    }else{
-        stateGamepad.left = 0
-        
-    }
-
-
- }
-
- function calculateVectorInfo(x, y) {
-     // Calculate the angle in radians
-
-     let angleRadians = Math.atan2(y, x);
-
-     // Convert radians to degrees
-     let angleDegrees = (angleRadians * 180) / Math.PI;
-
-     // Ensure the angle is between 0 and 360 degrees
-     angleDegrees = (angleDegrees + 360) % 360;
-
-     // Calculate the length of the vector
-     let vectorLength = Math.sqrt(x * x + y * y);
-
-     // Return the result
-     return {
-         angleDegrees: angleDegrees,
-         vectorLength: vectorLength
-     };
- }
-
-
-
-$: {
-     // This reactive statement will run whenever the state changes
-     let newDegrees = calculateVectorInfo(stateGamepad.leftAxis['x'],stateGamepad.leftAxis['y']).angleDegrees
-     let newSpeed = calculateVectorInfo(stateGamepad.leftAxis['x'],stateGamepad.leftAxis['y']).vectorLength*stateGamepad.speedtoggle
-    stateTama.rotation = stateGamepad.right + stateGamepad.left
-
-     if(newSpeed == 0){
-         if(stateTama.speed != 0){
-            stateTama.speed = 0
-         }
-     }
-     if(Math.abs(stateTama.speed-newSpeed)>0.1){
-        stateTama.speed = newSpeed
-        //sendWheel('m',Math.round(speed*6)*speedmulti+32)
-        //isMoving = true;
-     }
-     newDegrees = (Math.round((270-newDegrees)/11.25)*11.25)%360
-     if (newDegrees != stateTama.direction){
-        stateTama.direction = newDegrees
-         //sendWheel('m',Math.round(degrees/11.25))
-     }
-     
- }
-
-
-// ################ KEYBOARD ################
-
-let stateKeyboard = {
-    forward: 0,
-    left: 0,
-    right: 0,
-    back: 0,
-    rotate: 0,
-    rotatespeed: 0,
-    directionspeed: 0
-};
-
-
-function onKeyDown(e) {
+ // ################ Keyboard controller
+// On w -> update speed to 100, on up update 0 | add speed some other way | q = rotate and e is
+ function onKeyDown(e) {
         if (e.repeat) return;
 
 		 switch(e.key.toUpperCase()) {
@@ -368,24 +269,344 @@ function onKeyDown(e) {
          updateKeyMovement();
 	}
 
+ // ################ WEBSOCKETS
 
-// ################ UI ################
+ var raspi;
+ var myID;
 
-// function to handle the form submit
-function handleSubmit(e) {	
-		const formData = new FormData(e.target)
-		let data = {s:0,d:0,r:0}	
-		for (let field of formData) {
-			let [key, value] = field
-			data[key] = parseInt(value)		
-		}
-        console.log(data)
-		sendOmniWheel(data)
-	}
 
-let movement = 'rM';
+ // socketio
+ var protocol = window.location.protocol;
+ var socket = io(protocol + '//' + document.domain + ':' + location.port, {autoConnect: true});
 
- // ################ GAZE CONTROLLER ################
+ // Send audio but not video to tamatoo
+ var Constraints = {
+     audio: true,
+     video: false
+ }
+
+// connect to socket server
+ socket = io.connect();
+ socket.on('connect', function() {
+     socket.emit('my event', {data: 'I\'m connected!'});
+ });
+
+ var signalling_server_hostname = location.hostname || "192.168.1.8";
+ var signalling_server_address = signalling_server_hostname + ':' + (9000 || (location.protocol === 'https:' ? 443 : 80));
+
+
+ function createPeerConnection() {
+    try {
+        var pcConfig_ = pcConfig;
+        try {
+            ice_servers = document.getElementById('ice_servers').value;
+            if (ice_servers) {
+                pcConfig_.iceServers = JSON.parse(ice_servers);
+            }
+        } catch (e) {
+            alert(e + "\nExample: "
+                    + '\n[ {"urls": "stun:stun1.example.net"}, {"urls": "turn:turn.example.org", "username": "user", "credential": "myPassword"} ]'
+                    + "\nContinuing with built-in RTCIceServer array");
+        }
+        console.log(JSON.stringify(pcConfig_));
+        pc = new RTCPeerConnection(pcConfig_, pcOptions);
+        pc.onicecandidate = onIceCandidate;
+        if ('ontrack' in pc) {
+            pc.ontrack = onTrack;
+        } else {
+            pc.onaddstream = onRemoteStreamAdded; // deprecated
+        }
+        pc.onremovestream = onRemoteStreamRemoved;
+        pc.ondatachannel = onDataChannel;
+        console.log("peer connection successfully created!");
+    } catch (e) {
+        console.error("createPeerConnection() failed");
+    }
+ }
+
+
+ var MEDIA_CONSTRAINTS = {
+     optional: [],
+     mandatory: {
+                    OfferToReceiveAudio: false,
+                    OfferToReceiveVideo: true
+                }
+ }
+
+
+var calldata = {
+         what: "call",
+         options: {
+      force_hw_vcodec: true,
+      vformat: 30,
+      trickle_ice: true
+   }
+ }
+function onTrack(event) {
+                REMOTE_VIDEO_ELEMENT.srcObject = event.streams[0];
+}
+
+
+
+
+
+
+
+
+
+
+     // ################ GETTING THE MIC FROM THE LAPTOP
+
+     // GET AUDIO FROM GGOOGLES EXAMPLE: https://github.com/webrtc/samples/blob/gh-pages/src/content/getusermedia/audio/js/main.js
+
+
+
+     'use strict';
+
+     // Put variables in global scope to make them available to the browser console.
+     const audio = document.querySelector('audio');
+
+ const constraints = window.constraints = {
+     audio: true,
+     video: false
+ };
+
+ 
+
+
+
+ // ################ GAMEPAD DETECTORS CONTROLLERs
+
+
+ function gamepadChangeState(button){
+     state[buttons][button] = button.detail;
+
+ }
+
+ function dpad(direction){
+     state.buttons[direction] = button.detail;
+ }
+
+ function gamepadConnected(event) {
+     console.log(`app: gamepad ${event.detail.gamepadIndex} connected`);
+ }
+ function APressed(event) {
+     if (state.buttons["A"] != event.detail){
+         state.buttons["A"] = event.detail;
+         if(state.buttons["A"]==null){
+             return
+         }
+         else{
+             return
+         }
+
+     }
+
+ }
+
+ function RTPressed(event) {
+     if (state.buttons["RT"] != event.detail){
+         if(state.buttons["RT"]==null){
+            state.rotation = 300
+             console.log("rotate R")
+
+         }
+         else{
+            state.rotation = 0
+            console.log("rotate M")
+         }
+
+         state.buttons["RT"] = event.detail;
+
+     }
+
+ }
+
+ function LTPressed(event) {
+     if (state.buttons["LT"] != event.detail){
+         if(state.buttons["LT"]==null){
+            state.rotation = -300
+            console.log("rotate L")
+         }
+         else{
+            state.rotation = 0
+            console.log("rotate M")
+         }
+         state.buttons["LT"] = event.detail;
+
+     }
+
+ }
+
+ function RBPressed(event) {
+     if (state.buttons["RB"] != event.detail){
+         if(state.buttons["RB"]==null){
+            state.rotation = 400
+             console.log("rotate R")
+         }
+         else{
+            state.rotation = 0
+             console.log("rotate M")
+         }
+         state.buttons["RB"] = event.detail;
+
+     }
+
+ }
+
+ function LBPressed(event) {
+     if (state.buttons["LB"] != event.detail){
+         if(state.buttons["LB"]==null){
+            state.rotation = 400
+             console.log("rotate L")
+         }
+         else{
+             sendWheel("r","M")
+             console.log("rotate M")
+         }
+         state.buttons["LB"] = event.detail;
+
+     }
+
+ }
+
+ function RSPressed(event) {
+     if (state.buttons["RS"] != event.detail){
+         state.buttons["RS"] = event.detail;
+         if(state.buttons["RS"]==null){
+             return
+         }
+         else if(speedmulti == 1){
+             speedmulti=0.25
+         }
+         else{
+             speedmulti=1
+         }
+
+     }
+
+ }
+ function LSPressed(event) {
+    return
+
+ }
+
+ // ################ WHEELS CONTROLLERs
+
+
+
+ function LeftStick(event) {
+     state.leftAxis = event.detail;
+
+ }
+
+ function RightStick(event) {
+     state.rightAxis = event.detail;
+ }
+
+ function calculateVectorInfo(x, y) {
+     // Calculate the angle in radians
+
+     let angleRadians = Math.atan2(y, x);
+
+     // Convert radians to degrees
+     let angleDegrees = (angleRadians * 180) / Math.PI;
+
+     // Ensure the angle is between 0 and 360 degrees
+     angleDegrees = (angleDegrees + 360) % 360;
+
+     // Calculate the length of the vector
+     let vectorLength = Math.sqrt(x * x + y * y);
+
+     // Return the result
+     return {
+         angleDegrees: angleDegrees,
+         vectorLength: vectorLength
+     };
+ }
+
+ $: {
+     // This reactive statement will run whenever the state changes
+     let newDegrees = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).angleDegrees
+     let newSpeed = calculateVectorInfo(state.leftAxis['x'],state.leftAxis['y']).vectorLength
+     let newRotation = state.rotation
+     if(newSpeed == 0){
+         if(isMoving){
+             speed = 0
+             isMoving = false
+             sendWheel('m',32)
+             degrees = 0
+             sendWheel('m',0)
+         }
+     }
+     if(Math.abs(speed-newSpeed)>0.1){
+         speed = newSpeed
+         sendWheel('m',Math.round(speed*6)*speedmulti+32)
+         isMoving = true;
+     }
+     newDegrees = (Math.round((270-newDegrees)/11.25)*11.25)%360
+     if (newDegrees != degrees){
+         degrees = newDegrees
+         sendWheel('m',Math.round(degrees/11.25))
+     }
+     
+ }
+
+ let movement = 'rM';
+
+// sedning stuff down for the wheels!
+
+ async function sendWheel(action,direction) {
+     var obj = {[action]: direction}
+
+         var dataToSend = new FormData();
+     dataToSend.append( "json", JSON.stringify( obj ) );
+
+     const res = await fetch('./wheels', {
+         method: "POST",
+         body: dataToSend
+     })
+     const json = await res.json()
+	 console.log(JSON.stringify(json))
+ }
+
+ async function sendOmniWheel(obj){//speed,direction,rotation) {
+     //var obj = {s: speed,d: direction,r: rotation}
+     console.log(obj)
+     var dataToSend = new FormData();
+     dataToSend.append( "json", JSON.stringify( obj ) );
+     console.log(dataToSend)
+     const res = await fetch('./omniwheels', {
+         method: "POST",
+         body: dataToSend
+     })
+     const json = await res.json()
+	 console.log(JSON.stringify(json))
+ }
+
+ // just debugging aand test
+
+ function debut(){
+     console.log(movement)
+ }
+ let rand = -1;
+ $: { //Binds to changes in movement
+     // console.log("OUTSIDe")
+    console.log(movement)
+    console.log(movement.substring(0, 1));
+    console.log(movement.substring(1));
+    sendWheel(movement.substring(0,1),movement.substring(1))
+ }
+
+ function getRand() {
+     fetch("./rand")
+         .then(d => d.text())
+         .then(d => (rand = d));
+ }
+
+
+
+ // ################ GAZE CONTROLLERs
 
  // These are the blurring and gaze clicking functions
 
@@ -415,7 +636,7 @@ let movement = 'rM';
 // was using a touchscrene, but the eyes were a bit to slow for it
 // maybe can be tested again!
 
-function onMouseMove (event) {
+ function onMouseMove (event) {
      //getPoint(event)
  }
 
@@ -475,122 +696,20 @@ function onMouseMove (event) {
 	 console.log(JSON.stringify(json))
  }
 
-
-// ################ WEBSOCKETS ################
-
-var raspi;
-var myID;
-
-let rand=0;
-function getRand() {
-     fetch("./rand")
-         .then(d => d.text())
-         .then(d => (rand = d));
- }
-
-
-// socketio
-var protocol = window.location.protocol;
-var socket = io(protocol + '//' + document.domain + ':' + location.port, {autoConnect: true});
-
-// Send audio but not video to tamatoo
-var Constraints = {
-    audio: true,
-    video: false
-}
-
-// connect to socket server
-socket = io.connect();
-socket.on('connect', function() {
-    socket.emit('my event', {data: 'I\'m connected!'});
-});
-
-var signalling_server_hostname = location.hostname || "192.168.1.8";
-var signalling_server_address = signalling_server_hostname + ':' + (9000 || (location.protocol === 'https:' ? 443 : 80));
+// function to handle the form submit
+ function handleSubmit(e) {	
+		const formData = new FormData(e.target)
+		let data = {s:0,d:0,r:0}	
+		for (let field of formData) {
+			let [key, value] = field
+			data[key] = parseInt(value)		
+		}
+        console.log(data)
+		sendOmniWheel(data)
+	}
 
 
-function createPeerConnection() {
-   try {
-       var pcConfig_ = pcConfig;
-       try {
-           ice_servers = document.getElementById('ice_servers').value;
-           if (ice_servers) {
-               pcConfig_.iceServers = JSON.parse(ice_servers);
-           }
-       } catch (e) {
-           alert(e + "\nExample: "
-                   + '\n[ {"urls": "stun:stun1.example.net"}, {"urls": "turn:turn.example.org", "username": "user", "credential": "myPassword"} ]'
-                   + "\nContinuing with built-in RTCIceServer array");
-       }
-       console.log(JSON.stringify(pcConfig_));
-       pc = new RTCPeerConnection(pcConfig_, pcOptions);
-       pc.onicecandidate = onIceCandidate;
-       if ('ontrack' in pc) {
-           pc.ontrack = onTrack;
-       } else {
-           pc.onaddstream = onRemoteStreamAdded; // deprecated
-       }
-       pc.onremovestream = onRemoteStreamRemoved;
-       pc.ondatachannel = onDataChannel;
-       console.log("peer connection successfully created!");
-   } catch (e) {
-       console.error("createPeerConnection() failed");
-   }
-}
-
-
-var MEDIA_CONSTRAINTS = {
-    optional: [],
-    mandatory: {
-                   OfferToReceiveAudio: false,
-                   OfferToReceiveVideo: true
-               }
-}
-
-
-var calldata = {
-        what: "call",
-        options: {
-     force_hw_vcodec: true,
-     vformat: 30,
-     trickle_ice: true
-  }
-}
-function onTrack(event) {
-               REMOTE_VIDEO_ELEMENT.srcObject = event.streams[0];
-}
-
-
-
-
-
-
-
-
-
-
-    // ################ GETTING THE MIC FROM THE LAPTOP
-
-    // GET AUDIO FROM GGOOGLES EXAMPLE: https://github.com/webrtc/samples/blob/gh-pages/src/content/getusermedia/audio/js/main.js
-
-
-
-    'use strict';
-
-    // Put variables in global scope to make them available to the browser console.
-    const audio = document.querySelector('audio');
-
-const constraints = window.constraints = {
-    audio: true,
-    video: false
-};
-
-
-
-
- </script>
-
-
+</script>
 
 <!-- just a logo -->
 
@@ -614,7 +733,7 @@ const constraints = window.constraints = {
 </div>
 <!-- <h1>Your number is {rand}!</h1> -->
 <button on:click={getRand}>Get a random number</button>
-
+<button on:click={debut}>Debug</button>
 <form on:submit|preventDefault={handleSubmit}>
 	<input name="s" placeholder="speed" />
   <input name="d" placeholder="direction" />
@@ -631,27 +750,24 @@ const constraints = window.constraints = {
 <Gamepad
     gamepadIndex={0}
     on:Connected={gamepadConnected}
-
+    on:A={APressed}
+    on:RT={RTPressed}
     on:LeftStick={LeftStick}
     on:RightStick={RightStick}
     on:LB={LBPressed}
     on:RB={RBPressed}
+    on:RT={RTPressed}
+    on:LT={LTPressed}
     on:RS={RSPressed}
-
-    />
-
-    <!--
-
-            on:A={}
-    on:RT={}
-    on:LT={}
-    
-    on:LS={}
+    on:LS={LSPressed}
     on:DPadUp={ () => dpad("U")}
     on:DPadDown={ () => dpad("D")}
     on:DPadLeft={ () => dpad("L")}
     on:DPadRight={ () => dpad("R")}
 
+    />
+
+    <!--
          THe first layer is the unblurred livestream
          The second is blurred, with a circle clippath
          that is changed when clickin on the third layer
