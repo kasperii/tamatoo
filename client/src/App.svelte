@@ -29,20 +29,30 @@ let stateTama = {
     rotation: 0
 };
 
-let lastUpdate = {s: stateTama.speed,d: stateTama.direction,r: stateTama.rotation}
+let lastUpdate = {s: 0,d: 0,r: 0}
+
 $: {
     let obj = {s: stateTama.speed,d: stateTama.direction,r: stateTama.rotation};
-    if (lastUpdate != obj){
+    if (JSON.stringify(lastUpdate) != JSON.stringify(obj)){
+        console.log("PRE obj and lastupdate compare")
+        console.log(obj)
+        console.log(lastUpdate)
+        console.log(obj != lastUpdate)
         sendOmniWheel(obj);
-        lastUpdate == obj;
+        lastUpdate = obj;
+        console.log("POST obj and lastupdate compare")
+        console.log(obj)
+        console.log(lastUpdate)
+        console.log(obj != lastUpdate)
     }
 }
 
 async function sendOmniWheel(obj){//speed,direction,rotation) {
      //var obj = {s: speed,d: direction,r: rotation}
-     console.log(obj)
+     
      var dataToSend = new FormData();
      dataToSend.append( "json", JSON.stringify( obj ) );
+     console.log("dataToSend")
      console.log(dataToSend)
      const res = await fetch('./omniwheels', {
          method: "POST",
@@ -158,13 +168,16 @@ function RSPressed(event) {
 $: {
      // This reactive statement will run whenever the state changes
      let newDegrees = calculateVectorInfo(stateGamepad.leftAxis['x'],stateGamepad.leftAxis['y']).angleDegrees
-     let newSpeed = calculateVectorInfo(stateGamepad.leftAxis['x'],stateGamepad.leftAxis['y']).vectorLength*stateGamepad.speedtoggle
-    stateTama.rotation = stateGamepad.right + stateGamepad.left
+     let newSpeed = Math.min(calculateVectorInfo(stateGamepad.leftAxis['x'],stateGamepad.leftAxis['y']).vectorLength*stateGamepad.speedtoggle,1)
+     
 
      if(newSpeed == 0){
          if(stateTama.speed != 0){
             stateTama.speed = 0
          }
+         stateTama.rotation = stateGamepad.right + stateGamepad.left
+     }else{
+        stateTama.rotation = (stateGamepad.right + stateGamepad.left)*0.75
      }
      if(Math.abs(stateTama.speed-newSpeed)>0.1){
         stateTama.speed = newSpeed
@@ -638,8 +651,8 @@ const constraints = window.constraints = {
 
     on:LeftStick={LeftStick}
     on:RightStick={RightStick}
-    on:LB={LBPressed}
-    on:RB={RBPressed}
+    on:LT={LBPressed}
+    on:RT={RBPressed}
     on:RS={RSPressed}
 
     />
