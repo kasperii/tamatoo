@@ -4,7 +4,7 @@
 </script>
 
 <div class="iconbox">
-<svg version="1.1" id="Layer_1" style:width=200 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 135.5 111.2" style="enable-background:new 0 0 135.5 111.2;" xml:space="preserve">
 
 <g>

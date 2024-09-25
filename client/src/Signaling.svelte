@@ -330,7 +330,7 @@ const audio = document.querySelector('audio');
 <!-- <video id='v'></video> -->
 
 <div>
-    <button id='start' title="If you do not see any video stream, make sure your browser supports the codec used within this demo (see the source code for details, or try Firefox or Chrome)">Start Streaming</button>i
+    <button id='start' title="If you do not see any video stream, make sure your browser supports the codec used within this demo (see the source code for details, or try Firefox or Chrome)">Start Streaming</button>
     <button id='stop'> Stop Streaming </button>
-    <button id='audStart'> start sending audio </button>
+    <button id='audStart'> Start Sending Audio </button>
 </div>

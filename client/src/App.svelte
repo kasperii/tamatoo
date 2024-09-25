@@ -1,5 +1,5 @@
 <script>
-// just the logo
+ // just the logo
  import Tama from './Tama.svelte';
  // This is the UI element on the site – hardly functional right now
  import Controller from './Controller.svelte';
@@ -11,133 +11,233 @@
 
 
 
+ // SEPARATED TAMA CONTROL FUNCTIONS
 
+ // async function sendOmniWheel(obj){//speed,direction,rotation) {
+ //     var dataToSend = new FormData();
+ //     dataToSend.append( "json", JSON.stringify( obj ) );
+ //     const res = await fetch('./omniwheels', {
+ //         method: "POST",
+ //         body: dataToSend
+ //     })
+ //     const json = await res.json()
+ // 	 console.log(JSON.stringify(json))
+ // }
+ // // Old version – sending actions letters r/m and numbers
+ // async function sendWheel(action,direction) {
+ //     var obj = {[action]: direction}
+ //
+ //         var dataToSend = new FormData();
+ //     dataToSend.append( "json", JSON.stringify( obj ) );
+ //
+ //     const res = await fetch('./wheels', {
+ //         method: "POST",
+ //         body: dataToSend
+ //     })
+ //      const json = await res.json()
+ // 	  console.log(JSON.stringify(json))
+ //  }
+ //
+ //
+ // function changeEyeColor(color) {
+ //     var msg = {
+ //         type: color,
+ //         data: '',
+ //         end: '',
+ //         context: { destination: '' }
+ //     };
+ //     ws.send(JSON.stringify(msg));
+ //  }
+ //
+ // // sending stuff down to the server!
+ //
+ //  async function sendCol(color) {
+ //
+ //      console.log(color)
+ //      var obj = {'c': color}
+ //
+ //          var dataToSend = new FormData();
+ //      dataToSend.append( "json", JSON.stringify( obj ) );
+ //
+ //      const res = await fetch('./color', {
+ //          method: "POST",
+ //          body: dataToSend
+ //      })
+ //      const json = await res.json()
+ // 	 console.log(JSON.stringify(json))
+ //  }
+ //  async function sendGaze(gaze) {
+ //      var obj = {'g': gaze}
+ //
+ //          var dataToSend = new FormData();
+ //      dataToSend.append( "json", JSON.stringify( obj ) );
+ //
+ //      const res = await fetch('./gaze', {
+ //          method: "POST",
+ //          body: dataToSend
+ //      })
+ //      const json = await res.json()
+ // 	 console.log(JSON.stringify(json))
+ //  }
 
+ // CHANGE TO FALSE IF NOT USING COMPILATION WIZARD
+ let newWizard = true;
+ async function sendOmniWheel(obj){
+      if (newWizard) {
+          sendObjectWheel_pos()
+      } else {
+          var dataToSend = new FormData();
+          dataToSend.append( "json", JSON.stringify( obj ) );
+          const res = await fetch('./omniwheels', {
+              method: "POST",
+              body: dataToSend
+          })
+          const json = await res.json()
+ 	      console.log(JSON.stringify(json))
 
+      }
 
-
-
-
-
-
-
-// ################ TAMA ################
-
-let stateTama = {
-    speed: 0,
-    direction: 0,
-    rotation: 0
-};
-
-let lastUpdate = {s: 0,d: 0,r: 0}
-
-$: {
-    let obj = {s: stateTama.speed,d: stateTama.direction,r: stateTama.rotation};
-    if (JSON.stringify(lastUpdate) != JSON.stringify(obj)){
-        console.log("PRE obj and lastupdate compare")
-        console.log(obj)
-        console.log(lastUpdate)
-        console.log(obj != lastUpdate)
-        sendOmniWheel(obj);
-        lastUpdate = obj;
-        console.log("POST obj and lastupdate compare")
-        console.log(obj)
-        console.log(lastUpdate)
-        console.log(obj != lastUpdate)
-    }
-}
-
-async function sendOmniWheel(obj){//speed,direction,rotation) {
-     //var obj = {s: speed,d: direction,r: rotation}
-     
-     var dataToSend = new FormData();
-     dataToSend.append( "json", JSON.stringify( obj ) );
-     console.log("dataToSend")
-     console.log(dataToSend)
-     const res = await fetch('./omniwheels', {
-         method: "POST",
-         body: dataToSend
-     })
-     const json = await res.json()
-	 console.log(JSON.stringify(json))
  }
-
- // Old version – sending actions letters r/m and numbers
  async function sendWheel(action,direction) {
-     var obj = {[action]: direction}
+      if (newWizard) {
+          sendSimpleWheel_pos()
+      } else {
+          var obj = {[action]: direction};
+          var dataToSend = new FormData();
+          dataToSend.append( "json", JSON.stringify( obj ) );
 
-         var dataToSend = new FormData();
-     dataToSend.append( "json", JSON.stringify( obj ) );
+          const res = await fetch('./wheels', {
+              method: "POST",
+              body: dataToSend
+          })
+          const json = await res.json()
+ 	      console.log(JSON.stringify(json))
 
-     const res = await fetch('./wheels', {
-         method: "POST",
-         body: dataToSend
-     })
-     const json = await res.json()
-	 console.log(JSON.stringify(json))
+      }
+
+ }
+ async function sendCol(color) {
+     if (newWizard) {
+         changeEyeColor(color)
+     } else {
+         console.log(color)
+         var obj = {'c': color}
+
+             var dataToSend = new FormData();
+         dataToSend.append( "json", JSON.stringify( obj ) );
+
+         const res = await fetch('./color', {
+             method: "POST",
+             body: dataToSend
+         })
+         const json = await res.json()
+ 	     console.log(JSON.stringify(json))
+     }
  }
 
-// ################ GAMEPAD ################
+ async function sendGaze(aX,aY) {
+     if (newWizard) {
+         moveHead(aX,aY)
+     } else {
+         gaze = "p" + aX + "t" + aY;
+         var obj = {'g': gaze};
+         var dataToSend = new FormData();
+         dataToSend.append( "json", JSON.stringify( obj ) );
 
-let stateGamepad = {
-    leftAxis: { x: 0, y: 0 },
-    rightAxis: { x: 0, y: 0 },
-    button: {right: null, left: null},
-    right: 0,
-    left: 0,
-    speedtoggle: 1
+         const res = await fetch('./gaze', {
+             method: "POST",
+             body: dataToSend
+         })
+         const json = await res.json()
+ 	     console.log(JSON.stringify(json))
+     }
+ }
 
-};
 
 
-function gamepadConnected(event) {
+ // ################ TAMA ################
+
+ let stateTama = {
+         speed: 0,
+         direction: 0,
+         rotation: 0
+     };
+
+ let lastUpdate = {s: 0,d: 0,r: 0}
+
+     $: {
+         let obj = {s: stateTama.speed,d: stateTama.direction,r: stateTama.rotation};
+         if (JSON.stringify(lastUpdate) != JSON.stringify(obj)){
+             sendOmniWheel(obj);
+             lastUpdate = obj;
+         }
+     }
+
+
+
+
+
+ // ################ GAMEPAD ################
+
+ let stateGamepad = {
+     leftAxis: { x: 0, y: 0 },
+     rightAxis: { x: 0, y: 0 },
+     button: {right: null, left: null},
+     right: 0,
+     left: 0,
+     speedtoggle: 1
+
+ };
+
+
+ function gamepadConnected(event) {
      console.log(`app: gamepad ${event.detail.gamepadIndex} connected`);
  }
 
 
-function LeftStick(event) { stateGamepad.leftAxis = event.detail; }
+ function LeftStick(event) { stateGamepad.leftAxis = event.detail; }
 
-function RightStick(event) { stateGamepad.rightAxis = event.detail; }
+ function RightStick(event) { stateGamepad.rightAxis = event.detail; }
 
-function RSPressed(event) {
-    if (stateGamepad.speedtoggle = 1){
-        stateGamepad.speedtoggle = 0.5
-    }
-    else{
-        stateGamepad.speedtoggle = 1
-    }
+ function RSPressed(event) {
+     if (stateGamepad.speedtoggle = 1){
+         stateGamepad.speedtoggle = 0.5
+     }
+     else{
+         stateGamepad.speedtoggle = 1
+     }
 
  }
 
  $:{
-    console.log(stateGamepad.right)
+     console.log(stateGamepad.right)
  }
 
  function RBPressed(event) {
-    if (stateGamepad.button["right"] != event.detail){
-        if(stateGamepad.button["right"] == null){
-            stateGamepad.right = 400           
-        }    
-        stateGamepad.button["right"] == event.detail;
-    }else{
-        stateGamepad.right = 0
-        
-    }
+     if (stateGamepad.button["right"] != event.detail){
+         if(stateGamepad.button["right"] == null){
+             stateGamepad.right = 400
+         }
+         stateGamepad.button["right"] == event.detail;
+     }else{
+         stateGamepad.right = 0
+
+     }
 
 
  }
 
 
  function LBPressed(event) {
-    if (stateGamepad.button["left"] != event.detail){
-        if(stateGamepad.button["left"] == null){
-            stateGamepad.left = -400           
-        }    
-        stateGamepad.button["left"] == event.detail;
-    }else{
-        stateGamepad.left = 0
-        
-    }
+     if (stateGamepad.button["left"] != event.detail){
+         if(stateGamepad.button["left"] == null){
+             stateGamepad.left = -400
+         }
+         stateGamepad.button["left"] == event.detail;
+     }else{
+         stateGamepad.left = 0
+
+     }
 
 
  }
@@ -163,9 +263,9 @@ function RSPressed(event) {
      };
  }
 
-let speed = 600;
+ let speed = 600;
 
-$: {
+ $: {
      // This reactive statement will run whenever the state changes
      let newDegrees = calculateVectorInfo(stateGamepad.leftAxis['x'],stateGamepad.leftAxis['y']).angleDegrees
      let newSpeed = Math.min(calculateVectorInfo(stateGamepad.leftAxis['x'],stateGamepad.leftAxis['y']).vectorLength*stateGamepad.speedtoggle,1)*speed
@@ -173,234 +273,234 @@ $: {
 
      if(newSpeed == 0){
          if(stateTama.speed != 0){
-            stateTama.speed = 0
+             stateTama.speed = 0
          }
          stateTama.rotation = stateGamepad.right + stateGamepad.left
      }else{
-        stateTama.rotation = (stateGamepad.right + stateGamepad.left)*0.75
+         stateTama.rotation = (stateGamepad.right + stateGamepad.left)*0.75
      }
      if(Math.abs(stateTama.speed-newSpeed)>(0.1*speed)){
-        stateTama.speed = newSpeed
-        //sendWheel('m',Math.round(speed*6)*speedmulti+32)
-        //isMoving = true;
+         stateTama.speed = newSpeed
+         //sendWheel('m',Math.round(speed*6)*speedmulti+32)
+         //isMoving = true;
      }
      newDegrees = (Math.round((270-newDegrees)/11.25)*11.25)%360
      if (newDegrees != stateTama.direction){
-        stateTama.direction = newDegrees
+         stateTama.direction = newDegrees
          //sendWheel('m',Math.round(degrees/11.25))
      }
      
  }
 
 
-// ################ KEYBOARD ################
+ // ################ KEYBOARD ################
 
-let stateKeyboard = {
-    forward: 0,
-    left: 0,
-    right: 0,
-    back: 0,
-    rotate: 0,
-    rotatespeed: 0,
-    directionspeed: 0
-};
-
-
-function onKeyDown(e) {
-        if (e.repeat) return;
-
-		 switch(e.key.toUpperCase()) {
-			case "W":
-                console.log("pressed W");
-				 // forward
-                 kmf = true;
-                 //sendWheel('m',0);
-                 e.preventDefault();
-
-				 break;
-            case "S":
-                console.log("pressed s");
-				 // stop
-                 kmb = true;
-
-                 e.preventDefault();
-
-				 break;                 
-            case "A":
-                console.log("pressed s");
-				 // forward
-                 kml = true;
-                 e.preventDefault();
-
-				 break;                      
-            case "D":
-                console.log("pressed s");
-				 // forward
-                 kmr = true;
-                 e.preventDefault();
-
-				 break;    
-            case "Q":
-                console.log("pressed q");
-				 // forward
-                 krl = true;
-
-                 e.preventDefault();
-                 break;    
-
-            case "E":
-                console.log("pressed e");
-				 // forward
-
-                 krr = true;
-                 e.preventDefault();
-	            break;    
- 
-            case "G":
-                console.log("pressed e");
-				 // forward
-                 speedToggle = 1;
-                 //krr = true;
-                 e.preventDefault();
-	            break;      
-            case "H":
-                console.log("pressed e");
-				 // forward
-                 speedToggle = 3;
-                 //krr = true;
-                 e.preventDefault();
-	            break;  
-            case "J":
-                console.log("pressed e");
-				 // forward
-                 speedToggle = 6;
-                 //krr = true;
-                 e.preventDefault();
-	            break;
-            case "K":
-                console.log("pressed e");
-				 // forward
-                 speedToggle = 7;
-                 //krr = true;
-                 e.preventDefault();
-	            break;
-            case "T":
-                console.log("pressed e");
-
-                 left = 40
-                 right = 59
-                 e.preventDefault();
-	             break;
-                 
-            case "Y":
-                console.log("pressed e");
-
-                 left = 42
-                 right = 57
-                 e.preventDefault();
-	             break;
-                 
-            case "U":
-                console.log("pressed e");
-				 // forward
-                 left = 44
-                 right = 55
-                 e.preventDefault();
-	             break;
-            case "I":
-                console.log("pressed e");
-				 // forward
-                 left = 45
-                 right = 55
-                 e.preventDefault();
-	             break;
-            case "O":
-                console.log("pressed e");
-				 // forward
-                 left = 47
-                 right = 53
-                 e.preventDefault();
-	             break;
-            case "P":
-                console.log("pressed e");
-				 // forward
-                 left = 49
-                 right = 51
-                 e.preventDefault();
-	             break;
-             default:
-                 console.log(e.key);
-		 }
-
-        updateKeyMovement();
-	}
-
-    function onKeyUp(e) {
-		 switch(e.key.toUpperCase()) {
-            case "W":
-                console.log("pressed W");
-				 // forward
-                 //sendWheel('m',32);
-                 kmf = false;
-                 e.preventDefault();
-
-				 break;
-            case "S":
-                console.log("pressed s");
-				 // forward
-                 kmb = false;
-                 e.preventDefault();
-
-				 break;                 
-            case "A":
-                console.log("pressed s");
-				 // forward
-                 kml = false;
-                 e.preventDefault();
-
-				 break;                      
-            case "D":
-                console.log("pressed s");
-				 // forward
-                 kmr = false;
-                 e.preventDefault();
-
-				 break;    
-            case "Q":
-                console.log("pressed q");
-				 // forward
-                 //sendWheel("r","M")
-                 krl = false;
-                 e.preventDefault();
-                 break;    
-
-            case "E":
-                console.log("pressed e");
-				 // forward
-                 //sendWheel("r","M")
-                 krr = false;
-                 e.preventDefault();
-	            break;    
-		 }
-         updateKeyMovement();
-	}
+ let stateKeyboard = {
+     forward: 0,
+     left: 0,
+     right: 0,
+     back: 0,
+     rotate: 0,
+     rotatespeed: 0,
+     directionspeed: 0
+ };
 
 
-// ################ UI ################
+ function onKeyDown(e) {
+     if (e.repeat) return;
 
-// function to handle the form submit
-function handleSubmit(e) {	
-		const formData = new FormData(e.target)
-		let data = {s:0,d:0,r:0}	
-		for (let field of formData) {
-			let [key, value] = field
-			data[key] = parseInt(value)		
-		}
-        console.log(data)
-		sendOmniWheel(data)
-	}
+	 switch(e.key.toUpperCase()) {
+		 case "W":
+             console.log("pressed W");
+			 // forward
+             kmf = true;
+             //sendWheel('m',0);
+             e.preventDefault();
 
-let movement = 'rM';
+			 break;
+         case "S":
+             console.log("pressed s");
+			 // stop
+             kmb = true;
+
+             e.preventDefault();
+
+			 break;
+         case "A":
+             console.log("pressed s");
+			 // forward
+             kml = true;
+             e.preventDefault();
+
+			 break;
+         case "D":
+             console.log("pressed s");
+			 // forward
+             kmr = true;
+             e.preventDefault();
+
+			 break;
+         case "Q":
+             console.log("pressed q");
+			 // forward
+             krl = true;
+
+             e.preventDefault();
+             break;
+
+         case "E":
+             console.log("pressed e");
+			 // forward
+
+             krr = true;
+             e.preventDefault();
+	         break;
+
+         case "G":
+             console.log("pressed e");
+			 // forward
+             speedToggle = 1;
+             //krr = true;
+             e.preventDefault();
+	         break;
+         case "H":
+             console.log("pressed e");
+			 // forward
+             speedToggle = 3;
+             //krr = true;
+             e.preventDefault();
+	         break;
+         case "J":
+             console.log("pressed e");
+			 // forward
+             speedToggle = 6;
+             //krr = true;
+             e.preventDefault();
+	         break;
+         case "K":
+             console.log("pressed e");
+			 // forward
+             speedToggle = 7;
+             //krr = true;
+             e.preventDefault();
+	         break;
+         case "T":
+             console.log("pressed e");
+
+             left = 40
+             right = 59
+             e.preventDefault();
+	         break;
+
+         case "Y":
+             console.log("pressed e");
+
+             left = 42
+             right = 57
+             e.preventDefault();
+	         break;
+
+         case "U":
+             console.log("pressed e");
+			 // forward
+             left = 44
+             right = 55
+             e.preventDefault();
+	         break;
+         case "I":
+             console.log("pressed e");
+			 // forward
+             left = 45
+             right = 55
+             e.preventDefault();
+	         break;
+         case "O":
+             console.log("pressed e");
+			 // forward
+             left = 47
+             right = 53
+             e.preventDefault();
+	         break;
+         case "P":
+             console.log("pressed e");
+			 // forward
+             left = 49
+             right = 51
+             e.preventDefault();
+	         break;
+         default:
+             console.log(e.key);
+	 }
+
+     updateKeyMovement();
+ }
+
+ function onKeyUp(e) {
+	 switch(e.key.toUpperCase()) {
+         case "W":
+             console.log("pressed W");
+			 // forward
+             //sendWheel('m',32);
+             kmf = false;
+             e.preventDefault();
+
+			 break;
+         case "S":
+             console.log("pressed s");
+			 // forward
+             kmb = false;
+             e.preventDefault();
+
+			 break;
+         case "A":
+             console.log("pressed s");
+			 // forward
+             kml = false;
+             e.preventDefault();
+
+			 break;
+         case "D":
+             console.log("pressed s");
+			 // forward
+             kmr = false;
+             e.preventDefault();
+
+			 break;
+         case "Q":
+             console.log("pressed q");
+			 // forward
+             //sendWheel("r","M")
+             krl = false;
+             e.preventDefault();
+             break;
+
+         case "E":
+             console.log("pressed e");
+			 // forward
+             //sendWheel("r","M")
+             krr = false;
+             e.preventDefault();
+	         break;
+	 }
+     updateKeyMovement();
+ }
+
+
+ // ################ UI ################
+
+ // function to handle the form submit
+ function handleSubmit(e) {
+		                  const formData = new FormData(e.target)
+		                  let data = {s:0,d:0,r:0}
+		                  for (let field of formData) {
+			                  let [key, value] = field
+			                  data[key] = parseInt(value)
+		                  }
+                          console.log(data)
+		                  sendOmniWheel(data)
+	                      }
+
+ let movement = 'rM';
 
  // ################ GAZE CONTROLLER ################
 
@@ -423,16 +523,18 @@ let movement = 'rM';
      console.log("ax = " + aX)
      console.log("ay = " + aY)
      console.log("just test = ")
+     sendGaze(aX,aY)
+     //angles = "p" + aX + "t" + aY;
 
-     angles = "p" + aX + "t" + aY;
-     sendGaze(angles)
+
+    // sendGaze(angles)
  };
 
-// tried to use this for more continious moving gaze if the user
-// was using a touchscrene, but the eyes were a bit to slow for it
-// maybe can be tested again!
+ // tried to use this for more continious moving gaze if the user
+ // was using a touchscrene, but the eyes were a bit to slow for it
+ // maybe can be tested again!
 
-function onMouseMove (event) {
+ function onMouseMove (event) {
      //getPoint(event)
  }
 
@@ -462,122 +564,91 @@ function onMouseMove (event) {
  }];
 
 
- // sending stuff down to the server!
-
- async function sendCol(color) {
-     console.log(color)
-     var obj = {'c': color}
-
-         var dataToSend = new FormData();
-     dataToSend.append( "json", JSON.stringify( obj ) );
-
-     const res = await fetch('./color', {
-         method: "POST",
-         body: dataToSend
-     })
-     const json = await res.json()
-	 console.log(JSON.stringify(json))
- }
- async function sendGaze(gaze) {
-     var obj = {'g': gaze}
-
-         var dataToSend = new FormData();
-     dataToSend.append( "json", JSON.stringify( obj ) );
-
-     const res = await fetch('./gaze', {
-         method: "POST",
-         body: dataToSend
-     })
-     const json = await res.json()
-	 console.log(JSON.stringify(json))
- }
 
 
-// ################ WEBSOCKETS ################
+ // ################ WEBSOCKETS ################
 
-var raspi;
-var myID;
+ var raspi;
+ var myID;
 
-let rand=0;
-function getRand() {
+ let rand=0;
+ function getRand() {
      fetch("./rand")
          .then(d => d.text())
          .then(d => (rand = d));
  }
 
 
-// socketio
-var protocol = window.location.protocol;
-var socket = io(protocol + '//' + document.domain + ':' + location.port, {autoConnect: true});
+ // socketio
+ var protocol = window.location.protocol;
+ var socket = io(protocol + '//' + document.domain + ':' + location.port, {autoConnect: true});
 
-// Send audio but not video to tamatoo
-var Constraints = {
-    audio: true,
-    video: false
-}
+ // Send audio but not video to tamatoo
+ var Constraints = {
+     audio: true,
+     video: false
+ }
 
-// connect to socket server
-socket = io.connect();
-socket.on('connect', function() {
-    socket.emit('my event', {data: 'I\'m connected!'});
-});
+ // connect to socket server
+ socket = io.connect();
+ socket.on('connect', function() {
+     socket.emit('my event', {data: 'I\'m connected!'});
+ });
 
-var signalling_server_hostname = location.hostname || "192.168.1.8";
-var signalling_server_address = signalling_server_hostname + ':' + (9000 || (location.protocol === 'https:' ? 443 : 80));
-
-
-function createPeerConnection() {
-   try {
-       var pcConfig_ = pcConfig;
-       try {
-           ice_servers = document.getElementById('ice_servers').value;
-           if (ice_servers) {
-               pcConfig_.iceServers = JSON.parse(ice_servers);
-           }
-       } catch (e) {
-           alert(e + "\nExample: "
-                   + '\n[ {"urls": "stun:stun1.example.net"}, {"urls": "turn:turn.example.org", "username": "user", "credential": "myPassword"} ]'
-                   + "\nContinuing with built-in RTCIceServer array");
-       }
-       console.log(JSON.stringify(pcConfig_));
-       pc = new RTCPeerConnection(pcConfig_, pcOptions);
-       pc.onicecandidate = onIceCandidate;
-       if ('ontrack' in pc) {
-           pc.ontrack = onTrack;
-       } else {
-           pc.onaddstream = onRemoteStreamAdded; // deprecated
-       }
-       pc.onremovestream = onRemoteStreamRemoved;
-       pc.ondatachannel = onDataChannel;
-       console.log("peer connection successfully created!");
-   } catch (e) {
-       console.error("createPeerConnection() failed");
-   }
-}
+ var signalling_server_hostname = location.hostname || "192.168.1.8";
+ var signalling_server_address = signalling_server_hostname + ':' + (9000 || (location.protocol === 'https:' ? 443 : 80));
 
 
-var MEDIA_CONSTRAINTS = {
-    optional: [],
-    mandatory: {
-                   OfferToReceiveAudio: false,
-                   OfferToReceiveVideo: true
-               }
-}
+ function createPeerConnection() {
+     try {
+         var pcConfig_ = pcConfig;
+         try {
+             ice_servers = document.getElementById('ice_servers').value;
+             if (ice_servers) {
+                 pcConfig_.iceServers = JSON.parse(ice_servers);
+             }
+         } catch (e) {
+             alert(e + "\nExample: "
+                 + '\n[ {"urls": "stun:stun1.example.net"}, {"urls": "turn:turn.example.org", "username": "user", "credential": "myPassword"} ]'
+                 + "\nContinuing with built-in RTCIceServer array");
+         }
+         console.log(JSON.stringify(pcConfig_));
+         pc = new RTCPeerConnection(pcConfig_, pcOptions);
+         pc.onicecandidate = onIceCandidate;
+         if ('ontrack' in pc) {
+             pc.ontrack = onTrack;
+         } else {
+             pc.onaddstream = onRemoteStreamAdded; // deprecated
+         }
+         pc.onremovestream = onRemoteStreamRemoved;
+         pc.ondatachannel = onDataChannel;
+         console.log("peer connection successfully created!");
+     } catch (e) {
+         console.error("createPeerConnection() failed");
+     }
+ }
 
 
-var calldata = {
-        what: "call",
-        options: {
-     force_hw_vcodec: true,
-     vformat: 30,
-     trickle_ice: true
-  }
-}
-function onTrack(event) {
-               REMOTE_VIDEO_ELEMENT.srcObject = event.streams[0];
-}
+ var MEDIA_CONSTRAINTS = {
+     optional: [],
+     mandatory: {
+         OfferToReceiveAudio: false,
+         OfferToReceiveVideo: true
+     }
+ }
 
 
+ var calldata = {
+     what: "call",
+     options: {
+         force_hw_vcodec: true,
+         vformat: 30,
+         trickle_ice: true
+     }
+ }
+ function onTrack(event) {
+     REMOTE_VIDEO_ELEMENT.srcObject = event.streams[0];
+ }
 
 
 
@@ -586,26 +657,28 @@ function onTrack(event) {
 
 
 
-    // ################ GETTING THE MIC FROM THE LAPTOP
-
-    // GET AUDIO FROM GGOOGLES EXAMPLE: https://github.com/webrtc/samples/blob/gh-pages/src/content/getusermedia/audio/js/main.js
 
 
+ // ################ GETTING THE MIC FROM THE LAPTOP
 
-    'use strict';
-
-    // Put variables in global scope to make them available to the browser console.
-    const audio = document.querySelector('audio');
-
-const constraints = window.constraints = {
-    audio: true,
-    video: false
-};
+ // GET AUDIO FROM GGOOGLES EXAMPLE: https://github.com/webrtc/samples/blob/gh-pages/src/content/getusermedia/audio/js/main.js
 
 
 
+ 'use strict';
 
- </script>
+ // Put variables in global scope to make them available to the browser console.
+ const audio = document.querySelector('audio');
+
+ const constraints = window.constraints = {
+     audio: true,
+     video: false
+ };
+
+
+
+
+</script>
 
 
 
@@ -615,29 +688,45 @@ const constraints = window.constraints = {
     on:keydown={onKeyDown}
     on:keyup={onKeyUp}
 />
-<Tama />
+
+<div id="topbar">
+    <div id="gazercontrolbar">
+            <div class="column" id="colorbuttons">
+                {#each collist as col}
+                    <button on:click={() => sendCol(col.id)}>{col.name}</button>
+                {/each}
+            </div>
+            <form on:submit|preventDefault={handleSubmit}>
+	            <input name="s" placeholder="speed" />
+                <input name="d" placeholder="direction" />
+                <input name="r" placeholder="rotation" />
+	            <input type="submit" value="create" />
+            </form>
+
+            <div class="column" id="view"></div>
+
+    </div>
+    <div id="streamcontrolbar">
+        <Tama />
+    </div>
+    <div id="movementcontrolbar">
+
+        <div class="column" id="controller">
+            <Controller bind:movement/>
+        </div>
+        <div class="column" id="streaming">
+            <Signaling />
+        </div>
+    </div>
+
+
+</div>
 
 <!-- old controller, but also start call and hangup button -->
-<div class="row">
-      <div class="column" id="text">
-          {#each collist as col}
-              <button on:click={() => sendCol(col.id)}>{col.name}</button>
-          {/each}
-      </div>
-      <div class="column" id="controller">
-          <Controller bind:movement/>
-      </div>
-      <div class="column" id="view"></div>
-</div>
 <!-- <h1>Your number is {rand}!</h1> -->
-<button on:click={getRand}>Get a random number</button>
 
-<form on:submit|preventDefault={handleSubmit}>
-	<input name="s" placeholder="speed" />
-  <input name="d" placeholder="direction" />
-  <input name="r" placeholder="rotation" />
-	<input type="submit" value="create" />
-</form>
+
+
 
 
 <!--
@@ -689,9 +778,7 @@ const constraints = window.constraints = {
 
 
 
-    <audio id="gum-local" controls autoplay></audio>
-
-    <Signaling />
+    <!-- <audio id="gum-local" controls autoplay></audio> -->
 
 
 
@@ -703,86 +790,123 @@ const constraints = window.constraints = {
 
 
 
-<style>
- main {
-	 text-align: center;
-	 padding: 1em;
-	 max-width: 240px;
-	 margin: 0 auto;
- }
 
 
- h1 {
-	 color: #ff3e00;
-	 text-transform: uppercase;
-	 font-size: 4em;
-	 font-weight: 100;
- }
+    <style>
+     main {
+	     text-align: center;
+	     padding: 1em;
+	     max-width: 240px;
+	     margin: 0 auto;
+     }
+
+
+     h1 {
+	     color: #ff3e00;
+	     text-transform: uppercase;
+	     font-size: 4em;
+	     font-weight: 100;
+     }
 
 
 
- @media (min-width: 640px) {
-	 main {
-		 max-width: none;
-	 }
- }
- #text {
-     background-color: beige;
-     width: 20%;
- }
- #controller {
-     width: 200px;
- }
- #view {
-     width: 50%;
-     background-color: beige;
- }
- .column {
-     float: left;
- }
- video {
-     width: 100%;
-     height: 100%;
-     object-fit: cover;
-     /* -webkit-transform: rotate(180deg);
-        -moz-transform: rotate(180deg);
-        -o-transform: rotate(180deg);
-        transform: rotate(180deg); */
-     -webkit-user-drag: none;
+     @media (min-width: 640px) {
+	     main {
+		     max-width: none;
+	     }
+     }
+     #text {
+         background-color: beige;
+         width: 20%;
+     }
+     #controller {
+         width: 200px;
+     }
+     #view {
+         width: 50%;
+         background-color: beige;
+     }
+     .column {
+         float: left;
+     }
+     video {
+         width: 100%;
+         height: 100%;
+         object-fit: cover;
+         /* -webkit-transform: rotate(180deg);
+            -moz-transform: rotate(180deg);
+            -o-transform: rotate(180deg);
+            transform: rotate(180deg); */
+         -webkit-user-drag: none;
 
-     filter: FlipH;
-     -ms-filter: "FlipH";
- }
+         filter: FlipH;
+         -ms-filter: "FlipH";
+     }
 
- .blur-container {
-     position: relative;
-     width: 1296px;
-     height: 972px;
-     overflow: hidden;
- }
+     .blur-container {
+         position: relative;
+         width: 60vw;
+         height: 45vw;
+         margin: auto;
+         overflow: hidden;
+     }
 
- .blur-container img {
-     width: 100%;
-     height: 100%;
-     object-fit: cover;
+     .blur-container img {
+         width: 100%;
+         height: 100%;
+         object-fit: cover;
 
- }
- .blur-container .underlay {
-     position: absolute;
- 	 top: 0;
-  	 left: 0;
+     }
+     .blur-container .underlay {
+         position: absolute;
+ 	     top: 0;
+  	     left: 0;
 
-     transform: scale(1.06);
- }
- .blur-container .overlay {
-     position: absolute;
- 	 top: 0;
-  	 left: 0;
- }
- .focus{
+         transform: scale(1.06);
+     }
+     .blur-container .overlay {
+         position: absolute;
+ 	     top: 0;
+  	     left: 0;
+     }
+     .focus{
 
-     width: 100%;
-     height: 100%;
-     backdrop-filter: blur(4px);
- }
-</style>
+         width: 100%;
+         height: 100%;
+         backdrop-filter: blur(4px);
+     }
+     #topbar{
+         width: 100%;
+     }
+     #gazercontrolbar{
+
+         width: 44%;
+         float: left;
+
+     }
+     #colorbuttons{
+         margin: 10% 3%;
+     }
+     #streamcontrolbar{
+
+         width: 12%;
+         float: left;
+     }
+     #movementcontrolbar{
+
+         width: 44%;
+         float: left;
+     }
+     #gazercontrolbar form{
+         margin-top: 10%;
+     }
+     #controller{
+     }
+     #streaming{
+         float: left;
+
+         margin-top: 10%;
+
+
+     }
+    </style>

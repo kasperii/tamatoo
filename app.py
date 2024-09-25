@@ -26,6 +26,7 @@ if (platform.system() == "Darwin"):
 
 
 # https://wiki.seeedstudio.com/ReSpeaker-USB-Mic-Array/
+
 app = Flask(__name__)
 
 
