@@ -349,7 +349,12 @@ async function sendSimpleWheel_pos() {
  };
 
 
+ let isTyping = false;
+
  function onKeyDown(e) {
+     // Skip movement handling if we're typing
+     if (isTyping) return;
+     
      if (e.repeat) return;
 
 	 switch(e.key.toUpperCase()) {
@@ -479,6 +484,9 @@ async function sendSimpleWheel_pos() {
  }
 
  function onKeyUp(e) {
+     // Skip movement handling if we're typing
+     if (isTyping) return;
+     
 	 switch(e.key.toUpperCase()) {
          case "W":
              console.log("pressed W");
@@ -801,15 +809,8 @@ function updateKeyMovement() {
                     type="text" 
                     id="speech-text" 
                     placeholder="Enter text to speak"
-                    on:keydown={(e) => {
-                        // Prevent default only for non-movement keys
-                        if (!['W', 'A', 'S', 'D', 'Q', 'E'].includes(e.key.toUpperCase())) {
-                            e.preventDefault();
-                        }
-                        // Call the original keydown handler
-                        onKeyDown(e);
-                    }}
-                    on:keyup={onKeyUp}
+                    on:focus={() => isTyping = true}
+                    on:blur={() => isTyping = false}
                 />
                 <button on:click={() => {
                     const text = document.getElementById('speech-text').value;
