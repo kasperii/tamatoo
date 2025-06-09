@@ -105,13 +105,19 @@ async function sendObjectWheel_pos() {
     // It should send the current stateTama object to the server
     try {
         const dataToSend = new FormData();
-        dataToSend.append("json", JSON.stringify(stateTama));
+        // Create a new object with the current stateTama values
+        const wheelState = {
+            speed: stateTama.speed,
+            direction: stateTama.direction,
+            rotation: stateTama.rotation
+        };
+        dataToSend.append("json", JSON.stringify(wheelState));
         const res = await fetch('./omniwheels', {
             method: "POST",
             body: dataToSend
         });
         const json = await res.json();
-        console.log("Object wheel position sent:", JSON.stringify(json));
+        console.log("Object wheel position sent:", JSON.stringify(wheelState));
     } catch (error) {
         console.error("Error sending object wheel position:", error);
     }
@@ -560,15 +566,20 @@ function updateKeyMovement() {
 
  // function to handle the form submit
  function handleSubmit(e) {
-		                  const formData = new FormData(e.target)
-		                  let data = {s:0,d:0,r:0}
-		                  for (let field of formData) {
-			                  let [key, value] = field
-			                  data[key] = parseInt(value)
-		                  }
-                          console.log(data)
-		                  sendOmniWheel(data)
-	                      }
+    const formData = new FormData(e.target);
+    let data = {s:0, d:0, r:0};
+    for (let field of formData) {
+        let [key, value] = field;
+        data[key] = parseInt(value);
+    }
+    console.log("Form data:", data);
+    // Update stateTama with the form values
+    stateTama.speed = data.s;
+    stateTama.direction = data.d;
+    stateTama.rotation = data.r;
+    // Send the updated state
+    sendOmniWheel(data);
+}
 
  let movement = 'rM';
 
