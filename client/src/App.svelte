@@ -521,6 +521,40 @@ async function sendSimpleWheel_pos() {
      updateKeyMovement();
  }
 
+// Add keyboard movement state variables
+let kmf = false; // forward
+let kmb = false; // backward
+let kml = false; // left
+let kmr = false; // right
+let krl = false; // rotate left
+let krr = false; // rotate right
+let speedToggle = 1; // speed multiplier
+
+function updateKeyMovement() {
+    // Calculate speed based on movement keys
+    let speed = 0;
+    if (kmf) speed = 1;
+    if (kmb) speed = -1;
+    
+    // Calculate direction based on strafe keys
+    let direction = 0;
+    if (kml) direction = 90;
+    if (kmr) direction = -90;
+    
+    // Calculate rotation based on rotation keys
+    let rotation = 0;
+    if (krl) rotation = -400;
+    if (krr) rotation = 400;
+    
+    // Apply speed toggle
+    speed *= speedToggle;
+    
+    // Update stateTama with new values
+    stateTama.speed = speed;
+    stateTama.direction = direction;
+    stateTama.rotation = rotation;
+}
+
 
  // ################ UI ################
 
