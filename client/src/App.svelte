@@ -107,9 +107,9 @@ async function sendObjectWheel_pos() {
         const dataToSend = new FormData();
         // Create a new object with the current stateTama values
         const wheelState = {
-            speed: stateTama.speed,
-            direction: stateTama.direction,
-            rotation: stateTama.rotation
+            s: stateTama.speed,
+            d: stateTama.direction,
+            r: stateTama.rotation
         };
         dataToSend.append("json", JSON.stringify(wheelState));
         const res = await fetch('./omniwheels', {

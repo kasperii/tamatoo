@@ -412,7 +412,7 @@ def sendToWheels(value):
         break
 
 # –––––– Wheels raw ––––––
-
+# rawdata = '{"s":400,"d":90,"r":100}'
 @app.route("/omniwheels", methods=["POST"])
 def omniwheels():
     rawdata = str(request.form['json'])
