@@ -98,6 +98,42 @@
       }
 
  }
+
+// New functions for wheel control
+async function sendObjectWheel_pos() {
+    // This function handles the omnidirectional wheel movement
+    // It should send the current stateTama object to the server
+    try {
+        const dataToSend = new FormData();
+        dataToSend.append("json", JSON.stringify(stateTama));
+        const res = await fetch('./omniwheels', {
+            method: "POST",
+            body: dataToSend
+        });
+        const json = await res.json();
+        console.log("Object wheel position sent:", JSON.stringify(json));
+    } catch (error) {
+        console.error("Error sending object wheel position:", error);
+    }
+}
+
+async function sendSimpleWheel_pos() {
+    // This function handles simple wheel movement (forward/backward)
+    // It should send the current movement state to the server
+    try {
+        const dataToSend = new FormData();
+        dataToSend.append("json", JSON.stringify({ movement: movement }));
+        const res = await fetch('./wheels', {
+            method: "POST",
+            body: dataToSend
+        });
+        const json = await res.json();
+        console.log("Simple wheel position sent:", JSON.stringify(json));
+    } catch (error) {
+        console.error("Error sending simple wheel position:", error);
+    }
+}
+
  async function sendWheel(action,direction) {
       if (newWizard) {
           sendSimpleWheel_pos()
