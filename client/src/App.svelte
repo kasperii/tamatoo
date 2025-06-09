@@ -7,6 +7,7 @@
  import Gamepad from "./Gamepad.svelte";
  // This is for establishing connection with UV4L for video chat
  import Signaling from './Signaling.svelte';
+ import { onMount } from 'svelte';
 
 
 
@@ -756,8 +757,20 @@ function updateKeyMovement() {
      video: false
  };
 
-
-
+ async function speakText(text) {
+     try {
+         const dataToSend = new FormData();
+         dataToSend.append("text", text);
+         const res = await fetch('./speak', {
+             method: "POST",
+             body: dataToSend
+         });
+         const json = await res.json();
+         console.log("Speech response:", json);
+     } catch (error) {
+         console.error("Error sending speech text:", error);
+     }
+ }
 
 </script>
 
@@ -783,7 +796,13 @@ function updateKeyMovement() {
                 <input name="r" placeholder="rotation" />
 	            <input type="submit" value="create" />
             </form>
-
+            <div class="column" id="speech-control">
+                <input type="text" id="speech-text" placeholder="Enter text to speak" />
+                <button on:click={() => {
+                    const text = document.getElementById('speech-text').value;
+                    if (text) speakText(text);
+                }}>Speak</button>
+            </div>
             <div class="column" id="view"></div>
 
     </div>

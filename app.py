@@ -6,6 +6,7 @@ import serial
 import time
 from flask_socketio import SocketIO,emit,send
 import platform
+import subprocess
 
 mac = False
 if (platform.system() == "Darwin"):
@@ -541,8 +542,20 @@ def separate_string(input_string):
 #         cmdbuff = [ord('C'),rr, rg, rb, lr, lg, lb, ord('\n')]#command,pan-sign,pan-val,tilt-sign,tilt-val,TF-sign,TF-val
 #         ser0.write(cmdbuff)
 
+@app.route("/speak", methods=["POST"])
+def speak():
+    try:
+        text = request.form.get('text')
+        if not text:
+            return jsonify({"error": "No text provided"}), 400
 
-
+        # Use OVOS CLI to speak the text
+        cmd = f"ovos-cli-client speak '{text}'"
+        subprocess.run(cmd, shell=True, check=True)
+        
+        return jsonify({"status": "success", "message": "Text spoken successfully"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     #app.run(debug=True,threaded=True)
