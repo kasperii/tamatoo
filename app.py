@@ -549,11 +549,35 @@ def speak():
         if not text:
             return jsonify({"error": "No text provided"}), 400
 
-        # Use OVOS CLI to speak the text
-        cmd = f"ovos-cli-client speak '{text}'"
-        subprocess.run(cmd, shell=True, check=True)
+        # Try different OVOS commands
+        commands = [
+            "ovos-cli-client speak",
+            "ovos-skill-speak speak",
+            "ovos-speak",
+            "ovos-tts"
+        ]
         
-        return jsonify({"status": "success", "message": "Text spoken successfully"})
+        success = False
+        error_msg = ""
+        
+        for cmd_base in commands:
+            try:
+                cmd = f"{cmd_base} '{text}'"
+                result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+                if result.returncode == 0:
+                    success = True
+                    break
+                else:
+                    error_msg = f"Command '{cmd}' failed: {result.stderr}"
+            except Exception as e:
+                error_msg = f"Error with {cmd_base}: {str(e)}"
+                continue
+        
+        if success:
+            return jsonify({"status": "success", "message": "Text spoken successfully"})
+        else:
+            return jsonify({"error": f"Failed to speak text. Last error: {error_msg}"}), 500
+            
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

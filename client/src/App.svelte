@@ -797,7 +797,20 @@ function updateKeyMovement() {
 	            <input type="submit" value="create" />
             </form>
             <div class="column" id="speech-control">
-                <input type="text" id="speech-text" placeholder="Enter text to speak" />
+                <input 
+                    type="text" 
+                    id="speech-text" 
+                    placeholder="Enter text to speak"
+                    on:keydown={(e) => {
+                        // Prevent default only for non-movement keys
+                        if (!['W', 'A', 'S', 'D', 'Q', 'E'].includes(e.key.toUpperCase())) {
+                            e.preventDefault();
+                        }
+                        // Call the original keydown handler
+                        onKeyDown(e);
+                    }}
+                    on:keyup={onKeyUp}
+                />
                 <button on:click={() => {
                     const text = document.getElementById('speech-text').value;
                     if (text) speakText(text);
