@@ -32,7 +32,7 @@ app = Flask(__name__)
 
 ############## SOCKETS AND WEBRTC ##############
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app,  cors_allowed_origins="*", async_mode='eventlet') #
+socketio = SocketIO(app,  cors_allowed_origins="*", async_mode='threading') #
 
 # this is the placeholder data for the handshake betweeen
 # the uv4l and the client side javascript
