@@ -13,6 +13,13 @@ let gamepads = {
 
 let watcherRunning = false;
 
+let lastState = {
+  0: null,
+  1: null,
+  2: null,
+  3: null
+};
+
 /**
  * Update the Gamepad states by calling onChange
  */
@@ -24,11 +31,15 @@ function loop() {
     const gamepad = gamepads[i];
     if (pad && gamepad && gamepad.onChange) {
       const newState = mapLayout(pad, gamepad.layout, gamepad.stickThreshold);
-      gamepad.onChange(newState);
+      
+      // Only send update if state has changed significantly
+      if (hasSignificantChange(lastState[i], newState)) {
+        gamepad.onChange(newState);
+        lastState[i] = newState;
+      }
     }
   }
 
-  // may need => if (window && window.requestAnimationFrame) AND webkit prefixes
   frame = requestAnimationFrame(loop);
 }
 
@@ -104,6 +115,30 @@ function fixThreshold(value, threshold) {
   // console.log(50, mapRange(0.6, 0.2, 1, 0, 1));
   // console.log(25, mapRange(0.4, 0.2, 1, 0, 1));
   // console.log(75, mapRange(0.8, 0.2, 1, 0, 1));
+}
+
+function hasSignificantChange(oldState, newState) {
+  if (!oldState) return true;
+  
+  // Check stick changes
+  if (oldState.axes && newState.axes) {
+    const leftStickDiff = Math.abs(oldState.axes.LeftStick.x - newState.axes.LeftStick.x) > 0.05 ||
+                         Math.abs(oldState.axes.LeftStick.y - newState.axes.LeftStick.y) > 0.05;
+    const rightStickDiff = Math.abs(oldState.axes.RightStick.x - newState.axes.RightStick.x) > 0.05 ||
+                          Math.abs(oldState.axes.RightStick.y - newState.axes.RightStick.y) > 0.05;
+    if (leftStickDiff || rightStickDiff) return true;
+  }
+  
+  // Check button changes
+  if (oldState.buttons && newState.buttons) {
+    for (const key in newState.buttons) {
+      if (oldState.buttons[key]?.pressed !== newState.buttons[key]?.pressed) {
+        return true;
+      }
+    }
+  }
+  
+  return false;
 }
 
 /**
