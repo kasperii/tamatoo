@@ -549,34 +549,32 @@ def speak():
         if not text:
             return jsonify({"error": "No text provided"}), 400
 
-        # Try different OVOS commands
-        commands = [
-            "ovos-cli-client speak",
-            "ovos-skill-speak speak",
-            "ovos-speak",
-            "ovos-tts"
-        ]
-        
-        success = False
-        error_msg = ""
-        
-        for cmd_base in commands:
-            try:
-                cmd = f"{cmd_base} '{text}'"
-                result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-                if result.returncode == 0:
-                    success = True
-                    break
-                else:
-                    error_msg = f"Command '{cmd}' failed: {result.stderr}"
-            except Exception as e:
-                error_msg = f"Error with {cmd_base}: {str(e)}"
-                continue
-        
-        if success:
-            return jsonify({"status": "success", "message": "Text spoken successfully"})
-        else:
-            return jsonify({"error": f"Failed to speak text. Last error: {error_msg}"}), 500
+        # Try the most likely command first
+        cmd = f"ovos-speak '{text}'"
+        try:
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=2)
+            if result.returncode == 0:
+                return jsonify({"status": "success", "message": "Text spoken successfully"})
+        except subprocess.TimeoutExpired:
+            return jsonify({"error": "Speech command timed out"}), 500
+        except Exception as e:
+            # If first command fails, try alternatives
+            commands = [
+                "ovos-cli-client speak",
+                "ovos-skill-speak speak",
+                "ovos-tts"
+            ]
+            
+            for cmd_base in commands:
+                try:
+                    cmd = f"{cmd_base} '{text}'"
+                    result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=2)
+                    if result.returncode == 0:
+                        return jsonify({"status": "success", "message": "Text spoken successfully"})
+                except Exception:
+                    continue
+            
+            return jsonify({"error": "Failed to speak text with any available command"}), 500
             
     except Exception as e:
         return jsonify({"error": str(e)}), 500

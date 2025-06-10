@@ -243,20 +243,26 @@ async function sendSimpleWheel_pos() {
  function RightStick(event) { stateGamepad.rightAxis = event.detail; }
 
  function RSPressed(event) {
-     if (stateGamepad.speedtoggle = 1){
-         stateGamepad.speedtoggle = 0.5
+     if (stateGamepad.speedtoggle === 1) {
+         stateGamepad.speedtoggle = 0.5;
+     } else {
+         stateGamepad.speedtoggle = 1;
      }
-     else{
-         stateGamepad.speedtoggle = 1
-     }
-
+     console.log("Speed toggle changed to:", stateGamepad.speedtoggle);
  }
 
  $:{
-     console.log(stateGamepad.right)
+     console.log("Gamepad state:", {
+         leftAxis: stateGamepad.leftAxis,
+         rightAxis: stateGamepad.rightAxis,
+         right: stateGamepad.right,
+         left: stateGamepad.left,
+         speedtoggle: stateGamepad.speedtoggle
+     });
  }
 
  function R1Pressed(event) {
+     console.log("R1 pressed:", event.detail);
      if (stateGamepad.button["right"] !== event.detail) {
          if (event.detail) {  // Button is pressed
              stateGamepad.right = 400;
@@ -264,10 +270,12 @@ async function sendSimpleWheel_pos() {
              stateGamepad.right = 0;
          }
          stateGamepad.button["right"] = event.detail;
+         console.log("Updated right value:", stateGamepad.right);
      }
  }
 
  function L1Pressed(event) {
+     console.log("L1 pressed:", event.detail);
      if (stateGamepad.button["left"] !== event.detail) {
          if (event.detail) {  // Button is pressed
              stateGamepad.left = -400;
@@ -275,6 +283,7 @@ async function sendSimpleWheel_pos() {
              stateGamepad.left = 0;
          }
          stateGamepad.button["left"] = event.detail;
+         console.log("Updated left value:", stateGamepad.left);
      }
  }
 
