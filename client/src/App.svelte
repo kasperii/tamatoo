@@ -82,7 +82,7 @@
  //  }
 
  // CHANGE TO FALSE IF NOT USING COMPILATION WIZARD
- let newWizard = true;
+ let newWizard = false;
  async function sendOmniWheel(obj){
       if (newWizard) {
           sendObjectWheel_pos()
