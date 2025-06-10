@@ -1,5 +1,5 @@
 <script>
- import layout from "./layouts/XBOX.js";
+ import layout from "./layouts/PS5.js";
  import { onMount, createEventDispatcher } from "svelte";
  import { addGamepad } from "./gamepadController.js";
 

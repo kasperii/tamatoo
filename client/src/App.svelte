@@ -256,33 +256,26 @@ async function sendSimpleWheel_pos() {
      console.log(stateGamepad.right)
  }
 
- function RBPressed(event) {
-     if (stateGamepad.button["right"] != event.detail){
-         if(stateGamepad.button["right"] == null){
-             stateGamepad.right = 400
+ function R1Pressed(event) {
+     if (stateGamepad.button["right"] !== event.detail) {
+         if (event.detail) {  // Button is pressed
+             stateGamepad.right = 400;
+         } else {  // Button is released
+             stateGamepad.right = 0;
          }
-         stateGamepad.button["right"] == event.detail;
-     }else{
-         stateGamepad.right = 0
-
+         stateGamepad.button["right"] = event.detail;
      }
-
-
  }
 
-
- function LBPressed(event) {
-     if (stateGamepad.button["left"] != event.detail){
-         if(stateGamepad.button["left"] == null){
-             stateGamepad.left = -400
+ function L1Pressed(event) {
+     if (stateGamepad.button["left"] !== event.detail) {
+         if (event.detail) {  // Button is pressed
+             stateGamepad.left = -400;
+         } else {  // Button is released
+             stateGamepad.left = 0;
          }
-         stateGamepad.button["left"] == event.detail;
-     }else{
-         stateGamepad.left = 0
-
+         stateGamepad.button["left"] = event.detail;
      }
-
-
  }
 
  function calculateVectorInfo(x, y) {
@@ -851,14 +844,12 @@ function updateKeyMovement() {
 <Gamepad
     gamepadIndex={0}
     on:Connected={gamepadConnected}
-
     on:LeftStick={LeftStick}
     on:RightStick={RightStick}
-    on:LT={LBPressed}
-    on:RT={RBPressed}
-    on:RS={RSPressed}
-
-    />
+    on:R1={R1Pressed}
+    on:L1={L1Pressed}
+    on:R3={RSPressed}
+/>
 
     <!--
 
