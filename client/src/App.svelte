@@ -234,19 +234,24 @@ async function sendSimpleWheel_pos() {
 
  // Reactive declarations for gamepad state
  $: if (stateGamepad.leftAxis) {
-     console.log("Updating stateTama from leftAxis:", stateGamepad.leftAxis);
+     let newDegrees = calculateVectorInfo(stateGamepad.leftAxis.x, stateGamepad.leftAxis.y).angleDegrees;
+     let newSpeed = Math.min(calculateVectorInfo(stateGamepad.leftAxis.x, stateGamepad.leftAxis.y).vectorLength * stateGamepad.speedtoggle, 1) * speed;
+     
      stateTama = {
          ...stateTama,
-         speed: Math.round(stateGamepad.leftAxis.y * -500), // Inverted for natural control
-         direction: Math.round(stateGamepad.leftAxis.x * 500)
+         speed: Math.round(newSpeed),
+         direction: Math.round(newDegrees)
      };
  }
 
  $: if (stateGamepad.rightAxis) {
-     console.log("Updating stateTama from rightAxis:", stateGamepad.rightAxis);
+     let vectorInfo = calculateVectorInfo(stateGamepad.rightAxis.x, stateGamepad.rightAxis.y);
+     // Use x component to determine direction (-1 to 1) and vector length for speed
+     let rotationSpeed = Math.round(vectorInfo.vectorLength * 500);
+     // Make it negative for left rotation, positive for right
      stateTama = {
          ...stateTama,
-         rotation: Math.round(stateGamepad.rightAxis.x * 500)
+         rotation: stateGamepad.rightAxis.x < 0 ? -rotationSpeed : rotationSpeed
      };
  }
 
@@ -342,23 +347,16 @@ async function sendSimpleWheel_pos() {
  }
 
  function calculateVectorInfo(x, y) {
-     // Calculate the angle in radians
-
+     // Calculate the angle in degrees
      let angleRadians = Math.atan2(y, x);
-
-     // Convert radians to degrees
-     let angleDegrees = (angleRadians * 180) / Math.PI;
-
-     // Ensure the angle is between 0 and 360 degrees
-     angleDegrees = (angleDegrees + 360) % 360;
-
-     // Calculate the length of the vector
-     let vectorLength = Math.sqrt(x * x + y * y);
-
-     // Return the result
+     let angleDegrees = (angleRadians * 180 / Math.PI + 360) % 360;
+     
+     // Calculate the vector length (normalized to 0-1)
+     let vectorLength = Math.min(Math.sqrt(x * x + y * y), 1);
+     
      return {
-         angleDegrees: angleDegrees,
-         vectorLength: vectorLength
+         angleDegrees,
+         vectorLength
      };
  }
 
