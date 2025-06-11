@@ -1,3 +1,7 @@
+# Monkey patch eventlet first
+import eventlet
+eventlet.monkey_patch()
+
 from flask import Flask, send_from_directory, make_response, jsonify, request, Response
 import random
 import sys
@@ -498,11 +502,4 @@ def speak():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    try:
-        # Use eventlet for better WebSocket support
-        import eventlet
-        eventlet.monkey_patch()
-        socketio.run(app, host='0.0.0.0', port=5050, debug=True)
-    except ImportError:
-        print("Eventlet not found, falling back to threading mode")
-        socketio.run(app, host='0.0.0.0', port=5050, debug=True, allow_unsafe_werkzeug=True)
+    socketio.run(app, host='0.0.0.0', port=5050, debug=True)
