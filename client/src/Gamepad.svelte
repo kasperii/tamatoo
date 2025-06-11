@@ -1,9 +1,9 @@
 <script>
- import layout from "./layouts/PS5.js";
+ import PS5 from "./layouts/PS5.js";
  import { onMount, createEventDispatcher } from "svelte";
  import { addGamepad } from "./gamepadController.js";
 
- export let gamepadIndex;
+ export let gamepadIndex = 0;
  export let stickThreshold = 0.2; // default threshold
 
  const dispatch = createEventDispatcher();
@@ -50,7 +50,7 @@
  }
 
  const args = {
-     layout,
+     layout: PS5,
      onChange,
      stickThreshold
  };
