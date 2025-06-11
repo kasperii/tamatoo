@@ -1,15 +1,30 @@
 <script>
     import { onMount, onDestroy } from 'svelte';
+    import { io } from 'socket.io-client';
 
     let videoElement;
     let peerConnection;
     let isStreaming = false;
+    let socket;
 
     const ICE_SERVERS = {
         iceServers: [
             { urls: 'stun:stun.l.google.com:19302' }
         ]
     };
+
+    onMount(() => {
+        socket = io();
+        
+        socket.on('connect', () => {
+            console.log('Connected to signaling server');
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnected from signaling server');
+            stopVideo();
+        });
+    });
 
     async function startVideo() {
         try {
@@ -23,24 +38,35 @@
                     }
                 };
 
+                // Handle ICE candidates
+                peerConnection.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        socket.emit('ice-candidate', {
+                            candidate: event.candidate.candidate,
+                            sdpMid: event.candidate.sdpMid,
+                            sdpMLineIndex: event.candidate.sdpMLineIndex
+                        });
+                    }
+                };
+
                 // Create and send offer
                 const offer = await peerConnection.createOffer();
                 await peerConnection.setLocalDescription(offer);
 
                 // Send offer to server
-                const response = await fetch('/webrtc/offer', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(offer)
+                socket.emit('offer', {
+                    type: offer.type,
+                    sdp: offer.sdp,
+                    id: 'client'
                 });
 
-                if (response.ok) {
-                    const answer = await response.json();
-                    await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-                    isStreaming = true;
-                }
+                // Handle answer
+                socket.on('get_answer', async (answer) => {
+                    if (answer) {
+                        await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+                        isStreaming = true;
+                    }
+                });
             }
         } catch (error) {
             console.error('Error starting video:', error);
@@ -60,6 +86,9 @@
 
     onDestroy(() => {
         stopVideo();
+        if (socket) {
+            socket.disconnect();
+        }
     });
 </script>
 

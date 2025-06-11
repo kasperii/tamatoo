@@ -22,6 +22,7 @@
     "nodemon": "^3.0.2",
     "rollup-plugin-typescript2": "^0.36.0",
     "sirv-cli": "^2.0.0",
-    "socket.io": "^4.7.2"
+    "socket.io": "^4.7.2",
+    "socket.io-client": "^4.8.1"
   }
 }
