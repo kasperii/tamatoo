@@ -580,65 +580,56 @@ def speak():
         if not text:
             return jsonify({"error": "No text provided"}), 400
 
-        # Try OVOS TTS commands in order of preference
-        tts_commands = [
-            "ovos-speak",
-            "ovos-cli-client speak",
-            "ovos-skill-speak speak",
-            "ovos-tts"
-        ]
-        
-        for cmd_base in tts_commands:
-            try:
-                cmd = f"{cmd_base} '{text}'"
-                logger.info(f"Attempting TTS with command: {cmd}")
-                
-                # Run the command with a shorter timeout
-                result = subprocess.run(
-                    cmd, 
-                    shell=True, 
-                    capture_output=True, 
-                    text=True, 
-                    timeout=1  # Reduced timeout for faster response
-                )
-                
-                if result.returncode == 0:
-                    logger.info("TTS command successful")
-                    return jsonify({
-                        "status": "success", 
-                        "message": "Text spoken successfully",
-                        "command": cmd_base
-                    })
-                else:
-                    logger.warning(f"Command {cmd_base} failed with return code {result.returncode}")
-                    
-            except subprocess.TimeoutExpired:
-                logger.warning(f"Command {cmd_base} timed out")
-                continue
-            except Exception as e:
-                logger.error(f"Error with command {cmd_base}: {e}")
-                continue
-        
-        # If all commands fail, try direct message bus approach
         try:
-            from ovos_utils.messagebus import get_mycroft_bus
-            bus = get_mycroft_bus()
-            if bus:
-                msg = Message("speak", {"utterance": text})
-                bus.emit(msg)
-                logger.info("Sent speak message via message bus")
-                return jsonify({
-                    "status": "success",
-                    "message": "Text sent to message bus",
-                    "method": "message_bus"
-                })
+            from ovos_utils.messagebus import MessageBusClient
+            from ovos_utils.messagebus import Message
+            
+            # Create message bus client
+            bus = MessageBusClient()
+            bus.run_in_thread()
+            
+            # Wait for connection
+            bus.wait_for_message("mycroft.ready")
+            
+            # Send speak message
+            msg = Message("speak", {"utterance": text})
+            bus.emit(msg)
+            
+            logger.info("Sent speak message via message bus")
+            return jsonify({
+                "status": "success",
+                "message": "Text sent to message bus",
+                "method": "message_bus"
+            })
+            
         except Exception as e:
             logger.error(f"Message bus approach failed: {e}")
-        
-        return jsonify({
-            "error": "Failed to speak text with any available method",
-            "details": "All TTS methods failed"
-        }), 500
+            
+            # Fallback to direct TTS if message bus fails
+            try:
+                import subprocess
+                cmd = f"ovos-speak '{text}'"
+                result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+                
+                if result.returncode == 0:
+                    return jsonify({
+                        "status": "success",
+                        "message": "Text spoken using ovos-speak",
+                        "method": "ovos-speak"
+                    })
+                else:
+                    logger.error(f"ovos-speak failed: {result.stderr}")
+                    return jsonify({
+                        "error": "Failed to speak text",
+                        "details": result.stderr
+                    }), 500
+                    
+            except Exception as tts_error:
+                logger.error(f"Direct TTS failed: {tts_error}")
+                return jsonify({
+                    "error": "Failed to speak text",
+                    "details": str(tts_error)
+                }), 500
             
     except Exception as e:
         logger.error(f"Unexpected error in speak function: {e}")

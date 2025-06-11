@@ -266,7 +266,7 @@ async function sendSimpleWheel_pos() {
      console.log("R1 pressed:", event.detail);
      if (stateGamepad.button["right"] !== event.detail) {
          if (event.detail) {  // Button is pressed
-             stateGamepad.right = 400;
+             stateGamepad.right = 500;  // Fast turn right
          } else {  // Button is released
              stateGamepad.right = 0;
          }
@@ -279,12 +279,38 @@ async function sendSimpleWheel_pos() {
      console.log("L1 pressed:", event.detail);
      if (stateGamepad.button["left"] !== event.detail) {
          if (event.detail) {  // Button is pressed
-             stateGamepad.left = -400;
+             stateGamepad.left = -500;  // Fast turn left
          } else {  // Button is released
              stateGamepad.left = 0;
          }
          stateGamepad.button["left"] = event.detail;
          console.log("Updated left value:", stateGamepad.left);
+     }
+ }
+
+ function R2Pressed(event) {
+     console.log("R2 pressed:", event.detail);
+     if (stateGamepad.button["right2"] !== event.detail) {
+         if (event.detail) {  // Button is pressed
+             stateGamepad.right = 200;  // Slow turn right
+         } else {  // Button is released
+             stateGamepad.right = 0;
+         }
+         stateGamepad.button["right2"] = event.detail;
+         console.log("Updated right2 value:", stateGamepad.right);
+     }
+ }
+
+ function L2Pressed(event) {
+     console.log("L2 pressed:", event.detail);
+     if (stateGamepad.button["left2"] !== event.detail) {
+         if (event.detail) {  // Button is pressed
+             stateGamepad.left = -200;  // Slow turn left
+         } else {  // Button is released
+             stateGamepad.left = 0;
+         }
+         stateGamepad.button["left2"] = event.detail;
+         console.log("Updated left2 value:", stateGamepad.left);
      }
  }
 
@@ -316,26 +342,25 @@ async function sendSimpleWheel_pos() {
      let newDegrees = calculateVectorInfo(stateGamepad.leftAxis['x'],stateGamepad.leftAxis['y']).angleDegrees
      let newSpeed = Math.min(calculateVectorInfo(stateGamepad.leftAxis['x'],stateGamepad.leftAxis['y']).vectorLength*stateGamepad.speedtoggle,1)*speed
      
-
+     // Reset speed when stick is centered
+     if(newSpeed < 0.1) {
+         stateTama.speed = 0;
+     } else {
+         stateTama.speed = newSpeed;
+     }
+     
+     // Handle rotation
      if(newSpeed == 0){
-         if(stateTama.speed != 0){
-             stateTama.speed = 0
-         }
          stateTama.rotation = stateGamepad.right + stateGamepad.left
      }else{
          stateTama.rotation = (stateGamepad.right + stateGamepad.left)*0.75
      }
-     if(Math.abs(stateTama.speed-newSpeed)>(0.1*speed)){
-         stateTama.speed = newSpeed
-         //sendWheel('m',Math.round(speed*6)*speedmulti+32)
-         //isMoving = true;
-     }
+     
+     // Update direction
      newDegrees = (Math.round((270-newDegrees)/11.25)*11.25)%360
      if (newDegrees != stateTama.direction){
          stateTama.direction = newDegrees
-         //sendWheel('m',Math.round(degrees/11.25))
      }
-     
  }
 
 
@@ -492,7 +517,7 @@ async function sendSimpleWheel_pos() {
      
 	 switch(e.key.toUpperCase()) {
          case "W":
-             console.log("pressed W");
+             console.log("released W");
 			 // forward
              //sendWheel('m',32);
              kmf = false;
@@ -500,28 +525,28 @@ async function sendSimpleWheel_pos() {
 
 			 break;
          case "S":
-             console.log("pressed s");
+             console.log("released S");
 			 // forward
              kmb = false;
              e.preventDefault();
 
 			 break;
          case "A":
-             console.log("pressed s");
+             console.log("released A");
 			 // forward
              kml = false;
              e.preventDefault();
 
 			 break;
          case "D":
-             console.log("pressed s");
+             console.log("released D");
 			 // forward
              kmr = false;
              e.preventDefault();
 
 			 break;
          case "Q":
-             console.log("pressed q");
+             console.log("released Q");
 			 // forward
              //sendWheel("r","M")
              krl = false;
@@ -529,7 +554,7 @@ async function sendSimpleWheel_pos() {
              break;
 
          case "E":
-             console.log("pressed e");
+             console.log("released E");
 			 // forward
              //sendWheel("r","M")
              krr = false;
@@ -561,8 +586,8 @@ function updateKeyMovement() {
     
     // Calculate rotation based on rotation keys
     let rotation = 0;
-    if (krl) rotation = -400;
-    if (krr) rotation = 400;
+    if (krl) rotation = -200; // Slow turn left
+    if (krr) rotation = 500;  // Fast turn right
     
     // Apply speed toggle
     speed *= speedToggle;
@@ -571,6 +596,13 @@ function updateKeyMovement() {
     stateTama.speed = speed;
     stateTama.direction = direction;
     stateTama.rotation = rotation;
+
+    // If no movement keys are pressed, ensure speed is 0
+    if (!kmf && !kmb && !kml && !kmr && !krl && !krr) {
+        stateTama.speed = 0;
+        stateTama.direction = 0;
+        stateTama.rotation = 0;
+    }
 }
 
 
@@ -858,6 +890,8 @@ function updateKeyMovement() {
     on:RightStick={RightStick}
     on:R1={R1Pressed}
     on:L1={L1Pressed}
+    on:R2={R2Pressed}
+    on:L2={L2Pressed}
     on:R3={RSPressed}
 />
 
