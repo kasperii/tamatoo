@@ -207,6 +207,8 @@ async function sendSimpleWheel_pos() {
      };
 
  let lastUpdate = {s: 0, d: 0, r: 0};
+ let lastStickState = { x: 0, y: 0 };
+ let isMoving = false;
 
  // Gamepad state
  let stateGamepad = {
@@ -238,13 +240,20 @@ async function sendSimpleWheel_pos() {
      const x = Math.abs(stateGamepad.leftAxis.x) < deadzone ? 0 : stateGamepad.leftAxis.x;
      const y = Math.abs(stateGamepad.leftAxis.y) < deadzone ? 0 : stateGamepad.leftAxis.y;
      
-     // If both axes are in deadzone, ensure speed is 0
+     // Check if stick has moved significantly
+     const stickMoved = Math.abs(x - lastStickState.x) > 0.1 || Math.abs(y - lastStickState.y) > 0.1;
+     
+     // If both axes are in deadzone and we were moving, send one final stop command
      if (Math.abs(stateGamepad.leftAxis.x) < deadzone && Math.abs(stateGamepad.leftAxis.y) < deadzone) {
-         stateTama = {
-             ...stateTama,
-             speed: 0
-         };
-     } else {
+         if (isMoving) {
+             stateTama = {
+                 ...stateTama,
+                 speed: 0
+             };
+             isMoving = false;
+             lastStickState = { x: 0, y: 0 };
+         }
+     } else if (stickMoved) {
          let newDegrees = calculateVectorInfo(x, y).angleDegrees;
          let newSpeed = Math.min(calculateVectorInfo(x, y).vectorLength * stateGamepad.speedtoggle, 1) * speed;
          
@@ -253,6 +262,8 @@ async function sendSimpleWheel_pos() {
              speed: Math.round(newSpeed),
              direction: Math.round(newDegrees)
          };
+         isMoving = true;
+         lastStickState = { x, y };
      }
  }
 
