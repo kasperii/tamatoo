@@ -206,68 +206,39 @@ async function sendSimpleWheel_pos() {
          rotation: 0
      };
 
- let lastUpdate = {s: 0,d: 0,r: 0}
+ let lastUpdate = {s: 0, d: 0, r: 0};
 
-     $: {
-         console.log("Checking for state changes...");
-         console.log("Current stateTama:", stateTama);
-         console.log("Last update:", lastUpdate);
-         
-         let obj = {
-             s: stateTama.speed,
-             d: stateTama.direction,
-             r: stateTama.rotation
-         };
-         
-         if (JSON.stringify(lastUpdate) != JSON.stringify(obj)){
-             console.log("State changed, sending update:", obj);
-             sendOmniWheel(obj);
-             lastUpdate = obj;
-         } else {
-             console.log("No state change detected");
-         }
-     }
-
-
-
-
-
- // ################ GAMEPAD ################
-
- let stateGamepad = {
-     leftAxis: { x: 0, y: 0 },
-     rightAxis: { x: 0, y: 0 },
-     button: {right: null, left: null, right2: null, left2: null},
-     right: 0,
-     left: 0,
-     speedtoggle: 1
- };
-
-
- function gamepadConnected(event) {
-     console.log(`app: gamepad ${event.detail.gamepadIndex} connected`);
+ // Reactive declarations for gamepad state
+ $: if (stateGamepad.leftAxis) {
+     stateTama.speed = Math.round(stateGamepad.leftAxis.y * -500); // Inverted for natural control
+     stateTama.direction = Math.round(stateGamepad.leftAxis.x * 500);
  }
 
+ $: if (stateGamepad.rightAxis) {
+     stateTama.rotation = Math.round(stateGamepad.rightAxis.x * 500);
+ }
+
+ // Reactive statement to send updates when state changes
+ $: {
+     let obj = {
+         s: stateTama.speed,
+         d: stateTama.direction,
+         r: stateTama.rotation
+     };
+     
+     if (JSON.stringify(lastUpdate) != JSON.stringify(obj)){
+         console.log("State changed, sending update:", obj);
+         sendOmniWheel(obj);
+         lastUpdate = obj;
+     }
+ }
 
  function LeftStick(event) { 
-     console.log("Left stick event received:", event.detail);
      stateGamepad.leftAxis = event.detail;
-     // Map left stick Y axis to speed (forward/backward)
-     // -1 (up) to 1 (down) mapped to -500 to 500
-     stateTama.speed = Math.round(event.detail.y * 500);
-     // Map left stick X axis to direction (strafing)
-     // -1 (left) to 1 (right) mapped to -500 to 500
-     stateTama.direction = Math.round(event.detail.x * 500);
-     console.log("Updated stateTama:", stateTama);
  }
 
  function RightStick(event) { 
-     console.log("Right stick event received:", event.detail);
      stateGamepad.rightAxis = event.detail;
-     // Map right stick X axis to rotation
-     // -1 (left) to 1 (right) mapped to -500 to 500
-     stateTama.rotation = Math.round(event.detail.x * 500);
-     console.log("Updated stateTama:", stateTama);
  }
 
  function RSPressed(event) {

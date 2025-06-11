@@ -14,6 +14,10 @@
      
      // Handle sticks
      if (state.axes) {
+         console.log("Dispatching stick events:", {
+             left: state.axes.LeftStick,
+             right: state.axes.RightStick
+         });
          dispatch("leftstick", state.axes.LeftStick);
          dispatch("rightstick", state.axes.RightStick);
      }
