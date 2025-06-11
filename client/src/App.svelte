@@ -246,12 +246,11 @@ async function sendSimpleWheel_pos() {
 
  $: if (stateGamepad.rightAxis) {
      let vectorInfo = calculateVectorInfo(stateGamepad.rightAxis.x, stateGamepad.rightAxis.y);
-     // Use x component to determine direction (-1 to 1) and vector length for speed
+     // Use vector length for speed but preserve X sign for direction
      let rotationSpeed = Math.round(vectorInfo.vectorLength * 500);
-     // Make it negative for left rotation, positive for right
      stateTama = {
          ...stateTama,
-         rotation: stateGamepad.rightAxis.x < 0 ? -rotationSpeed : rotationSpeed
+         rotation: Math.sign(stateGamepad.rightAxis.x) * rotationSpeed
      };
  }
 
