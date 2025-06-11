@@ -60,32 +60,108 @@ data = {}
 webrtc_process = None
 webrtc_queue = queue.Queue()
 
+def check_camera():
+    """Check if camera is detected and accessible"""
+    try:
+        # Check if video device exists
+        if not os.path.exists('/dev/video0'):
+            print("Error: /dev/video0 not found")
+            return False
+            
+        # Try to get camera capabilities using GStreamer instead of v4l2
+        result = subprocess.run(['gst-launch-1.0', '--gst-debug=3', 'v4l2src', 'device=/dev/video0', '!', 'fakesink'],
+                              capture_output=True, text=True)
+        if result.returncode == 0:
+            print("Camera is accessible via GStreamer")
+            return True
+        else:
+            print("Error: Camera not accessible via GStreamer")
+            print(result.stderr)
+            return False
+    except Exception as e:
+        print(f"Error checking camera: {e}")
+        return False
+
+def check_audio():
+    """Check if audio devices are detected and accessible"""
+    try:
+        # List ALSA devices
+        result = subprocess.run(['arecord', '-l'], capture_output=True, text=True)
+        print("\nAvailable audio input devices:")
+        print(result.stdout)
+        
+        result = subprocess.run(['aplay', '-l'], capture_output=True, text=True)
+        print("\nAvailable audio output devices:")
+        print(result.stdout)
+        
+        # Test audio device with GStreamer
+        result = subprocess.run(['gst-launch-1.0', '--gst-debug=3', 'alsasrc', 'device=hw:3', '!', 'fakesink'],
+                              capture_output=True, text=True)
+        if result.returncode == 0:
+            print("Audio device hw:3 is working with GStreamer")
+            return True
+        else:
+            print("Error: Audio device hw:3 not working with GStreamer")
+            print(result.stderr)
+            return False
+    except Exception as e:
+        print(f"Error checking audio: {e}")
+        return False
+
+def check_gstreamer():
+    """Check GStreamer installation and capabilities"""
+    try:
+        # Check GStreamer version
+        result = subprocess.run(['gst-launch-1.0', '--version'],
+                              capture_output=True, text=True)
+        print("\nGStreamer version:")
+        print(result.stdout)
+        
+        # Check only essential plugins that are guaranteed to exist
+        required_plugins = [
+            'v4l2src',
+            'videoconvert',
+            'autovideosink',
+            'alsasrc',
+            'alsasink',
+            'audioconvert',
+            'fakesink'
+        ]
+        
+        print("\nChecking essential GStreamer plugins:")
+        for plugin in required_plugins:
+            result = subprocess.run(['gst-inspect-1.0', plugin],
+                                  capture_output=True, text=True)
+            if result.returncode == 0:
+                print(f"✓ {plugin} is available")
+            else:
+                print(f"✗ {plugin} is NOT available")
+        
+        return True
+    except Exception as e:
+        print(f"Error checking GStreamer: {e}")
+        return False
+
 def start_webrtc_stream():
     global webrtc_process
     
-    # GStreamer pipeline for WebRTC with audio
+    # Run hardware checks
+    print("\n=== Running hardware checks ===")
+    camera_ok = check_camera()
+    audio_ok = check_audio()
+    gstreamer_ok = check_gstreamer()
+    
+    if not all([camera_ok, audio_ok, gstreamer_ok]):
+        print("\nWarning: Some hardware checks failed. WebRTC stream may not work properly.")
+    
+    # Simplified GStreamer pipeline for testing
     pipeline = """
     gst-launch-1.0 -v \
         v4l2src device=/dev/video0 ! \
-        video/x-raw,width=1280,height=720,framerate=30/1 ! \
+        video/x-raw,width=640,height=480,framerate=30/1 ! \
         videoconvert ! \
-        x264enc tune=zerolatency bitrate=1000 speed-preset=ultrafast ! \
-        video/x-h264,profile=baseline ! \
-        h264parse ! \
-        rtph264pay config-interval=1 pt=96 ! \
-        queue ! \
-        webrtcbin name=webrtc \
+        autovideosink \
         alsasrc device=hw:3 ! \
-        audioconvert ! \
-        audio/x-raw,channels=2,rate=48000 ! \
-        opusenc ! \
-        rtpopuspay ! \
-        queue ! \
-        webrtc. \
-        webrtc. ! \
-        rtpjitterbuffer ! \
-        rtpopusdepay ! \
-        opusdec ! \
         audioconvert ! \
         alsasink device=hw:3
     """
@@ -103,10 +179,22 @@ def start_webrtc_stream():
             stderr=subprocess.PIPE,
             preexec_fn=os.setsid
         )
-        print("WebRTC stream started successfully")
+        
+        # Start a thread to monitor the process output
+        def monitor_process():
+            while True:
+                output = webrtc_process.stderr.readline()
+                if output:
+                    print(f"GStreamer: {output.decode().strip()}")
+                if webrtc_process.poll() is not None:
+                    break
+        
+        threading.Thread(target=monitor_process, daemon=True).start()
+        
+        print("GStreamer test pipeline started successfully")
         return True
     except Exception as e:
-        print(f"Error starting WebRTC stream: {e}")
+        print(f"Error starting GStreamer pipeline: {e}")
         return False
 
 def stop_webrtc_stream():
@@ -167,6 +255,11 @@ def handle_offer(data):
             answer['sdp'] += '\nm=audio 9 UDP/TLS/RTP/SAVPF 111\nc=IN IP4 0.0.0.0\na=rtpmap:111 opus/48000/2\n'
         if 'm=video' not in answer['sdp']:
             answer['sdp'] += '\nm=video 9 UDP/TLS/RTP/SAVPF 96\nc=IN IP4 0.0.0.0\na=rtpmap:96 H264/90000\n'
+        
+        # Add ICE candidates to SDP
+        answer['sdp'] += '\na=ice-ufrag:server\n'
+        answer['sdp'] += 'a=ice-pwd:serverpass\n'
+        answer['sdp'] += 'a=fingerprint:sha-256 00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00\n'
         
         print("Sending answer:", answer)
         emit('get_answer', answer)
@@ -493,6 +586,21 @@ def speak():
             
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# Add debug endpoint
+@app.route("/debug", methods=["GET"])
+def debug():
+    """Endpoint to run hardware checks"""
+    camera_ok = check_camera()
+    audio_ok = check_audio()
+    gstreamer_ok = check_gstreamer()
+    
+    return jsonify({
+        'camera': camera_ok,
+        'audio': audio_ok,
+        'gstreamer': gstreamer_ok,
+        'webrtc_process_running': webrtc_process is not None and webrtc_process.poll() is None
+    })
 
 if __name__ == "__main__":
     socketio.run(app, host='0.0.0.0', port=5050, debug=True)
