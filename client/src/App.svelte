@@ -208,6 +208,16 @@ async function sendSimpleWheel_pos() {
 
  let lastUpdate = {s: 0, d: 0, r: 0};
 
+ // Gamepad state
+ let stateGamepad = {
+     leftAxis: { x: 0, y: 0 },
+     rightAxis: { x: 0, y: 0 },
+     button: {right: null, left: null, right2: null, left2: null},
+     right: 0,
+     left: 0,
+     speedtoggle: 1
+ };
+
  // Reactive declarations for gamepad state
  $: if (stateGamepad.leftAxis) {
      stateTama.speed = Math.round(stateGamepad.leftAxis.y * -500); // Inverted for natural control
