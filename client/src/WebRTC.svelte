@@ -83,78 +83,132 @@
 
     async function startVideo() {
         try {
-            if (!peerConnection) {
-                console.log('Creating new peer connection');
-                peerConnection = new RTCPeerConnection(ICE_SERVERS);
-                
-                // Handle incoming tracks
-                peerConnection.ontrack = (event) => {
-                    console.log('Received track:', event.track.kind, event.track.label);
-                    if (videoElement && event.streams[0]) {
-                        console.log('Setting video stream with tracks:', event.streams[0].getTracks().map(t => t.kind));
-                        videoElement.srcObject = event.streams[0];
-                        videoElement.play().catch(e => console.error('Error playing video:', e));
-                    }
-                };
-
-                // Handle ICE candidates
-                peerConnection.onicecandidate = (event) => {
-                    if (event.candidate) {
-                        console.log('Sending ICE candidate:', event.candidate.candidate);
-                        socket.emit('ice-candidate', {
-                            candidate: event.candidate.candidate,
-                            sdpMid: event.candidate.sdpMid,
-                            sdpMLineIndex: event.candidate.sdpMLineIndex
-                        });
-                    }
-                };
-
-                peerConnection.oniceconnectionstatechange = () => {
-                    console.log('ICE connection state:', peerConnection.iceConnectionState);
-                };
-
-                peerConnection.onconnectionstatechange = () => {
-                    console.log('Connection state:', peerConnection.connectionState);
-                };
-
-                // Create and send offer with explicit media constraints
-                console.log('Creating offer with media constraints');
-                const offer = await peerConnection.createOffer({
-                    offerToReceiveAudio: true,
-                    offerToReceiveVideo: true,
-                    voiceActivityDetection: true
-                });
-                
-                console.log('Setting local description');
-                await peerConnection.setLocalDescription(offer);
-                console.log('Local description set:', peerConnection.localDescription.sdp);
-
-                // Send offer to server
-                console.log('Sending offer to server');
-                socket.emit('offer', {
-                    type: offer.type,
-                    sdp: offer.sdp,
-                    id: 'client'
-                });
-            }
+            console.log("Starting video stream...");
+            isStreaming = true;
+            
+            // Create peer connection with proper configuration
+            peerConnection = new RTCPeerConnection({
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' }
+                ],
+                bundlePolicy: 'max-bundle',
+                rtcpMuxPolicy: 'require'
+            });
+            
+            // Set up event handlers
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    console.log("Sending ICE candidate:", event.candidate);
+                    socket.emit('ice-candidate', {
+                        candidate: event.candidate,
+                        sdpMid: event.sdpMid,
+                        sdpMLineIndex: event.sdpMLineIndex
+                    });
+                }
+            };
+            
+            peerConnection.ontrack = (event) => {
+                console.log("Received track:", event.track.kind, event.track.label);
+                if (event.streams && event.streams[0]) {
+                    console.log("Setting video stream with tracks:", event.streams[0].getTracks().map(t => t.kind));
+                    videoElement.srcObject = event.streams[0];
+                }
+            };
+            
+            peerConnection.onconnectionstatechange = () => {
+                console.log("Connection state:", peerConnection.connectionState);
+            };
+            
+            peerConnection.oniceconnectionstatechange = () => {
+                console.log("ICE connection state:", peerConnection.iceConnectionState);
+            };
+            
+            // Create and send offer
+            const offer = await peerConnection.createOffer({
+                offerToReceiveAudio: true,
+                offerToReceiveVideo: true,
+                voiceActivityDetection: true
+            });
+            
+            console.log("Setting local description...");
+            await peerConnection.setLocalDescription(offer);
+            
+            console.log("Sending offer to server...");
+            socket.emit('offer', {
+                type: offer.type,
+                sdp: offer.sdp
+            });
+            
         } catch (error) {
-            console.error('Error starting video:', error);
+            console.error("Error starting video:", error);
             isStreaming = false;
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
         }
     }
-
+    
     function stopVideo() {
+        console.log("Stopping video stream...");
+        isStreaming = false;
+        
         if (peerConnection) {
-            console.log('Closing peer connection');
             peerConnection.close();
             peerConnection = null;
         }
+        
         if (videoElement) {
-            console.log('Clearing video stream');
             videoElement.srcObject = null;
         }
-        isStreaming = false;
     }
+    
+    // Handle incoming answer
+    socket.on('answer', async (data) => {
+        try {
+            console.log("Received answer from server");
+            if (!peerConnection) {
+                console.error("No peer connection when receiving answer");
+                return;
+            }
+            
+            const answer = new RTCSessionDescription({
+                type: 'answer',
+                sdp: data.sdp
+            });
+            
+            console.log("Setting remote description...");
+            await peerConnection.setRemoteDescription(answer);
+            console.log("Remote description set successfully");
+            
+        } catch (error) {
+            console.error("Error handling answer:", error);
+            stopVideo();
+        }
+    });
+    
+    // Handle incoming ICE candidates
+    socket.on('ice-candidate', async (data) => {
+        try {
+            console.log("Received ICE candidate from server");
+            if (!peerConnection) {
+                console.error("No peer connection when receiving ICE candidate");
+                return;
+            }
+            
+            const candidate = new RTCIceCandidate({
+                candidate: data.candidate,
+                sdpMid: data.sdpMid,
+                sdpMLineIndex: data.sdpMLineIndex
+            });
+            
+            await peerConnection.addIceCandidate(candidate);
+            console.log("Added ICE candidate successfully");
+            
+        } catch (error) {
+            console.error("Error handling ICE candidate:", error);
+        }
+    });
 
     onDestroy(() => {
         stopVideo();

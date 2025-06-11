@@ -17,6 +17,13 @@ import threading
 import queue
 import atexit
 from flask_cors import CORS
+import glob
+from gtts import gTTS
+import tempfile
+import logging
+from ovos_utils.messagebus import Message
+from ovos_utils.process_utils import RuntimeRequirements
+from ovos_utils.log import LOG
 
 mac = False
 if (platform.system() == "Darwin"):
@@ -60,53 +67,62 @@ data = {}
 webrtc_process = None
 webrtc_queue = queue.Queue()
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Cache for TTS audio files
+tts_cache = {}
+
 def check_camera():
-    """Check if camera is detected and accessible"""
+    """Check if camera is accessible and list available devices"""
     try:
-        # Check if video device exists
-        if not os.path.exists('/dev/video0'):
-            print("Error: /dev/video0 not found")
+        # Check for libcamera GStreamer plugin
+        result = subprocess.run(['gst-inspect-1.0', 'libcamerasrc'], capture_output=True, text=True)
+        if result.returncode != 0:
+            print("WARNING: GStreamer libcamera plugin not found")
             return False
             
-        # Try to get camera capabilities using GStreamer instead of v4l2
-        result = subprocess.run(['gst-launch-1.0', '--gst-debug=3', 'v4l2src', 'device=/dev/video0', '!', 'fakesink'],
-                              capture_output=True, text=True)
-        if result.returncode == 0:
-            print("Camera is accessible via GStreamer")
-            return True
-        else:
-            print("Error: Camera not accessible via GStreamer")
+        # Test GStreamer pipeline with libcamera
+        test_pipeline = "libcamerasrc ! video/x-raw,width=640,height=480,framerate=30/1 ! videoconvert ! fakesink"
+        result = subprocess.run(['gst-launch-1.0', '-v', test_pipeline], capture_output=True, text=True)
+        if result.returncode != 0:
+            print("WARNING: Failed to test GStreamer pipeline")
             print(result.stderr)
             return False
+            
+        return True
+            
     except Exception as e:
         print(f"Error checking camera: {e}")
         return False
 
 def check_audio():
-    """Check if audio devices are detected and accessible"""
+    """Check if audio devices are available"""
     try:
-        # List ALSA devices
-        result = subprocess.run(['arecord', '-l'], capture_output=True, text=True)
-        print("\nAvailable audio input devices:")
-        print(result.stdout)
+        # List all audio input devices
+        input_devices = subprocess.check_output(['arecord', '-l'], stderr=subprocess.STDOUT).decode()
+        print("Available audio input devices:")
+        print(input_devices)
         
-        result = subprocess.run(['aplay', '-l'], capture_output=True, text=True)
-        print("\nAvailable audio output devices:")
-        print(result.stdout)
+        # List all audio output devices
+        output_devices = subprocess.check_output(['aplay', '-l'], stderr=subprocess.STDOUT).decode()
+        print("Available audio output devices:")
+        print(output_devices)
         
-        # Test audio device with GStreamer
-        result = subprocess.run(['gst-launch-1.0', '--gst-debug=3', 'alsasrc', 'device=hw:3', '!', 'fakesink'],
-                              capture_output=True, text=True)
-        if result.returncode == 0:
-            print("Audio device hw:3 is working with GStreamer")
-            return True
-        else:
-            print("Error: Audio device hw:3 not working with GStreamer")
-            print(result.stderr)
-            return False
+        # Try to find a working audio device
+        for i in range(4):  # Check first 4 devices
+            try:
+                test_cmd = f"ffmpeg -f alsa -i hw:{i} -t 1 -f null -"
+                subprocess.run(test_cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+                print(f"Found working audio device: hw:{i}")
+                return f"hw:{i}"
+            except:
+                continue
+        return None
     except Exception as e:
         print(f"Error checking audio: {e}")
-        return False
+        return None
 
 def check_gstreamer():
     """Check GStreamer installation and capabilities"""
@@ -143,58 +159,65 @@ def check_gstreamer():
         return False
 
 def start_webrtc_stream():
+    """Start the WebRTC stream using GStreamer with libcamera"""
     global webrtc_process
     
-    # Run hardware checks
-    print("\n=== Running hardware checks ===")
-    camera_ok = check_camera()
-    audio_ok = check_audio()
-    gstreamer_ok = check_gstreamer()
-    
-    if not all([camera_ok, audio_ok, gstreamer_ok]):
-        print("\nWarning: Some hardware checks failed. WebRTC stream may not work properly.")
-    
-    # Simplified GStreamer pipeline for testing
-    pipeline = """
-    gst-launch-1.0 -v \
-        v4l2src device=/dev/video0 ! \
-        video/x-raw,width=640,height=480,framerate=30/1 ! \
-        videoconvert ! \
-        autovideosink \
-        alsasrc device=hw:3 ! \
-        audioconvert ! \
-        alsasink device=hw:3
-    """
-    
     try:
-        # Kill any existing webrtc process
-        if webrtc_process:
-            stop_webrtc_stream()
+        # Check for camera
+        if not check_camera():
+            print("ERROR: No camera found or camera not working")
+            return False
+            
+        # Build the GStreamer pipeline with libcamera
+        gst_cmd = [
+            "gst-launch-1.0",
+            "-v",
+            "libcamerasrc",
+            "!",
+            "video/x-raw,width=640,height=480,framerate=30/1",
+            "!",
+            "videoconvert",
+            "!",
+            "x264enc",
+            "tune=zerolatency",
+            "speed-preset=ultrafast",
+            "!",
+            "h264parse",
+            "!",
+            "mpegtsmux",
+            "!",
+            "fdsink"
+        ]
         
-        # Start GStreamer pipeline
+        # Join the command
+        cmd_str = " ".join(gst_cmd)
+        print(f"Starting GStreamer pipeline: {cmd_str}")
+        
+        # Start the process
         webrtc_process = subprocess.Popen(
-            pipeline,
+            cmd_str,
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            preexec_fn=os.setsid
+            universal_newlines=True
         )
         
         # Start a thread to monitor the process output
         def monitor_process():
-            while True:
-                output = webrtc_process.stderr.readline()
+            while webrtc_process and webrtc_process.poll() is None:
+                output = webrtc_process.stdout.readline()
                 if output:
-                    print(f"GStreamer: {output.decode().strip()}")
-                if webrtc_process.poll() is not None:
-                    break
+                    print(f"GStreamer: {output.strip()}")
+                error = webrtc_process.stderr.readline()
+                if error:
+                    print(f"GStreamer Error: {error.strip()}")
         
         threading.Thread(target=monitor_process, daemon=True).start()
         
-        print("GStreamer test pipeline started successfully")
         return True
+        
     except Exception as e:
-        print(f"Error starting GStreamer pipeline: {e}")
+        print(f"Error starting GStreamer stream: {e}")
         return False
 
 def stop_webrtc_stream():
@@ -557,35 +580,81 @@ def speak():
         if not text:
             return jsonify({"error": "No text provided"}), 400
 
-        # Try the most likely command first
-        cmd = f"ovos-speak '{text}'"
+        # Try OVOS TTS commands in order of preference
+        tts_commands = [
+            "ovos-speak",
+            "ovos-cli-client speak",
+            "ovos-skill-speak speak",
+            "ovos-tts"
+        ]
+        
+        for cmd_base in tts_commands:
+            try:
+                cmd = f"{cmd_base} '{text}'"
+                logger.info(f"Attempting TTS with command: {cmd}")
+                
+                # Run the command with a shorter timeout
+                result = subprocess.run(
+                    cmd, 
+                    shell=True, 
+                    capture_output=True, 
+                    text=True, 
+                    timeout=1  # Reduced timeout for faster response
+                )
+                
+                if result.returncode == 0:
+                    logger.info("TTS command successful")
+                    return jsonify({
+                        "status": "success", 
+                        "message": "Text spoken successfully",
+                        "command": cmd_base
+                    })
+                else:
+                    logger.warning(f"Command {cmd_base} failed with return code {result.returncode}")
+                    
+            except subprocess.TimeoutExpired:
+                logger.warning(f"Command {cmd_base} timed out")
+                continue
+            except Exception as e:
+                logger.error(f"Error with command {cmd_base}: {e}")
+                continue
+        
+        # If all commands fail, try direct message bus approach
         try:
-            result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=2)
-            if result.returncode == 0:
-                return jsonify({"status": "success", "message": "Text spoken successfully"})
-        except subprocess.TimeoutExpired:
-            return jsonify({"error": "Speech command timed out"}), 500
+            from ovos_utils.messagebus import get_mycroft_bus
+            bus = get_mycroft_bus()
+            if bus:
+                msg = Message("speak", {"utterance": text})
+                bus.emit(msg)
+                logger.info("Sent speak message via message bus")
+                return jsonify({
+                    "status": "success",
+                    "message": "Text sent to message bus",
+                    "method": "message_bus"
+                })
         except Exception as e:
-            # If first command fails, try alternatives
-            commands = [
-                "ovos-cli-client speak",
-                "ovos-skill-speak speak",
-                "ovos-tts"
-            ]
-            
-            for cmd_base in commands:
-                try:
-                    cmd = f"{cmd_base} '{text}'"
-                    result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=2)
-                    if result.returncode == 0:
-                        return jsonify({"status": "success", "message": "Text spoken successfully"})
-                except Exception:
-                    continue
-            
-            return jsonify({"error": "Failed to speak text with any available command"}), 500
+            logger.error(f"Message bus approach failed: {e}")
+        
+        return jsonify({
+            "error": "Failed to speak text with any available method",
+            "details": "All TTS methods failed"
+        }), 500
             
     except Exception as e:
+        logger.error(f"Unexpected error in speak function: {e}")
         return jsonify({"error": str(e)}), 500
+
+# Cleanup function to remove temporary files
+def cleanup_tts_cache():
+    for file_path in tts_cache.values():
+        try:
+            if os.path.exists(file_path):
+                os.unlink(file_path)
+        except Exception as e:
+            logger.error(f"Error cleaning up TTS cache: {e}")
+
+# Register cleanup on application exit
+atexit.register(cleanup_tts_cache)
 
 # Add debug endpoint
 @app.route("/debug", methods=["GET"])
