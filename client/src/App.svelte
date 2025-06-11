@@ -85,20 +85,19 @@
  // CHANGE TO FALSE IF NOT USING COMPILATION WIZARD
  let newWizard = false;
  async function sendOmniWheel(obj){
-      if (newWizard) {
-          sendObjectWheel_pos()
-      } else {
-          var dataToSend = new FormData();
-          dataToSend.append( "json", JSON.stringify( obj ) );
-          const res = await fetch('./omniwheels', {
-              method: "POST",
-              body: dataToSend
-          })
-          const json = await res.json()
- 	      console.log(JSON.stringify(json))
-
-      }
-
+     console.log("Sending omniwheel command:", obj);
+     var dataToSend = new FormData();
+     dataToSend.append("json", JSON.stringify(obj));
+     try {
+         const res = await fetch('./omniwheels', {
+             method: "POST",
+             body: dataToSend
+         });
+         const json = await res.json();
+         console.log("Omniwheel response:", json);
+     } catch (error) {
+         console.error("Error sending omniwheel command:", error);
+     }
  }
 
 // New functions for wheel control
@@ -210,15 +209,22 @@ async function sendSimpleWheel_pos() {
  let lastUpdate = {s: 0,d: 0,r: 0}
 
      $: {
+         console.log("Checking for state changes...");
+         console.log("Current stateTama:", stateTama);
+         console.log("Last update:", lastUpdate);
+         
          let obj = {
              s: stateTama.speed,
              d: stateTama.direction,
              r: stateTama.rotation
          };
+         
          if (JSON.stringify(lastUpdate) != JSON.stringify(obj)){
-             console.log("Sending movement update:", obj);
+             console.log("State changed, sending update:", obj);
              sendOmniWheel(obj);
              lastUpdate = obj;
+         } else {
+             console.log("No state change detected");
          }
      }
 
@@ -244,6 +250,7 @@ async function sendSimpleWheel_pos() {
 
 
  function LeftStick(event) { 
+     console.log("Left stick event received:", event.detail);
      stateGamepad.leftAxis = event.detail;
      // Map left stick Y axis to speed (forward/backward)
      // -1 (up) to 1 (down) mapped to -500 to 500
@@ -251,13 +258,16 @@ async function sendSimpleWheel_pos() {
      // Map left stick X axis to direction (strafing)
      // -1 (left) to 1 (right) mapped to -500 to 500
      stateTama.direction = Math.round(event.detail.x * 500);
+     console.log("Updated stateTama:", stateTama);
  }
 
  function RightStick(event) { 
+     console.log("Right stick event received:", event.detail);
      stateGamepad.rightAxis = event.detail;
      // Map right stick X axis to rotation
      // -1 (left) to 1 (right) mapped to -500 to 500
      stateTama.rotation = Math.round(event.detail.x * 500);
+     console.log("Updated stateTama:", stateTama);
  }
 
  function RSPressed(event) {
