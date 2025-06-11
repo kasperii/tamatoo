@@ -245,10 +245,12 @@ async function sendSimpleWheel_pos() {
  }
 
  $: if (stateGamepad.rightAxis) {
-     // Directly use X value for rotation, scaled to 500
+     // Add deadzone to prevent small values from causing rotation
+     const deadzone = 0.1;
+     const x = Math.abs(stateGamepad.rightAxis.x) < deadzone ? 0 : stateGamepad.rightAxis.x;
      stateTama = {
          ...stateTama,
-         rotation: Math.round(stateGamepad.rightAxis.x * 500)
+         rotation: Math.round(x * 500)
      };
  }
 
