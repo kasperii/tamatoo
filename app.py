@@ -45,7 +45,11 @@ socketio = SocketIO(
     cors_allowed_origins="*",
     async_mode='eventlet',
     logger=True,
-    engineio_logger=True
+    engineio_logger=True,
+    path='/socket.io/',
+    ping_timeout=20,
+    ping_interval=25,
+    max_http_buffer_size=1e6
 )
 
 # this is the placeholder data for the handshake betweeen
@@ -136,60 +140,35 @@ def before_request():
         app._webrtc_initialized = True
 
 # WebRTC signaling endpoints
-@socketio.on("connect")
-def connected():
-    """event listener when client connects to the server"""
+@socketio.on('connect')
+def handle_connect():
     print(f"Client {request.sid} connected")
-    emit("connect", {"data": f"id: {request.sid} is connected"})
+    return {'data': f'id: {request.sid} is connected'}
 
-@socketio.on("offer")
-def offer():
+@socketio.on('disconnect')
+def handle_disconnect():
+    print(f"Client {request.sid} disconnected")
+
+@socketio.on('offer')
+def handle_offer(data):
     try:
-        if request.form["type"] == "offer":
-            data["offer"] = {
-                "id": request.form['id'],
-                "type": request.form['type'],
-                "sdp": request.form['sdp']
-            }
-            print("Received offer from client")
-            return Response(status=200)
+        print(f"Received offer from {request.sid}")
+        # Process the offer and create an answer
+        # For now, just echo back the offer
+        socketio.emit('get_answer', data, room=request.sid)
     except Exception as e:
         print(f"Error handling offer: {e}")
-        return Response(status=400)
-    return Response(status=400)
+        return {'error': str(e)}
 
-@socketio.on("answer")
-def answer():
+@socketio.on('ice-candidate')
+def handle_ice_candidate(data):
     try:
-        if request.form["type"] == "answer":
-            data["answer"] = {
-                "id": request.form['id'],
-                "type": request.form['type'],
-                "sdp": request.form['sdp']
-            }
-            print("Received answer from client")
-            return Response(status=200)
-    except Exception as e:
-        print(f"Error handling answer: {e}")
-        return Response(status=400)
-    return Response(status=400)
-
-@socketio.on("ice-candidate")
-def ice_candidate():
-    try:
-        candidate = {
-            "candidate": request.form['candidate'],
-            "sdpMid": request.form['sdpMid'],
-            "sdpMLineIndex": request.form['sdpMLineIndex']
-        }
-        if "candidates" not in data:
-            data["candidates"] = []
-        data["candidates"].append(candidate)
-        print("Received ICE candidate")
-        return Response(status=200)
+        print(f"Received ICE candidate from {request.sid}")
+        # Forward the ICE candidate to the appropriate peer
+        socketio.emit('ice-candidate', data, room=request.sid)
     except Exception as e:
         print(f"Error handling ICE candidate: {e}")
-        return Response(status=400)
+        return {'error': str(e)}
 
 @socketio.on("get_offer")
 def getOffer():

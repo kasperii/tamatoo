@@ -22,23 +22,62 @@
         
         console.log('Connecting to server at:', serverUrl);
         
+        // Disconnect any existing socket
+        if (socket) {
+            socket.disconnect();
+        }
+        
         socket = io(serverUrl, {
-            transports: ['websocket', 'polling'],
-            reconnectionAttempts: 5,
-            reconnectionDelay: 1000
+            transports: ['websocket'],
+            reconnectionAttempts: 3,
+            reconnectionDelay: 1000,
+            timeout: 10000,
+            forceNew: false,
+            path: '/socket.io/',
+            extraHeaders: {
+                'Access-Control-Allow-Origin': '*'
+            }
         });
         
         socket.on('connect', () => {
             console.log('Connected to signaling server');
+            isStreaming = false; // Reset streaming state on new connection
         });
 
         socket.on('connect_error', (error) => {
             console.error('Connection error:', error);
+            isStreaming = false;
         });
 
         socket.on('disconnect', (reason) => {
             console.log('Disconnected from signaling server:', reason);
+            isStreaming = false;
             stopVideo();
+        });
+
+        // Handle WebRTC signaling events
+        socket.on('get_answer', async (answer) => {
+            if (answer && peerConnection) {
+                try {
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+                    console.log('Set remote description successfully');
+                    isStreaming = true;
+                } catch (error) {
+                    console.error('Error setting remote description:', error);
+                    isStreaming = false;
+                }
+            }
+        });
+
+        socket.on('ice-candidate', async (candidate) => {
+            if (candidate && peerConnection) {
+                try {
+                    await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+                    console.log('Added ICE candidate successfully');
+                } catch (error) {
+                    console.error('Error adding ICE candidate:', error);
+                }
+            }
         });
     });
 
@@ -104,6 +143,7 @@
         stopVideo();
         if (socket) {
             socket.disconnect();
+            socket = null;
         }
     });
 </script>
