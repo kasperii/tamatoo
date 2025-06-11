@@ -226,11 +226,10 @@ async function sendSimpleWheel_pos() {
  let stateGamepad = {
      leftAxis: { x: 0, y: 0 },
      rightAxis: { x: 0, y: 0 },
-     button: {right: null, left: null},
+     button: {right: null, left: null, right2: null, left2: null},
      right: 0,
      left: 0,
      speedtoggle: 1
-
  };
 
 
@@ -264,54 +263,50 @@ async function sendSimpleWheel_pos() {
 
  function R1Pressed(event) {
      console.log("R1 pressed:", event.detail);
-     if (stateGamepad.button["right"] !== event.detail) {
-         if (event.detail) {  // Button is pressed
-             stateGamepad.right = 500;  // Fast turn right
-         } else {  // Button is released
-             stateGamepad.right = 0;
-         }
-         stateGamepad.button["right"] = event.detail;
-         console.log("Updated right value:", stateGamepad.right);
+     if (event.detail) {  // Button is pressed
+         stateGamepad.right = 500;  // Fast turn right
+         stateGamepad.button.right = true;
+     } else {  // Button is released
+         stateGamepad.right = 0;
+         stateGamepad.button.right = false;
      }
+     console.log("Updated right value:", stateGamepad.right);
  }
 
  function L1Pressed(event) {
      console.log("L1 pressed:", event.detail);
-     if (stateGamepad.button["left"] !== event.detail) {
-         if (event.detail) {  // Button is pressed
-             stateGamepad.left = -500;  // Fast turn left
-         } else {  // Button is released
-             stateGamepad.left = 0;
-         }
-         stateGamepad.button["left"] = event.detail;
-         console.log("Updated left value:", stateGamepad.left);
+     if (event.detail) {  // Button is pressed
+         stateGamepad.left = -500;  // Fast turn left
+         stateGamepad.button.left = true;
+     } else {  // Button is released
+         stateGamepad.left = 0;
+         stateGamepad.button.left = false;
      }
+     console.log("Updated left value:", stateGamepad.left);
  }
 
  function R2Pressed(event) {
      console.log("R2 pressed:", event.detail);
-     if (stateGamepad.button["right2"] !== event.detail) {
-         if (event.detail) {  // Button is pressed
-             stateGamepad.right = 200;  // Slow turn right
-         } else {  // Button is released
-             stateGamepad.right = 0;
-         }
-         stateGamepad.button["right2"] = event.detail;
-         console.log("Updated right2 value:", stateGamepad.right);
+     if (event.detail) {  // Button is pressed
+         stateGamepad.right = 200;  // Slow turn right
+         stateGamepad.button.right2 = true;
+     } else {  // Button is released
+         stateGamepad.right = 0;
+         stateGamepad.button.right2 = false;
      }
+     console.log("Updated right2 value:", stateGamepad.right);
  }
 
  function L2Pressed(event) {
      console.log("L2 pressed:", event.detail);
-     if (stateGamepad.button["left2"] !== event.detail) {
-         if (event.detail) {  // Button is pressed
-             stateGamepad.left = -200;  // Slow turn left
-         } else {  // Button is released
-             stateGamepad.left = 0;
-         }
-         stateGamepad.button["left2"] = event.detail;
-         console.log("Updated left2 value:", stateGamepad.left);
+     if (event.detail) {  // Button is pressed
+         stateGamepad.left = -200;  // Slow turn left
+         stateGamepad.button.left2 = true;
+     } else {  // Button is released
+         stateGamepad.left = 0;
+         stateGamepad.button.left2 = false;
      }
+     console.log("Updated left2 value:", stateGamepad.left);
  }
 
  function calculateVectorInfo(x, y) {
