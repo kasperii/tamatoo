@@ -1,120 +1,76 @@
 <script>
- import PS5 from "./layouts/PS5.js";
- import { onMount, createEventDispatcher } from "svelte";
- import { addGamepad } from "./gamepadController.js";
+    import { onMount, createEventDispatcher } from "svelte";
+    import { addGamepad } from "./gamepadController.js";
+    import PS5 from "./layouts/PS5.js";
 
- export let gamepadIndex = 0;
- export let stickThreshold = 0.2; // default threshold
+    export let gamepadIndex = 0;
+    export let stickThreshold = 0.2;
 
- const dispatch = createEventDispatcher();
- let gamepadState = null;
+    const dispatch = createEventDispatcher();
+    let gamepadState = null;
 
- function onChange(state) {
-     console.log("Gamepad state changed:", state);
-     
-     // Handle sticks
-     if (state.axes) {
-         console.log("Dispatching stick events:", {
-             left: state.axes.LeftStick,
-             right: state.axes.RightStick
-         });
-         dispatch("leftstick", state.axes.LeftStick);
-         dispatch("rightstick", state.axes.RightStick);
-     }
+    function onChange(newGamepadState) {
+        if (!gamepadState) {
+            dispatch("Connected", { gamepadIndex });
+        }
 
-     // Handle buttons
-     if (state.buttons) {
-         // L1/R1 (fast turns)
-         if (state.buttons.L1?.pressed) {
-             dispatch("l1pressed", true);
-         } else if (state.buttons.L1?.pressed === false) {
-             dispatch("l1pressed", false);
-         }
-         
-         if (state.buttons.R1?.pressed) {
-             dispatch("r1pressed", true);
-         } else if (state.buttons.R1?.pressed === false) {
-             dispatch("r1pressed", false);
-         }
+        // handle buttons
+        Object.keys(newGamepadState.buttons).forEach(key => {
+            const button = newGamepadState.buttons[key];
 
-         // L2/R2 (slow turns)
-         if (state.buttons.L2?.pressed) {
-             dispatch("l2pressed", true);
-         } else if (state.buttons.L2?.pressed === false) {
-             dispatch("l2pressed", false);
-         }
-         
-         if (state.buttons.R2?.pressed) {
-             dispatch("r2pressed", true);
-         } else if (state.buttons.R2?.pressed === false) {
-             dispatch("r2pressed", false);
-         }
-     }
- }
+            if (button && button.pressed) {
+                dispatch(key, button); // e.g. "RT" , {pressed: true, value: 0.2}
+            }
 
- const args = {
-     layout: PS5,
-     onChange,
-     stickThreshold
- };
+            // Send null when player stops pressing button
+            // Needs to check if the previous state is marked as pressed
+            if (
+                button &&
+                !button.pressed &&
+                gamepadState &&
+                gamepadState.buttons[key].pressed
+            ) {
+                dispatch(key, null);
+            }
+        });
 
- onMount(() => {
-     console.log("Gamepad component mounted");
-     const cleanup = addGamepad(gamepadIndex, {
-         layout: PS5,
-         onChange,
-         stickThreshold
-     });
-     return cleanup;
- });
+        // handle axes
+        Object.keys(newGamepadState.axes).forEach(key => {
+            const axis = newGamepadState.axes[key];
 
- function gamepadLoop() {
-     if (!gamepadState) {
-         console.log("No gamepad connected, checking for gamepads...");
-         const gamepads = navigator.getGamepads();
-         for (const gamepad of gamepads) {
-             if (gamepad) {
-                 console.log("Found connected gamepad:", gamepad);
-                 gamepadState = gamepad;
-                 break;
-             }
-         }
-         if (!gamepadState) {
-             console.log("No gamepads found");
-             return;
-         }
-     }
+            if (axis) {
+                dispatch(key, axis); // e.g. "LeftStick" , {x: 10, y:0}
+            }
+        });
 
-     // Get the current gamepad state
-     const gamepad = navigator.getGamepads()[gamepadState.index];
-     if (!gamepad) {
-         console.log("Gamepad not found in getGamepads()");
-         return;
-     }
+        gamepadState = { ...newGamepadState };
+    }
 
-     // Check for button changes
-     gamepad.buttons.forEach((button, index) => {
-         const key = buttonMap[index];
-         if (key) {
-             const wasPressed = gamepadState.buttons[index]?.pressed;
-             const isPressed = button.pressed;
-             
-             if (isPressed !== wasPressed) {
-                 console.log(`Button ${key} (index ${index}) state changed:`, {
-                     wasPressed,
-                     isPressed,
-                     value: button.value
-                 });
-                 
-                 if (isPressed) {
-                     console.log(`Dispatching ${key} pressed event`);
-                     dispatch(`${key.toLowerCase()}pressed`, { detail: true });
-                 } else {
-                     console.log(`Dispatching ${key} released event`);
-                     dispatch(`${key.toLowerCase()}pressed`, { detail: false });
-                 }
-             }
-         }
-     });
- }
+    const args = {
+        layout: PS5,
+        onChange,
+        stickThreshold
+    };
+
+    onMount(() => {
+        const cleanup = addGamepad(gamepadIndex, args);
+        return cleanup;
+    });
 </script>
+
+{#if gamepadState}
+    {#if gamepadState.axes}
+        <div style="display: none"
+            on:leftstick={e => e.detail = gamepadState.axes.LeftStick}
+            on:rightstick={e => e.detail = gamepadState.axes.RightStick}
+        />
+    {/if}
+    {#if gamepadState.buttons}
+        <div style="display: none"
+            on:l1pressed={e => e.detail = gamepadState.buttons.L1?.pressed}
+            on:r1pressed={e => e.detail = gamepadState.buttons.R1?.pressed}
+            on:l2pressed={e => e.detail = gamepadState.buttons.L2?.pressed}
+            on:r2pressed={e => e.detail = gamepadState.buttons.R2?.pressed}
+        />
+    {/if}
+{/if}
