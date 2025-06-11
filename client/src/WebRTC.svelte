@@ -1,93 +1,53 @@
 <script>
     import { onMount, onDestroy } from 'svelte';
-    import { io } from 'socket.io-client';
 
-    let socket;
-    let peerConnection;
     let videoElement;
-    let isConnected = false;
+    let peerConnection;
     let isStreaming = false;
 
-    const configuration = {
+    const ICE_SERVERS = {
         iceServers: [
             { urls: 'stun:stun.l.google.com:19302' }
         ]
     };
 
-    onMount(() => {
-        socket = io('http://localhost:5050');
-        setupSocketListeners();
-    });
-
-    onDestroy(() => {
-        if (socket) socket.disconnect();
-        if (peerConnection) peerConnection.close();
-    });
-
-    function setupSocketListeners() {
-        socket.on('connect', () => {
-            console.log('Connected to signaling server');
-        });
-
-        socket.on('disconnect', () => {
-            console.log('Disconnected from signaling server');
-            isConnected = false;
-        });
-    }
-
-    async function startStream() {
+    async function startVideo() {
         try {
-            // Create peer connection
-            peerConnection = new RTCPeerConnection(configuration);
+            if (!peerConnection) {
+                peerConnection = new RTCPeerConnection(ICE_SERVERS);
+                
+                // Handle incoming tracks
+                peerConnection.ontrack = (event) => {
+                    if (videoElement && event.streams[0]) {
+                        videoElement.srcObject = event.streams[0];
+                    }
+                };
 
-            // Handle ICE candidates
-            peerConnection.onicecandidate = (event) => {
-                if (event.candidate) {
-                    socket.emit('ice-candidate', {
-                        candidate: event.candidate.candidate,
-                        sdpMid: event.candidate.sdpMid,
-                        sdpMLineIndex: event.candidate.sdpMLineIndex
-                    });
+                // Create and send offer
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+
+                // Send offer to server
+                const response = await fetch('/webrtc/offer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(offer)
+                });
+
+                if (response.ok) {
+                    const answer = await response.json();
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+                    isStreaming = true;
                 }
-            };
-
-            // Handle incoming tracks
-            peerConnection.ontrack = (event) => {
-                if (videoElement) {
-                    videoElement.srcObject = event.streams[0];
-                }
-            };
-
-            // Create and send offer
-            const offer = await peerConnection.createOffer();
-            await peerConnection.setLocalDescription(offer);
-
-            socket.emit('offer', {
-                type: offer.type,
-                sdp: offer.sdp
-            });
-
-            // Handle answer
-            socket.on('answer', async (answer) => {
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-                isStreaming = true;
-            });
-
-            // Handle ICE candidates from server
-            socket.on('ice-candidate', async (candidate) => {
-                try {
-                    await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-                } catch (e) {
-                    console.error('Error adding ICE candidate:', e);
-                }
-            });
-
+            }
         } catch (error) {
-            console.error('Error starting stream:', error);
+            console.error('Error starting video:', error);
         }
     }
 
-    function stopStream() {
+    function stopVideo() {
         if (peerConnection) {
             peerConnection.close();
             peerConnection = null;
@@ -97,6 +57,10 @@
         }
         isStreaming = false;
     }
+
+    onDestroy(() => {
+        stopVideo();
+    });
 </script>
 
 <div class="video-container">
@@ -109,8 +73,8 @@
         muted
     ></video>
     <div class="controls">
-        <button on:click={startStream} disabled={isStreaming}>Start Stream</button>
-        <button on:click={stopStream} disabled={!isStreaming}>Stop Stream</button>
+        <button on:click={startVideo} disabled={isStreaming}>Start Stream</button>
+        <button on:click={stopVideo} disabled={!isStreaming}>Stop Stream</button>
     </div>
 </div>
 
