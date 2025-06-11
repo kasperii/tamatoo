@@ -234,24 +234,45 @@ async function sendSimpleWheel_pos() {
 
  // Reactive declarations for gamepad state
  $: if (stateGamepad.leftAxis) {
-     let newDegrees = calculateVectorInfo(stateGamepad.leftAxis.x, stateGamepad.leftAxis.y).angleDegrees;
-     let newSpeed = Math.min(calculateVectorInfo(stateGamepad.leftAxis.x, stateGamepad.leftAxis.y).vectorLength * stateGamepad.speedtoggle, 1) * speed;
+     const deadzone = 0.1;
+     const x = Math.abs(stateGamepad.leftAxis.x) < deadzone ? 0 : stateGamepad.leftAxis.x;
+     const y = Math.abs(stateGamepad.leftAxis.y) < deadzone ? 0 : stateGamepad.leftAxis.y;
      
-     stateTama = {
-         ...stateTama,
-         speed: Math.round(newSpeed),
-         direction: Math.round(newDegrees)
-     };
+     // If both axes are in deadzone, ensure speed is 0
+     if (Math.abs(stateGamepad.leftAxis.x) < deadzone && Math.abs(stateGamepad.leftAxis.y) < deadzone) {
+         stateTama = {
+             ...stateTama,
+             speed: 0
+         };
+     } else {
+         let newDegrees = calculateVectorInfo(x, y).angleDegrees;
+         let newSpeed = Math.min(calculateVectorInfo(x, y).vectorLength * stateGamepad.speedtoggle, 1) * speed;
+         
+         stateTama = {
+             ...stateTama,
+             speed: Math.round(newSpeed),
+             direction: Math.round(newDegrees)
+         };
+     }
  }
 
  $: if (stateGamepad.rightAxis) {
      // Add deadzone to prevent small values from causing rotation
      const deadzone = 0.1;
      const x = Math.abs(stateGamepad.rightAxis.x) < deadzone ? 0 : stateGamepad.rightAxis.x;
-     stateTama = {
-         ...stateTama,
-         rotation: Math.round(x * 500)
-     };
+     
+     // If we're in the deadzone, ensure rotation is 0
+     if (Math.abs(stateGamepad.rightAxis.x) < deadzone) {
+         stateTama = {
+             ...stateTama,
+             rotation: 0
+         };
+     } else {
+         stateTama = {
+             ...stateTama,
+             rotation: Math.round(x * 500)
+         };
+     }
  }
 
  // Reactive statement to send updates when state changes
@@ -841,6 +862,19 @@ function updateKeyMovement() {
      }
  }
 
+ function XPressed(event) {
+     console.log("X pressed event received:", event.detail);
+     if (event.detail) {  // Button is pressed
+         console.log("Sending zero movement update");
+         stateTama = {
+             speed: 0,
+             direction: 0,
+             rotation: 0
+         };
+         sendOmniWheel({s: 0, d: 0, r: 0});
+     }
+ }
+
 </script>
 
 
@@ -919,6 +953,7 @@ function updateKeyMovement() {
     on:R2={R2Pressed}
     on:L2={L2Pressed}
     on:R3={RSPressed}
+    on:Cross={XPressed}
 />
 
     <!--
