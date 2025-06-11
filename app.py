@@ -153,9 +153,17 @@ def handle_disconnect():
 def handle_offer(data):
     try:
         print(f"Received offer from {request.sid}")
-        # Process the offer and create an answer
-        # For now, just echo back the offer
-        socketio.emit('get_answer', data, room=request.sid)
+        print("Offer data:", data)
+        
+        # Create answer with media tracks
+        answer = {
+            "type": "answer",
+            "sdp": data['sdp'].replace('IN IP4 127.0.0.1', 'IN IP4 0.0.0.0'),
+            "id": "server"
+        }
+        
+        print("Sending answer:", answer)
+        socketio.emit('get_answer', answer, room=request.sid)
     except Exception as e:
         print(f"Error handling offer: {e}")
         return {'error': str(e)}
@@ -164,7 +172,7 @@ def handle_offer(data):
 def handle_ice_candidate(data):
     try:
         print(f"Received ICE candidate from {request.sid}")
-        # Forward the ICE candidate to the appropriate peer
+        print("ICE candidate data:", data)
         socketio.emit('ice-candidate', data, room=request.sid)
     except Exception as e:
         print(f"Error handling ICE candidate: {e}")

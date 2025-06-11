@@ -84,18 +84,23 @@
     async function startVideo() {
         try {
             if (!peerConnection) {
+                console.log('Creating new peer connection');
                 peerConnection = new RTCPeerConnection(ICE_SERVERS);
                 
                 // Handle incoming tracks
                 peerConnection.ontrack = (event) => {
+                    console.log('Received track:', event.track.kind);
                     if (videoElement && event.streams[0]) {
+                        console.log('Setting video stream');
                         videoElement.srcObject = event.streams[0];
+                        videoElement.play().catch(e => console.error('Error playing video:', e));
                     }
                 };
 
                 // Handle ICE candidates
                 peerConnection.onicecandidate = (event) => {
                     if (event.candidate) {
+                        console.log('Sending ICE candidate');
                         socket.emit('ice-candidate', {
                             candidate: event.candidate.candidate,
                             sdpMid: event.candidate.sdpMid,
@@ -104,23 +109,28 @@
                     }
                 };
 
+                peerConnection.oniceconnectionstatechange = () => {
+                    console.log('ICE connection state:', peerConnection.iceConnectionState);
+                };
+
+                peerConnection.onconnectionstatechange = () => {
+                    console.log('Connection state:', peerConnection.connectionState);
+                };
+
                 // Create and send offer
-                const offer = await peerConnection.createOffer();
+                console.log('Creating offer');
+                const offer = await peerConnection.createOffer({
+                    offerToReceiveAudio: true,
+                    offerToReceiveVideo: true
+                });
                 await peerConnection.setLocalDescription(offer);
 
                 // Send offer to server
+                console.log('Sending offer');
                 socket.emit('offer', {
                     type: offer.type,
                     sdp: offer.sdp,
                     id: 'client'
-                });
-
-                // Handle answer
-                socket.on('get_answer', async (answer) => {
-                    if (answer) {
-                        await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-                        isStreaming = true;
-                    }
                 });
             }
         } catch (error) {
@@ -130,10 +140,12 @@
 
     function stopVideo() {
         if (peerConnection) {
+            console.log('Closing peer connection');
             peerConnection.close();
             peerConnection = null;
         }
         if (videoElement) {
+            console.log('Clearing video stream');
             videoElement.srcObject = null;
         }
         isStreaming = false;
