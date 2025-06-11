@@ -262,51 +262,59 @@ async function sendSimpleWheel_pos() {
  }
 
  function R1Pressed(event) {
-     console.log("R1 pressed:", event.detail);
+     console.log("R1 pressed event received:", event.detail);
      if (event.detail) {  // Button is pressed
+         console.log("Setting R1 rotation to 500");
          stateGamepad.right = 500;  // Fast turn right
          stateGamepad.button.right = true;
      } else {  // Button is released
+         console.log("Resetting R1 rotation to 0");
          stateGamepad.right = 0;
          stateGamepad.button.right = false;
      }
-     console.log("Updated right value:", stateGamepad.right);
+     console.log("Updated gamepad state:", stateGamepad);
  }
 
  function L1Pressed(event) {
-     console.log("L1 pressed:", event.detail);
+     console.log("L1 pressed event received:", event.detail);
      if (event.detail) {  // Button is pressed
+         console.log("Setting L1 rotation to -500");
          stateGamepad.left = -500;  // Fast turn left
          stateGamepad.button.left = true;
      } else {  // Button is released
+         console.log("Resetting L1 rotation to 0");
          stateGamepad.left = 0;
          stateGamepad.button.left = false;
      }
-     console.log("Updated left value:", stateGamepad.left);
+     console.log("Updated gamepad state:", stateGamepad);
  }
 
  function R2Pressed(event) {
-     console.log("R2 pressed:", event.detail);
+     console.log("R2 pressed event received:", event.detail);
      if (event.detail) {  // Button is pressed
+         console.log("Setting R2 rotation to 200");
          stateGamepad.right = 200;  // Slow turn right
          stateGamepad.button.right2 = true;
      } else {  // Button is released
+         console.log("Resetting R2 rotation to 0");
          stateGamepad.right = 0;
          stateGamepad.button.right2 = false;
      }
-     console.log("Updated right2 value:", stateGamepad.right);
+     console.log("Updated gamepad state:", stateGamepad);
  }
 
  function L2Pressed(event) {
-     console.log("L2 pressed:", event.detail);
+     console.log("L2 pressed event received:", event.detail);
      if (event.detail) {  // Button is pressed
+         console.log("Setting L2 rotation to -200");
          stateGamepad.left = -200;  // Slow turn left
          stateGamepad.button.left2 = true;
      } else {  // Button is released
+         console.log("Resetting L2 rotation to 0");
          stateGamepad.left = 0;
          stateGamepad.button.left2 = false;
      }
-     console.log("Updated left2 value:", stateGamepad.left);
+     console.log("Updated gamepad state:", stateGamepad);
  }
 
  function calculateVectorInfo(x, y) {

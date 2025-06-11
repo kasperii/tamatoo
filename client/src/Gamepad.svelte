@@ -17,8 +17,10 @@
      // handle buttons
      Object.keys(newGamepadState.buttons).forEach(key => {
          const button = newGamepadState.buttons[key];
+         console.log(`Button ${key}:`, button); // Debug log
 
          if (button && button.pressed) {
+             console.log(`Dispatching ${key} pressed event`); // Debug log
              dispatch(key, button); // e.g. "RT" , {pressed: true, value: 0.2}
          }
 
@@ -30,6 +32,7 @@
              gamepadState &&
              gamepadState.buttons[key].pressed
          ) {
+             console.log(`Dispatching ${key} released event`); // Debug log
              dispatch(key, null);
          }
      });
