@@ -222,18 +222,37 @@ async function sendSimpleWheel_pos() {
      console.log(`Gamepad ${event.detail.gamepadIndex} connected`);
  }
 
+ function LeftStick(event) { 
+     console.log("Left stick event received:", event.detail);
+     stateGamepad.leftAxis = event.detail;
+ }
+
+ function RightStick(event) { 
+     console.log("Right stick event received:", event.detail);
+     stateGamepad.rightAxis = event.detail;
+ }
+
  // Reactive declarations for gamepad state
  $: if (stateGamepad.leftAxis) {
-     stateTama.speed = Math.round(stateGamepad.leftAxis.y * -500); // Inverted for natural control
-     stateTama.direction = Math.round(stateGamepad.leftAxis.x * 500);
+     console.log("Updating stateTama from leftAxis:", stateGamepad.leftAxis);
+     stateTama = {
+         ...stateTama,
+         speed: Math.round(stateGamepad.leftAxis.y * -500), // Inverted for natural control
+         direction: Math.round(stateGamepad.leftAxis.x * 500)
+     };
  }
 
  $: if (stateGamepad.rightAxis) {
-     stateTama.rotation = Math.round(stateGamepad.rightAxis.x * 500);
+     console.log("Updating stateTama from rightAxis:", stateGamepad.rightAxis);
+     stateTama = {
+         ...stateTama,
+         rotation: Math.round(stateGamepad.rightAxis.x * 500)
+     };
  }
 
  // Reactive statement to send updates when state changes
  $: {
+     console.log("Checking stateTama:", stateTama);
      let obj = {
          s: stateTama.speed,
          d: stateTama.direction,
@@ -245,14 +264,6 @@ async function sendSimpleWheel_pos() {
          sendOmniWheel(obj);
          lastUpdate = obj;
      }
- }
-
- function LeftStick(event) { 
-     stateGamepad.leftAxis = event.detail;
- }
-
- function RightStick(event) { 
-     stateGamepad.rightAxis = event.detail;
  }
 
  function RSPressed(event) {
