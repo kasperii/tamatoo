@@ -7,6 +7,11 @@ import time
 from flask_socketio import SocketIO,emit,send
 import platform
 import subprocess
+import os
+import signal
+import threading
+import queue
+import atexit
 
 mac = False
 if (platform.system() == "Darwin"):
@@ -39,284 +44,185 @@ socketio = SocketIO(app,  cors_allowed_origins="*", async_mode='threading') #
 # the uv4l and the client side javascript
 data = {}
 
-# checking if connected
+# Global variables for WebRTC
+webrtc_process = None
+webrtc_queue = queue.Queue()
+
+def start_webrtc_stream():
+    global webrtc_process
+    
+    # GStreamer pipeline for WebRTC with audio
+    pipeline = """
+    gst-launch-1.0 -v \
+        v4l2src device=/dev/video0 ! \
+        video/x-raw,width=1280,height=720,framerate=30/1 ! \
+        videoconvert ! \
+        x264enc tune=zerolatency bitrate=1000 speed-preset=ultrafast ! \
+        video/x-h264,profile=baseline ! \
+        h264parse ! \
+        rtph264pay config-interval=1 pt=96 ! \
+        queue ! \
+        webrtcbin name=webrtc \
+        alsasrc device=hw:3 ! \
+        audioconvert ! \
+        audio/x-raw,channels=2,rate=48000 ! \
+        opusenc ! \
+        rtpopuspay ! \
+        queue ! \
+        webrtc. \
+        webrtc. ! \
+        rtpjitterbuffer ! \
+        rtpopusdepay ! \
+        opusdec ! \
+        audioconvert ! \
+        alsasink device=hw:3
+    """
+    
+    try:
+        # Kill any existing webrtc process
+        if webrtc_process:
+            stop_webrtc_stream()
+        
+        # Start GStreamer pipeline
+        webrtc_process = subprocess.Popen(
+            pipeline,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            preexec_fn=os.setsid
+        )
+        print("WebRTC stream started successfully")
+        return True
+    except Exception as e:
+        print(f"Error starting WebRTC stream: {e}")
+        return False
+
+def stop_webrtc_stream():
+    global webrtc_process
+    if webrtc_process:
+        try:
+            os.killpg(os.getpgid(webrtc_process.pid), signal.SIGTERM)
+            webrtc_process = None
+            print("WebRTC stream stopped successfully")
+            return True
+        except Exception as e:
+            print(f"Error stopping WebRTC stream: {e}")
+    return False
+
+# Start WebRTC stream when the app starts
+@app.before_first_request
+def initialize():
+    start_webrtc_stream()
+
+# Clean up when the app shuts down
+@atexit.register
+def cleanup():
+    stop_webrtc_stream()
+
+# WebRTC signaling endpoints
 @socketio.on("connect")
 def connected():
     """event listener when client connects to the server"""
-    print(request.sid)
-    print("client has connected")
-    emit("connect",{"data":f"id: {request.sid} is connected"})
+    print(f"Client {request.sid} connected")
+    emit("connect", {"data": f"id: {request.sid} is connected"})
 
 @socketio.on("offer")
 def offer():
-    if request.form["type"] == "offer":
-        data["offer"] = {"id" : request.form['id'], "type" : request.form['type'], "sdp" : request.form['sdp']}
-        return Response(status=200)
-    else:
+    try:
+        if request.form["type"] == "offer":
+            data["offer"] = {
+                "id": request.form['id'],
+                "type": request.form['type'],
+                "sdp": request.form['sdp']
+            }
+            print("Received offer from client")
+            return Response(status=200)
+    except Exception as e:
+        print(f"Error handling offer: {e}")
         return Response(status=400)
+    return Response(status=400)
 
-socketio.on("answer")
+@socketio.on("answer")
 def answer():
-    if request.form["type"] == "answer":
-        data["answer"] = {"id" : request.form['id'], "type" : request.form['type'], "sdp" : request.form['sdp']}
+    try:
+        if request.form["type"] == "answer":
+            data["answer"] = {
+                "id": request.form['id'],
+                "type": request.form['type'],
+                "sdp": request.form['sdp']
+            }
+            print("Received answer from client")
+            return Response(status=200)
+    except Exception as e:
+        print(f"Error handling answer: {e}")
+        return Response(status=400)
+    return Response(status=400)
+
+@socketio.on("ice-candidate")
+def ice_candidate():
+    try:
+        candidate = {
+            "candidate": request.form['candidate'],
+            "sdpMid": request.form['sdpMid'],
+            "sdpMLineIndex": request.form['sdpMLineIndex']
+        }
+        if "candidates" not in data:
+            data["candidates"] = []
+        data["candidates"].append(candidate)
+        print("Received ICE candidate")
         return Response(status=200)
-    else:
+    except Exception as e:
+        print(f"Error handling ICE candidate: {e}")
         return Response(status=400)
 
-
-socketio.on("get_offer")
+@socketio.on("get_offer")
 def getOffer():
-    if "offer" in data:
-        j = json.dumps(data["offer"])
-        del data["offer"]
-        return Response(j, status=200, mimetype='application/json')
-    else:
-        return Response(status=503)
+    try:
+        if "offer" in data:
+            j = json.dumps(data["offer"])
+            del data["offer"]
+            print("Sending offer to client")
+            return Response(j, status=200, mimetype='application/json')
+    except Exception as e:
+        print(f"Error getting offer: {e}")
+    return Response(status=503)
 
-socketio.on("get_answer")
+@socketio.on("get_answer")
 def getAnswer():
-    if "answer" in data:
-        j = json.dumps(data["answer"])
-        del data["answer"]
-        return Response(j, status=200, mimetype='application/json')
-    else:
-        return Response(status=503)
+    try:
+        if "answer" in data:
+            j = json.dumps(data["answer"])
+            del data["answer"]
+            print("Sending answer to client")
+            return Response(j, status=200, mimetype='application/json')
+    except Exception as e:
+        print(f"Error getting answer: {e}")
+    return Response(status=503)
 
+@socketio.on("get_ice_candidates")
+def get_ice_candidates():
+    try:
+        if "candidates" in data and len(data["candidates"]) > 0:
+            j = json.dumps(data["candidates"])
+            data["candidates"] = []
+            print("Sending ICE candidates to client")
+            return Response(j, status=200, mimetype='application/json')
+    except Exception as e:
+        print(f"Error getting ICE candidates: {e}")
+    return Response(status=503)
 
+# Add routes to start/stop WebRTC stream
+@app.route("/start_stream", methods=["POST"])
+def start_stream():
+    if start_webrtc_stream():
+        return jsonify({"status": "success", "message": "WebRTC stream started"})
+    return jsonify({"status": "error", "message": "Failed to start WebRTC stream"}), 500
 
-
-
-# ------------UV4L----------------
-# Start UV4L and stop
-
-def startUv4l():
-    setting = "uv4l --auto-video_nr \
-                --server-option '–-bind-host-address=localhost' \
-                --server-option '--port=9000' \
-                --driver raspicam \
-                --encoding h264 \
-                --server-option '--enable-webrtc=yes' \
-                --server-option '--enable-webrtc-video=yes' \
-                --server-option '--webrtc-receive-video=no' \
-                --server-option '--enable-webrtc-audio=yes' \
-                --server-option '--webrtc-receive-audio=yes' \
-                --server-option '--webrtc-recdevice-index=3' \
-                --server-option '--webrtc-vad=yes' \
-                --server-option '--webrtc-echo-cancellation=yes' \
-                --server-option '--enable-webrtc-datachannels=yes' \
-                --server-option '--webrtc-datachannel-label=uv4'"
-    subprocess.call(setting, shell=True)
-    return
-def stopUv4l():
-    subprocess.call("pkill uv4l", shell=True)
-    return
-# ------------ffmpeg--------------
-#
-
-# from flask import stream_with_context, request, Response
-# import subprocess
-# import time
-
-
-
-# @app.route("/ffmpeg")
-# def ffmpegstream():
-#     ffmpeg_command = ["ffmpeg", "-f", "alsa", "-channels", "6", "-sample_rate", "16000" "-i", "hw:3", "-f", "mp3", "pipe:stdout"]
-#     ffmpeg_command = ["ffmpeg", "-f",  "alsa",  "-channels", "6",  "-sample_rate",  "16000",  "-i",  "hw:3",  "-b:v",  "40M",  "-maxrate 50M",  "-bufsize 200M",  "-field_order",  "tt",  "-fflags",  "nobuffer",  "-threads",  "1",  "-vcodec",  "mpeg4",  "-g",  "100",  "-r",  "30",  "-bf",  "0",  "-mbd",  "bits",  "-flags",  "+aic+mv4+low_delay",  "-thread_type",  "slice",  "-slices",  "1",  "-level",  "32",  "-strict",  "experimental",  "-f_strict",  "experimental",  "-syncpoints",  "none", "pipe:stdout"]
-#     #ffmpeg -f alsa -ac 4 -i default
-#     process = subprocess.Popen(ffmpeg_command, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, bufsize = -1)
-
-#     def generate():
-#         startTime = time.time()
-#         buffer = []
-#         sentBurst = False
-
-
-#         while True:
-#             # Get some data from ffmpeg
-#             line = process.stdout.read(1024)
-
-#             # We buffer everything before outputting it
-#             buffer.append(line)
-
-#             # Minimum buffer time, 3 seconds
-#             if sentBurst is False and time.time() > startTime + 3 and len(buffer) > 0:
-#                 sentBurst = True
-
-#                 for i in range(0, len(buffer) - 2):
-#                     print("Send initial burst #", i)
-#                     yield buffer.pop(0)
-
-#             elif time.time() > startTime + 3 and len(buffer) > 0:
-#                 yield buffer.pop(0)
-
-#             process.poll()
-#             if isinstance(process.returncode, int):
-#                 if process.returncode > 0:
-#                     print('FFmpeg Error', process.returncode)
-#                 break
-
-#     response = Response(stream_with_context(generate()), mimetype = "audio/mpeg")
-
-#     @response.call_on_close
-#     def on_close():
-#         process.kill()
-#     return response
-
-
-
-# -------------AUDIO---------------
-#
-# ffmpeg -f  alsa -channels 6 -sample_rate 16000 -i hw:3   -b:v 40M -maxrate 50M -bufsize 200M     -field_order tt -fflags nobuffer -threads 1     -vcodec mpeg4 -g 100 -r 30 -bf 0 -mbd bits -flags +aic+mv4+low_delay     -thread_type slice -slices 1 -level 32 -strict experimental -f_strict experimental     -syncpoints none -f nut "tcp://10.10.0.238:1234"
-# import pyaudio
-# import sounddevice
-# FORMAT = pyaudio.paInt16
-# CHANNELS = 2
-# RATE = 16000
-# CHUNK = 1024
-# RECORD_SECONDS = 5
-# audio1 = pyaudio.PyAudio()
-# # ReSpeaker 4 Mic Array (UAC1.0): USB Audio (hw:3,0): 1
-
-# def genHeader(sampleRate, bitsPerSample, channels):
-#     datasize = 2000*10**6
-#     o = bytes("RIFF",'ascii')                                               # (4byte) Marks file as RIFF
-#     o += (datasize + 36).to_bytes(4,'little')                               # (4byte) File size in bytes excluding this and RIFF marker
-#     o += bytes("WAVE",'ascii')                                              # (4byte) File type
-#     o += bytes("fmt ",'ascii')                                              # (4byte) Format Chunk Marker
-#     o += (16).to_bytes(4,'little')                                          # (4byte) Length of above format data
-#     o += (1).to_bytes(2,'little')                                           # (2byte) Format type (1 - PCM)
-#     o += (channels).to_bytes(2,'little')                                    # (2byte)
-#     o += (sampleRate).to_bytes(4,'little')                                  # (4byte)
-#     o += (sampleRate * channels * bitsPerSample // 8).to_bytes(4,'little')  # (4byte)
-#     o += (channels * bitsPerSample // 8).to_bytes(2,'little')               # (2byte)
-#     o += (bitsPerSample).to_bytes(2,'little')                               # (2byte)
-#     o += bytes("data",'ascii')                                              # (4byte) Data Chunk Marker
-#     o += (datasize).to_bytes(4,'little')                                    # (4byte) Data size in bytes
-#     return o
-
-
-# @app.route('/audio')
-# def audio():
-#     # start Recording
-#     def sound():
-
-#         CHUNK = 1024
-#         sampleRate = 16000
-#         bitsPerSample = 16
-#         channels = 6
-#         wav_header = genHeader(sampleRate, bitsPerSample, channels)
-
-#         stream = audio1.open(format=FORMAT, channels=CHANNELS,
-#                         rate=RATE, input=True,input_device_index=1,
-#                         frames_per_buffer=CHUNK)
-#         print("recording...")
-#         #frames = []
-#         first_run = True
-#         while True:
-#            if first_run:
-#                data = wav_header + stream.read(CHUNK)
-#                first_run = False
-#            else:
-#                data = stream.read(CHUNK)
-#            yield(data)
-
-#     return Response(sound())
-
-# from picamera2 import Picamera2, Preview
-# picam2 = Picamera2()
-# camera_config = picam2.create_preview_configuration()
-# picam2.configure(camera_config)
-# picam2.start_preview(Preview.DRM)
-# picam2.start()
-# time.sleep(2)
-# picam2.capture_file("testing.jpg")
-
-
-# ------ CAMERA funcs ------
-# import io
-# import logging
-# import socketserver
-# from http import server
-# from threading import Condition
-# from camera import VideoCamera
-# if(not mac):
-#     import picamera2 #camera module for RPi camera
-#     from picamera2 import Picamera2
-#     from picamera2.encoders import JpegEncoder
-#     from picamera2.outputs import FileOutput
-# import io
-# from threading import Condition
-
-
-# class StreamingOutput(io.BufferedIOBase):
-#     def __init__(self):
-#         self.frame = None
-#         self.condition = Condition()
-#         def write(self, buf):
-#           with self.condition:
-#               self.frame = buf
-#               self.condition.notify_all()
-
-# def genFrames():
-#     #buffer = StreamingOutput()
-#     if not mac:
-#         with picamera2.Picamera2() as camera:
-#             camera.configure(camera.create_video_configuration(main={"size": (1296,972)}))
-#             output = StreamingOutput()
-#             camera.start_recording(JpegEncoder(), FileOutput(output))
-#             while True:
-#                 with output.condition:
-#                     output.condition.wait()
-#                     frame = output.frame
-#                     yield (b'--frame\r\n'
-#                            b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-#     else:
-#         return
-
-
-
-# picam2 = Picamera2()
-# camera_config = picam2.create_preview_configuration()
-# picam2.configure(camera_config)
-# encoder = H264Encoder(1000000)
-
-# class StreamingOutput(io.BufferedIOBase):
-#     def __init__(self):
-#         self.frame = None
-#         self.condition = Condition()
-
-#     def write(self, buf):
-#         with self.condition:
-#             self.frame = buf
-#             self.condition.notify_all()
-
-
-# def gen(camera):
-#     while True:
-#         frame = camera.get_frame()
-#         yield (b'--frame\r\n'
-#                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n'
-#               )
-
-# @app.route('/video_feed')
-# def video_feed():
-#     return Response(genFrames(),
-#                     mimetype='multipart/x-mixed-replace; boundary=frame')
-
-    #buffer = StreamingOutput()
-    # while True:
-    #     with Picamera2() as camera:
-    #         camera.configure(camera.create_video_configuration(main={"size": (640, 480)}))
-    #         output = StreamingOutput()
-    #         camera.start_recording(JpegEncoder(), FileOutput(output))
-    #     yield (b'--frame\r\n'
-    #         b'Content-Type: image/jpeg\r\n\r\n' + output.frame + b'\r\n')
-
-
-
-
-
+@app.route("/stop_stream", methods=["POST"])
+def stop_stream():
+    if stop_webrtc_stream():
+        return jsonify({"status": "success", "message": "WebRTC stream stopped"})
+    return jsonify({"status": "error", "message": "Failed to stop WebRTC stream"}), 500
 
 ############ MAIN SVELTE AND WEBSITE
 

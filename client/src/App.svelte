@@ -8,6 +8,7 @@
  // This is for establishing connection with UV4L for video chat
  import Signaling from './Signaling.svelte';
  import { onMount } from 'svelte';
+ import WebRTC from './WebRTC.svelte';
 
 
 
@@ -879,10 +880,9 @@ function updateKeyMovement() {
     -->
 
     <div class="blur-container">
-        <video class="underlay" id="tamaview"> </video>
-        <!-- <video class="overlay" id="tamablur" style="clip-path: circle(40% at {blurPoint[0]}% {blurPoint[1]}%)"></video> -->
+        <WebRTC />
         <div class="focus" style="-webkit-mask: radial-gradient(circle at {blurPoint[0]}% {blurPoint[1]}%, #00000000 250px, rgba(0, 0, 0, 0.9) 0px);"></div>
-        <img class="overlay" on:mousedown={onMouseDown}>
+        <img class="overlay" on:mousedown={onMouseDown} alt="Overlay">
     </div>
     <!-- <audio controls>
          <source src="./ffmpeg" type="audio/mpeg">
@@ -959,36 +959,30 @@ function updateKeyMovement() {
 
      .blur-container {
          position: relative;
-         width: 60vw;
-         height: 45vw;
-         margin: auto;
+         width: 100%;
+         height: 100vh;
          overflow: hidden;
      }
 
-     .blur-container img {
+     .focus {
+         position: absolute;
+         top: 0;
+         left: 0;
+         width: 100%;
+         height: 100%;
+         pointer-events: none;
+     }
+
+     .overlay {
+         position: absolute;
+         top: 0;
+         left: 0;
          width: 100%;
          height: 100%;
          object-fit: cover;
+         pointer-events: none;
+     }
 
-     }
-     .blur-container .underlay {
-         position: absolute;
- 	     top: 0;
-  	     left: 0;
-
-         transform: scale(1.06);
-     }
-     .blur-container .overlay {
-         position: absolute;
- 	     top: 0;
-  	     left: 0;
-     }
-     .focus{
-
-         width: 100%;
-         height: 100%;
-         backdrop-filter: blur(4px);
-     }
      #topbar{
          width: 100%;
      }
