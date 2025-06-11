@@ -245,12 +245,10 @@ async function sendSimpleWheel_pos() {
  }
 
  $: if (stateGamepad.rightAxis) {
-     let vectorInfo = calculateVectorInfo(stateGamepad.rightAxis.x, stateGamepad.rightAxis.y);
-     // Use vector length for speed but preserve X sign for direction
-     let rotationSpeed = Math.round(vectorInfo.vectorLength * 500);
+     // Directly use X value for rotation, scaled to 500
      stateTama = {
          ...stateTama,
-         rotation: Math.sign(stateGamepad.rightAxis.x) * rotationSpeed
+         rotation: Math.round(stateGamepad.rightAxis.x * 500)
      };
  }
 
@@ -373,11 +371,13 @@ async function sendSimpleWheel_pos() {
          stateTama.speed = newSpeed;
      }
      
-     // Handle rotation
-     if(newSpeed == 0){
-         stateTama.rotation = stateGamepad.right + stateGamepad.left
-     }else{
-         stateTama.rotation = (stateGamepad.right + stateGamepad.left)*0.75
+     // Only handle button rotation if right stick is centered
+     if (Math.abs(stateGamepad.rightAxis.x) < 0.1) {
+         if(newSpeed == 0){
+             stateTama.rotation = stateGamepad.right + stateGamepad.left
+         }else{
+             stateTama.rotation = (stateGamepad.right + stateGamepad.left)*0.75
+         }
      }
      
      // Update direction
