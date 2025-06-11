@@ -218,6 +218,10 @@ async function sendSimpleWheel_pos() {
      speedtoggle: 1
  };
 
+ function gamepadConnected(event) {
+     console.log(`Gamepad ${event.detail.gamepadIndex} connected`);
+ }
+
  // Reactive declarations for gamepad state
  $: if (stateGamepad.leftAxis) {
      stateTama.speed = Math.round(stateGamepad.leftAxis.y * -500); // Inverted for natural control
