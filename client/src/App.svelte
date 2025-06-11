@@ -210,8 +210,13 @@ async function sendSimpleWheel_pos() {
  let lastUpdate = {s: 0,d: 0,r: 0}
 
      $: {
-         let obj = {s: stateTama.speed,d: stateTama.direction,r: stateTama.rotation};
+         let obj = {
+             s: stateTama.speed,
+             d: stateTama.direction,
+             r: stateTama.rotation
+         };
          if (JSON.stringify(lastUpdate) != JSON.stringify(obj)){
+             console.log("Sending movement update:", obj);
              sendOmniWheel(obj);
              lastUpdate = obj;
          }
@@ -238,9 +243,22 @@ async function sendSimpleWheel_pos() {
  }
 
 
- function LeftStick(event) { stateGamepad.leftAxis = event.detail; }
+ function LeftStick(event) { 
+     stateGamepad.leftAxis = event.detail;
+     // Map left stick Y axis to speed (forward/backward)
+     // -1 (up) to 1 (down) mapped to -500 to 500
+     stateTama.speed = Math.round(event.detail.y * 500);
+     // Map left stick X axis to direction (strafing)
+     // -1 (left) to 1 (right) mapped to -500 to 500
+     stateTama.direction = Math.round(event.detail.x * 500);
+ }
 
- function RightStick(event) { stateGamepad.rightAxis = event.detail; }
+ function RightStick(event) { 
+     stateGamepad.rightAxis = event.detail;
+     // Map right stick X axis to rotation
+     // -1 (left) to 1 (right) mapped to -500 to 500
+     stateTama.rotation = Math.round(event.detail.x * 500);
+ }
 
  function RSPressed(event) {
      if (stateGamepad.speedtoggle === 1) {
