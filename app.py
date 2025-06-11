@@ -12,6 +12,7 @@ import signal
 import threading
 import queue
 import atexit
+from flask_cors import CORS
 
 mac = False
 if (platform.system() == "Darwin"):
@@ -33,12 +34,9 @@ if (platform.system() == "Darwin"):
 
 # https://wiki.seeedstudio.com/ReSpeaker-USB-Mic-Array/
 
-app = Flask(__name__)
-
-
-############## SOCKETS AND WEBRTC ##############
-app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app,  cors_allowed_origins="*", async_mode='threading') #
+app = Flask(__name__, static_folder='client/public')
+CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 # this is the placeholder data for the handshake betweeen
 # the uv4l and the client side javascript
@@ -109,15 +107,23 @@ def stop_webrtc_stream():
             print(f"Error stopping WebRTC stream: {e}")
     return False
 
-# Start WebRTC stream when the app starts
-@app.before_first_request
-def initialize():
-    start_webrtc_stream()
+# Initialize WebRTC stream
+def init_webrtc():
+    try:
+        start_webrtc_stream()
+        print("WebRTC stream started successfully")
+    except Exception as e:
+        print(f"Error starting WebRTC stream: {e}")
 
-# Clean up when the app shuts down
-@atexit.register
-def cleanup():
-    stop_webrtc_stream()
+# Register cleanup function
+atexit.register(stop_webrtc_stream)
+
+# Initialize WebRTC on first request
+@app.before_request
+def before_request():
+    if not hasattr(app, '_webrtc_initialized'):
+        init_webrtc()
+        app._webrtc_initialized = True
 
 # WebRTC signaling endpoints
 @socketio.on("connect")
