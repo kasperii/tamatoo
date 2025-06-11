@@ -14,14 +14,30 @@
     };
 
     onMount(() => {
-        socket = io();
+        // Get the current host and port from window location
+        const protocol = window.location.protocol;
+        const hostname = window.location.hostname;
+        const port = '5050'; // Your Flask server port
+        const serverUrl = `${protocol}//${hostname}:${port}`;
+        
+        console.log('Connecting to server at:', serverUrl);
+        
+        socket = io(serverUrl, {
+            transports: ['websocket', 'polling'],
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000
+        });
         
         socket.on('connect', () => {
             console.log('Connected to signaling server');
         });
 
-        socket.on('disconnect', () => {
-            console.log('Disconnected from signaling server');
+        socket.on('connect_error', (error) => {
+            console.error('Connection error:', error);
+        });
+
+        socket.on('disconnect', (reason) => {
+            console.log('Disconnected from signaling server:', reason);
             stopVideo();
         });
     });

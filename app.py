@@ -35,8 +35,8 @@ if (platform.system() == "Darwin"):
 # https://wiki.seeedstudio.com/ReSpeaker-USB-Mic-Array/
 
 app = Flask(__name__, static_folder='client/public')
-CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*")
+CORS(app, resources={r"/*": {"origins": "*"}})
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 # this is the placeholder data for the handshake betweeen
 # the uv4l and the client side javascript
@@ -493,5 +493,4 @@ def speak():
 
 if __name__ == "__main__":
     #app.run(debug=True,threaded=True)
-    context = ('local.crt', 'local.key')
-    socketio.run(app, host='0.0.0.0', debug=True,port=5050)
+    socketio.run(app, host='0.0.0.0', port=5050, debug=True, allow_unsafe_werkzeug=True)
