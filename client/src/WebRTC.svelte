@@ -89,9 +89,9 @@
                 
                 // Handle incoming tracks
                 peerConnection.ontrack = (event) => {
-                    console.log('Received track:', event.track.kind);
+                    console.log('Received track:', event.track.kind, event.track.label);
                     if (videoElement && event.streams[0]) {
-                        console.log('Setting video stream');
+                        console.log('Setting video stream with tracks:', event.streams[0].getTracks().map(t => t.kind));
                         videoElement.srcObject = event.streams[0];
                         videoElement.play().catch(e => console.error('Error playing video:', e));
                     }
@@ -100,7 +100,7 @@
                 // Handle ICE candidates
                 peerConnection.onicecandidate = (event) => {
                     if (event.candidate) {
-                        console.log('Sending ICE candidate');
+                        console.log('Sending ICE candidate:', event.candidate.candidate);
                         socket.emit('ice-candidate', {
                             candidate: event.candidate.candidate,
                             sdpMid: event.candidate.sdpMid,
@@ -117,16 +117,20 @@
                     console.log('Connection state:', peerConnection.connectionState);
                 };
 
-                // Create and send offer
-                console.log('Creating offer');
+                // Create and send offer with explicit media constraints
+                console.log('Creating offer with media constraints');
                 const offer = await peerConnection.createOffer({
                     offerToReceiveAudio: true,
-                    offerToReceiveVideo: true
+                    offerToReceiveVideo: true,
+                    voiceActivityDetection: true
                 });
+                
+                console.log('Setting local description');
                 await peerConnection.setLocalDescription(offer);
+                console.log('Local description set:', peerConnection.localDescription.sdp);
 
                 // Send offer to server
-                console.log('Sending offer');
+                console.log('Sending offer to server');
                 socket.emit('offer', {
                     type: offer.type,
                     sdp: offer.sdp,
@@ -135,6 +139,7 @@
             }
         } catch (error) {
             console.error('Error starting video:', error);
+            isStreaming = false;
         }
     }
 

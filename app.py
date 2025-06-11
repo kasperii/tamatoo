@@ -157,26 +157,32 @@ def handle_offer(data):
         
         # Create answer with media tracks
         answer = {
-            "type": "answer",
-            "sdp": data['sdp'].replace('IN IP4 127.0.0.1', 'IN IP4 0.0.0.0'),
-            "id": "server"
+            'type': 'answer',
+            'sdp': data['sdp'].replace('IN IP4 127.0.0.1', 'IN IP4 0.0.0.0'),
+            'id': 'server'
         }
         
+        # Add media tracks to SDP if not present
+        if 'm=audio' not in answer['sdp']:
+            answer['sdp'] += '\nm=audio 9 UDP/TLS/RTP/SAVPF 111\nc=IN IP4 0.0.0.0\na=rtpmap:111 opus/48000/2\n'
+        if 'm=video' not in answer['sdp']:
+            answer['sdp'] += '\nm=video 9 UDP/TLS/RTP/SAVPF 96\nc=IN IP4 0.0.0.0\na=rtpmap:96 H264/90000\n'
+        
         print("Sending answer:", answer)
-        socketio.emit('get_answer', answer, room=request.sid)
+        emit('get_answer', answer)
     except Exception as e:
-        print(f"Error handling offer: {e}")
-        return {'error': str(e)}
+        print(f"Error handling offer: {str(e)}")
+        emit('error', {'message': str(e)})
 
 @socketio.on('ice-candidate')
 def handle_ice_candidate(data):
     try:
         print(f"Received ICE candidate from {request.sid}")
         print("ICE candidate data:", data)
-        socketio.emit('ice-candidate', data, room=request.sid)
+        emit('ice-candidate', data)
     except Exception as e:
-        print(f"Error handling ICE candidate: {e}")
-        return {'error': str(e)}
+        print(f"Error handling ICE candidate: {str(e)}")
+        emit('error', {'message': str(e)})
 
 @socketio.on("get_offer")
 def getOffer():
